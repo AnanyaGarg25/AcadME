@@ -83,6 +83,8 @@ path('student_view_attendance_post', StudentViews.student_view_attendance_post, 
     path('save_updateattendance_data', StaffViews.save_updateattendance_data, name='save_updateattendance_data'),
     path('staff_feedback', StaffViews.staff_feedback, name='staff_feedback'),
     path('staff_feedback_save', StaffViews.staff_feedback_save, name='staff_feedback_save'),
+    path('staff_upload_assignment',StaffViews.staff_upload_assignment, name="staff_upload_assignment"),
+
     path('student_feedback', StudentViews.student_feedback, name='student_feedback'),
     path('student_feedback_save', StudentViews.student_feedback_save, name='student_feedback_save'),
     path('staff_profile', StaffViews.staff_profile, name='staff_profile'),

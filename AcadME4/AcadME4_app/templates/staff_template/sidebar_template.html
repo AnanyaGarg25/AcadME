@@ -75,6 +75,16 @@
               </p>
             </a>
           </li>
+            <li class="nav-item">
+             {% url 'staff_upload_assignment' as staff_upload_assignment  %}
+           <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
+            <a href="{{ staff_upload_assignment }}" class="nav-link  {% if request.path == staff_upload_assignment %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
+              <i class="fas fa-comment-dots" style="margin-right: 8px;"></i>
+              <p>
+                  Upload Assignment
+              </p>
+            </a>
+          </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

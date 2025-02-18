@@ -3,7 +3,7 @@ import json
 from django.contrib import messages
 from django.core.serializers import serialize
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from django.shortcuts import render,reverse
+from django.shortcuts import render, reverse, redirect
 
 from AcadME4_app.models import Subjects, SessionYearModel
 from django.views.decorators.csrf import csrf_exempt
@@ -23,6 +23,8 @@ from AcadME4_app.models import CustomUser
 from AcadME4_app.models import Courses
 
 from AcadME4_app.models import StudentResult
+
+from AcadME4_app.models import Assignment
 
 
 def staff_home(request):
@@ -241,3 +243,72 @@ def save_student_result(request):
     except:
         messages.error(request, "Failed to Add Result")
         return HttpResponseRedirect(reverse("staff_add_result"))
+
+@csrf_exempt
+def staff_upload_assignment(request):
+    if request.user.user_type != "2":  # Ensure only staff can upload
+        messages.error(request, "Unauthorized access.")
+        return redirect("home")
+    try:
+        staff_obj = Staffs.objects.get(admin=request.user)# Get the related Staffs object
+
+    except Staffs.DoesNotExist:
+        messages.error(request, "Staff information not found.")
+        return redirect("home")
+
+
+    subjects = Subjects.objects.filter(staff_id=staff_obj.admin)  # Get subjects assigned to staff
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        subject_id = request.POST.get("subject")
+        assignment_file = request.FILES.get("assignment_file")
+        due_date = request.POST.get("due_date")
+
+        # Validate subject
+        try:
+            subject = Subjects.objects.get(id=subject_id, staff_id=staff_obj.admin)
+        except Subjects.DoesNotExist:
+            messages.error(request, "Invalid subject selection.")
+            return redirect("staff_upload_assignment")
+
+        # Validate file type (only PDFs allowed)
+        if assignment_file:
+            if not assignment_file.name.lower().endswith(".pdf"):
+                messages.error(request, "Only PDF files are allowed.")
+                return redirect("staff_upload_assignment")
+
+        # Save assignment
+        assignment = Assignment(
+            title=title,
+            description=description,
+            subject=subject,
+            assignment_file=assignment_file,
+            due_date=due_date,
+            staff=staff_obj
+        )
+        assignment.save()
+
+        messages.success(request, "Assignment uploaded successfully.")
+        return redirect("staff_upload_assignment")  # Redirect after success
+
+    '''if request.method == "POST":
+        form = AssignmentUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+
+            # Ensure the subject selected belongs to the staff
+            if assignment.subject not in subjects:
+                messages.error(request, "You can only upload assignments for subjects you teach.")
+                return redirect("staff_upload_assignment")
+
+            assignment.staff = request.user  # Link assignment to staff
+            assignment.save()
+            messages.success(request, "Assignment uploaded successfully.")
+            return redirect("staff_dashboard")  # Redirect to staff dashboard
+        else:
+            messages.error(request, "Error in uploading assignment.")
+    else:
+        form = AssignmentUploadForm()'''
+    return render(request, "staff_template/upload_assignment.html", {"subjects": subjects})

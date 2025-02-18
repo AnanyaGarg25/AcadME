@@ -1,0 +1,90 @@
+{% extends "staff_template/base_template.html" %}
+{% block page_title %}
+Upload Assignment
+{% endblock page_title %}
+{% block main_content %}
+
+<style>
+    .alert {
+        padding: 15px;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+        margin: 10px 0;
+        text-align: center;
+    }
+    .alert-success {
+        background-color: #28a745; /* Green */
+    }
+    .alert-danger {
+        background-color: #dc3545; /* Red */
+    }
+    /* Auto-dismiss messages after 5 seconds */
+    .alert {
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+    }
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    .alert.fade {
+        animation: fadeOut 0.5s forwards;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="text-center mb-0">Upload Assignment</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="id_title" class="form-label"><strong>Title</strong></label>
+                    <input type="text" name="title" class="form-control" required id="id_title">
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_description" class="form-label"><strong>Description</strong></label>
+                    <textarea name="description" class="form-control" rows="4" required id="id_description"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_subject" class="form-label"><strong>Subject</strong></label>
+                    <select name="subject" class="form-select" required id="id_subject">
+                        {% for subject in subjects %}
+                            <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_assignment_file" class="form-label"><strong>Assignment File</strong></label>
+                    <input type="file" name="assignment_file" class="form-control" id="id_assignment_file">
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_due_date" class="form-label"><strong>Due Date</strong></label>
+                    <input type="date" name="due_date" class="form-control" required id="id_due_date">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Upload</button>
+
+                {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

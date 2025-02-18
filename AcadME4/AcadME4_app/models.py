@@ -167,3 +167,42 @@ def save_user_profile(sender,instance,**kwargs):
         instance.staffs.save()
     if instance.user_type==3:
         instance.students.save()
+
+def validate_pdf(value):
+    ext = os.path.splitext(value.name)[1]  # Extract file extension
+    if ext.lower() != '.pdf':
+        raise ValidationError('Only PDF files are allowed.')
+
+class Assignment(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    subject = models.ForeignKey(Subjects, on_delete=models.CASCADE)
+    staff = models.ForeignKey(Staffs, on_delete=models.CASCADE)  # The teacher who created the assignment
+    due_date = models.DateTimeField()
+    assignment_file = models.FileField(upload_to="assignments/", validators=[validate_pdf], null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"{self.title} - {self.subject.subject_name}"
+
+class AssignmentSubmission(models.Model):
+    id = models.AutoField(primary_key=True)
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
+    student = models.ForeignKey(Students, on_delete=models.CASCADE)
+    submission_file = models.FileField(upload_to="submissions/", validators=[validate_pdf])
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[("Submitted", "Submitted"), ("Graded", "Graded"), ("Late", "Late")],
+        default="Submitted",
+    )
+    feedback = models.TextField(null=True, blank=True)
+    marks_obtained = models.FloatField(default=0)
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"{self.student.admin.username} - {self.assignment.title}"
