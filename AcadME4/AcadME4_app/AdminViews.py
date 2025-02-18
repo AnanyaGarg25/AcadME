@@ -2,7 +2,7 @@ import json
 
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from AcadME4_app.models import CustomUser,Courses,Subjects,Staffs,Students
@@ -18,7 +18,10 @@ from AcadME4_app.models import FeedBackStudent , FeedBackStaffs
 
 from AcadME4_app.models import AttendanceReport
 
+from AcadME4_app.models import NotificationStaffs, NotificationStudent
 
+from django.contrib import messages
+from django.utils.timezone import now
 def admin_home(request):
     student_count=Students.objects.all().count()
     staff_count = Staffs.objects.all().count()
@@ -460,6 +463,43 @@ def staff_feedback_message_replied(request):
         return HttpResponse("True")
     except:
         return HttpResponse("False")
+
+def send_notification(request):
+    if request.method == "POST":
+        message = request.POST.get("message")
+        recipient_type = request.POST.get("recipient_type")
+
+        if recipient_type == "student":
+            students = Students.objects.all()
+            notifications = []
+
+            for student in students:
+                exists = NotificationStudent.objects.filter(student_id=student, message=message).exists()
+                if not exists:
+                    notifications.append(
+                        NotificationStudent(student_id=student, message=message, created_at=now(), updated_at=now()))
+
+            if notifications:
+                NotificationStudent.objects.bulk_create(notifications)  # Bulk insert only new notifications
+
+        elif recipient_type == "staff":
+            staffs = Staffs.objects.all()
+            notifications = []
+
+            for staff in staffs:
+                exists = NotificationStaffs.objects.filter(staff_id=staff, message=message).exists()
+                if not exists:
+                    notifications.append(
+                        NotificationStaffs(staff_id=staff, message=message, created_at=now(), updated_at=now()))
+
+            if notifications:
+                NotificationStaffs.objects.bulk_create(notifications)  # Bulk insert only new notifications
+
+        messages.success(request, "Notification sent successfully!")
+        return redirect("send_notification")  # Redirect to prevent resubmission
+
+    return render(request, "admin_template/send_notification.html")
+
 
 
 

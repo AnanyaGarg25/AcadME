@@ -1,0 +1,55 @@
+{% extends 'admin_template/base_template.html' %}
+
+{% block page_title %}
+  Notification
+{% endblock page_title %}
+
+{% block main_content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Send Notification</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <p>Send notifications to students or staff.</p>
+
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-success">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                        {% if error %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endif %}
+
+                        <form method="POST">
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <label for="message">Notification Message:</label>
+                                <textarea name="message" id="message" class="form-control" rows="4" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="recipient_type">Recipient Type:</label>
+                                <select name="recipient_type" id="recipient_type" class="form-control" required>
+                                    <option value="student">Student</option>
+                                    <option value="staff">Staff</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-block">Send Notification</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+{% endblock main_content %}

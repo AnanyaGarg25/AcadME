@@ -1,9 +1,10 @@
 import json
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.serializers import serialize
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from django.shortcuts import render, reverse, redirect
+from django.shortcuts import render, reverse, redirect, get_object_or_404
 
 from AcadME4_app.models import Subjects, SessionYearModel
 from django.views.decorators.csrf import csrf_exempt
@@ -25,6 +26,8 @@ from AcadME4_app.models import Courses
 from AcadME4_app.models import StudentResult
 
 from AcadME4_app.models import Assignment
+
+from AcadME4_app.models import NotificationStaffs
 
 
 def staff_home(request):
@@ -243,6 +246,17 @@ def save_student_result(request):
     except:
         messages.error(request, "Failed to Add Result")
         return HttpResponseRedirect(reverse("staff_add_result"))
+
+@login_required
+def staff_notifications(request):
+    """Display notifications for staff members"""
+
+    staff = get_object_or_404(Staffs, admin=request.user)  # Get the staff linked to the logged-in user
+    notifications = NotificationStaffs.objects.filter(staff_id=staff).order_by('-created_at')  # Fetch staff notifications
+
+    return render(request, 'staff_template/staff_notifications.html', {
+        'notifications': notifications
+    })
 
 @csrf_exempt
 def staff_upload_assignment(request):

@@ -1,7 +1,9 @@
+from time import localtime
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect,HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from AcadME4_app.models import CustomUser
@@ -12,6 +14,12 @@ from AcadME4_app.models import Attendance, AttendanceReport
 from future.backports.datetime import datetime
 
 from AcadME4_app.models import FeedBackStudent
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils.timezone import localtime
+
+from AcadME4_app.models import NotificationStudent
 
 
 def student_home(request):
@@ -81,6 +89,22 @@ def student_profile(request):
     user=CustomUser.objects.get(id=request.user.id)
     student = Students.objects.get(admin=user)
     return render(request,"student_template/student_profile.html",{"user":user,"student":student})
+
+@login_required
+def student_notifications(request):
+    student = get_object_or_404(Students, admin=request.user)
+    notifications = NotificationStudent.objects.filter(student_id=student).order_by('-created_at')
+
+    # Convert timestamps to local time
+    for notification in notifications:
+        notification.created_at = localtime(notification.created_at)
+
+    unread_notifications_count = notifications.filter(is_read=False).count() if hasattr(NotificationStudent, 'is_read') else 0
+
+    return render(request, 'student_template/student_notifications.html', {
+        'notifications': notifications,
+        'unread_notifications_count': unread_notifications_count
+    })
 
 def student_profile_save(request):
     if request.method!="POST":

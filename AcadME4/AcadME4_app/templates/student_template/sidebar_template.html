@@ -54,6 +54,16 @@
               </p>
             </a>
           </li>
+            <li class="nav-item">
+             {% url 'student_notifications' as student_notifications %}
+           <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
+            <a href="{{ student_notifications }}" class="nav-link  {% if request.path == student_notifications %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Notifications
+              </p>
+            </a>
+          </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

@@ -94,5 +94,9 @@ path('student_view_attendance_post', StudentViews.student_view_attendance_post, 
 
     path('student_profile', StudentViews.student_profile, name='student_profile'),
     path('student_profile_save', StudentViews.student_profile_save, name='student_profile_save'),
+
+    path('student_notifications', StudentViews.student_notifications, name='student_notifications'),
+    path('staff_notifications', StaffViews.staff_notifications, name='staff_notifications'),
+    path('send_notification', AdminViews.send_notification,name='send_notification'),
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 
