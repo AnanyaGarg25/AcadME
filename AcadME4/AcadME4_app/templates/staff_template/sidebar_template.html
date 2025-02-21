@@ -66,6 +66,16 @@
             </a>
           </li>
             <li class="nav-item">
+              {% url 'edit_student_result' as edit_student_result %}
+            <!--{% url 'edit_staff' staff_id=id as edit_staff %}-->
+            <a href="{{ edit_student_result }}" class="nav-link  {% if request.path == edit_student_result %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                 Edit Result
+              </p>
+            </a>
+          </li>
+            <li class="nav-item">
              {% url 'staff_feedback' as staff_feedback  %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ staff_feedback }}" class="nav-link  {% if request.path == staff_feedback %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
@@ -95,6 +105,16 @@
               </p>
             </a>
           </li>
+            <li class="nav-item">
+   {% url 'staff_view_submissions' as staff_view_submissions  %}
+ <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
+  <a href="{{ staff_view_submissions }}" class="nav-link  {% if request.path == staff_view_submissions %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
+    <i class="fas fa-comment-dots" style="margin-right: 8px;"></i>
+    <p>
+        View Submitted  Assignments
+    </p>
+  </a>
+</li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

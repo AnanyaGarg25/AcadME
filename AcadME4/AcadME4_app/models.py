@@ -206,3 +206,12 @@ class AssignmentSubmission(models.Model):
 
     def __str__(self):
         return f"{self.student.admin.username} - {self.assignment.title}"
+    '''
+    def save(self, *args, **kwargs):
+        # Check if submission is late
+        if self.assignment.due_date and now() > self.assignment.due_date:
+            self.status = "Late"
+        super().save(*args, **kwargs)
+    class Meta:
+        verbose_name = "Assignment Submission"
+        verbose_name_plural = "Assignment Submissions"'''

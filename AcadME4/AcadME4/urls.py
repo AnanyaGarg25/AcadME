@@ -27,6 +27,8 @@ from AcadME4_app import StudentViews
 
 from AcadME4_app import StaffViews
 
+from AcadME4_app.EditResultViewClass import EditResultViewClass
+
 urlpatterns = [
     path('demo', views.showDemoPage),
     path('admin/', admin.site.urls),
@@ -68,7 +70,7 @@ path('logout_user',views.logout_user,name="logout"),
     path('admin_view_attendance', AdminViews.admin_view_attendance, name='admin_view_attendance'),
     path('admin_get_attendance_dates', AdminViews.admin_get_attendance_dates, name='admin_get_attendance_dates'),
     path('admin_get_attendance_student', AdminViews.admin_get_attendance_student, name='admin_get_attendance_student'),
-
+   path('admin_get_monthly_attendance', AdminViews.admin_get_monthly_attendance, name='admin_get_monthly_attendance'),
     # Staff URl Path
     path('staff_home', StaffViews.staff_home, name='staff_home'),
     path('student_home', StudentViews.student_home, name='student_home'),
@@ -91,6 +93,8 @@ path('student_view_attendance_post', StudentViews.student_view_attendance_post, 
     path('staff_profile_save', StaffViews.staff_profile_save, name='staff_profile_save'),
     path('staff_add_result', StaffViews.staff_add_result, name='staff_add_result'),
     path('save_student_result', StaffViews.save_student_result, name='save_student_result'),
+    path('edit_student_result', EditResultViewClass.as_view(), name='edit_student_result'),
+    path('fetch_result_student', StaffViews.fetch_result_student, name='fetch_result_student'),
 
     path('student_profile', StudentViews.student_profile, name='student_profile'),
     path('student_profile_save', StudentViews.student_profile_save, name='student_profile_save'),
@@ -98,5 +102,13 @@ path('student_view_attendance_post', StudentViews.student_view_attendance_post, 
     path('student_notifications', StudentViews.student_notifications, name='student_notifications'),
     path('staff_notifications', StaffViews.staff_notifications, name='staff_notifications'),
     path('send_notification', AdminViews.send_notification,name='send_notification'),
+    path('student_view_result', StudentViews.student_view_result, name='student_view_result'),
+path("student_view_assignments", StudentViews.student_view_assignments, name="student_view_assignments"),
+ path("student_submit_assignment/<int:assignment_id>",StudentViews.student_submit_assignment,
+                    name="student_submit_assignment"),
+
+ # Staff URLs
+ path("staff_view_submissions", StaffViews.staff_view_submissions, name="staff_view_submissions"),
+# path("staff_grade_submission/<int:submission_id>", StaffViews.staff_grade_submission,name="staff_grade_submission"),
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

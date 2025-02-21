@@ -55,6 +55,16 @@
             </a>
           </li>
             <li class="nav-item">
+             {% url 'student_view_result' as student_view_result %}
+           <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
+            <a href="{{ student_view_result }}" class="nav-link  {% if request.path == student_view_result %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Grade Card
+              </p>
+            </a>
+          </li>
+            <li class="nav-item">
              {% url 'student_notifications' as student_notifications %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ student_notifications }}" class="nav-link  {% if request.path == student_notifications %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
@@ -64,6 +74,16 @@
               </p>
             </a>
           </li>
+            <li class="nav-item">
+   {% url 'student_view_assignments' as student_view_assignments %}
+ <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
+  <a href="{{ student_view_assignments }}" class="nav-link  {% if request.path == student_view_assignments %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
+    <i class="nav-icon fas fa-th"></i>
+    <p>
+      View Assignments
+    </p>
+  </a>
+</li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

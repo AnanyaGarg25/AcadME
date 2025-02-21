@@ -21,6 +21,10 @@ from django.utils.timezone import localtime
 
 from AcadME4_app.models import NotificationStudent
 
+from AcadME4_app.models import StudentResult
+
+from AcadME4_app.models import AssignmentSubmission, Assignment
+
 
 def student_home(request):
     student_obj=Students.objects.get(admin=request.user.id)
@@ -130,3 +134,57 @@ def student_profile_save(request):
         except:
             messages.error(request, "Failed to Update Profile")
             return HttpResponseRedirect(reverse("student_profile"))
+
+def student_view_result(request):
+    student=Students.objects.get(admin=request.user.id)
+    studentresult=StudentResult.objects.filter(student_id=student.id)
+    return render(request,"student_template/student_result.html",{"studentresult":studentresult})
+
+@login_required
+def student_view_assignments(request):
+    try:
+        student_obj = Students.objects.get(admin=request.user)  # Get student
+    except Students.DoesNotExist:
+        messages.error(request, "Student information not found.")
+        return redirect("home")
+
+    # Fetch assignments based on student's enrolled subjects
+    assignments = Assignment.objects.filter(subject__course_id=student_obj.course_id)
+
+    return render(
+        request,
+        "student_template/view_assignments.html",
+        {"assignments": assignments}
+    )
+
+@login_required
+def student_submit_assignment(request, assignment_id):
+    try:
+        student_obj = Students.objects.get(admin=request.user)
+        assignment = Assignment.objects.get(id=assignment_id)
+    except (Students.DoesNotExist, Assignment.DoesNotExist):
+        messages.error(request, "Invalid request.")
+        return redirect("student_view_assignments")
+
+    if request.method == "POST":
+        submission_file = request.FILES.get("submission_file")
+        if submission_file and not submission_file.name.lower().endswith(".pdf"):
+            messages.error(request, "Only PDF files are allowed.")
+            return redirect("student_submit_assignment", assignment_id=assignment_id)
+
+        # Save submission
+        submission = AssignmentSubmission(
+            assignment=assignment,
+            student=student_obj,
+            submission_file=submission_file
+        )
+        submission.save()
+
+        messages.success(request, "Assignment submitted successfully!")
+        return redirect("student_view_assignments")
+
+    return render(
+        request,
+        "student_template/submit_assignment.html",
+        {"assignment": assignment}
+    )

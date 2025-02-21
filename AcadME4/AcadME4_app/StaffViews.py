@@ -29,6 +29,8 @@ from AcadME4_app.models import Assignment
 
 from AcadME4_app.models import NotificationStaffs
 
+from AcadME4_app.models import AssignmentSubmission
+
 
 def staff_home(request):
     #for fetch all students under staff
@@ -326,3 +328,57 @@ def staff_upload_assignment(request):
     else:
         form = AssignmentUploadForm()'''
     return render(request, "staff_template/upload_assignment.html", {"subjects": subjects})
+
+@csrf_exempt
+def fetch_result_student(request):
+    subject_id=request.POST.get('subject_id')
+    student_id = request.POST.get('student_id')
+    student_obj=Students.objects.get(admin=student_id)
+    result=StudentResult.objects.filter(student_id=student_obj.id,subject_id=subject_id).exists()
+    if result:
+        result = StudentResult.objects.get(student_id=student_obj.id, subject_id=subject_id).exists()
+        result_data={"exam_marks":result.subject_exam_marks,"assign_marks":result.subject_assignment_marks}
+        return HttpResponse(json.dumps(result_data))
+    else:
+        return HttpResponse("False")
+
+@login_required
+def staff_view_submissions(request):
+    try:
+        staff_obj = Staffs.objects.get(admin=request.user)
+    except Staffs.DoesNotExist:
+        messages.error(request, "Staff information not found.")
+        return redirect("home")
+
+    submissions = AssignmentSubmission.objects.filter(assignment__staff=staff_obj)
+
+    return render(
+        request,
+        "staff_template/view_submissions.html",
+        {"submissions": submissions}
+    )
+'''
+@login_required
+def staff_grade_submission(request, submission_id):
+    try:
+        submission = AssignmentSubmission.objects.get(id=submission_id)
+    except AssignmentSubmission.DoesNotExist:
+        messages.error(request, "Submission not found.")
+        return redirect("staff_view_submissions")
+
+    if request.method == "POST":
+        marks = request.POST.get("marks")
+        feedback = request.POST.get("feedback")
+        submission.marks_obtained = marks
+        submission.feedback = feedback
+        submission.status = "Graded"
+        submission.save()
+        messages.success(request, "Submission graded successfully.")
+        return redirect("staff_view_submissions")
+
+    return render(
+        request,
+        "staff_template/grade_submission.html",
+        {"submission": submission}
+    )
+'''

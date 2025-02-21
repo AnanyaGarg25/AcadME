@@ -1,0 +1,39 @@
+{% extends "staff_template/base_template.html" %}
+{% block page_title %} View Submissions {% endblock %}
+
+{% block main_content %}
+<div class="container mt-4">
+    <h3 class="text-center">Student Submissions</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Assignment</th>
+                <th>Student</th>
+                <th>Submitted At</th>
+                <th>Status</th>
+                <th>Download</th>
+                <!--<th>Grade</th>-->
+            </tr>
+        </thead>
+        <tbody>
+            {% for submission in submissions %}
+            <tr>
+                <td>{{ submission.assignment.title }}</td>
+                <td>{{ submission.student.admin.username }}</td>
+                <td>{{ submission.submitted_at }}</td>
+                <td>{{ submission.status }}</td>
+                <td>
+                    <a href="{{ submission.submission_file.url }}" class="btn btn-primary" target="_blank">Download</a>
+                </td>
+
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No submissions yet</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+<!--  <td><a href="{% url 'staff_grade_submission' submission.id %}" class="btn btn-warning">Grade</a></td> -->

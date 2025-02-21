@@ -499,6 +499,56 @@ def send_notification(request):
         return redirect("send_notification")  # Redirect to prevent resubmission
 
     return render(request, "admin_template/send_notification.html")
+from django.http import JsonResponse
+from datetime import datetime
+from .models import Attendance, AttendanceReport
+
+def admin_get_monthly_attendance(request):
+    if request.method == "POST":
+        subject_id = request.POST.get("subject")
+        session_year_id = request.POST.get("session_year_id")
+        selected_month = request.POST.get("month")  # Expected format: YYYY-MM
+
+        if not subject_id or not session_year_id or not selected_month:
+            return JsonResponse({"error": "Missing data. Please select all fields."}, status=400)
+
+        try:
+            year, month = map(int, selected_month.split("-"))
+        except ValueError:
+            return JsonResponse({"error": "Invalid month format. Use YYYY-MM."}, status=400)
+
+        attendance_records = Attendance.objects.filter(
+            subject_id=subject_id,
+            session_year_id=session_year_id,
+            attendance_date__year=year,
+            attendance_date__month=month
+        )
+
+        if not attendance_records.exists():
+            return JsonResponse({"error": "No attendance data found for this month."}, status=404)
+
+        total_classes = attendance_records.count()
+        student_attendance = {}
+
+        for record in attendance_records:
+            reports = AttendanceReport.objects.filter(attendance_id=record)
+            for report in reports:
+                student_name = f"{report.student_id.admin.first_name} {report.student_id.admin.last_name}"
+                if student_name not in student_attendance:
+                    student_attendance[student_name] = {"attended": 0, "total": total_classes}
+                if report.status:
+                    student_attendance[student_name]["attended"] += 1
+
+        student_data = []
+        for student, data in student_attendance.items():
+            student_data.append({
+                "name": student,
+                "attended_classes": data["attended"],
+                "total_classes": data["total"],
+                "status": data["attended"] > (data["total"] / 2)  # Green if attended more than 50%
+            })
+
+        return JsonResponse(student_data, safe=False)
 
 
 
