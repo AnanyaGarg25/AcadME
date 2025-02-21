@@ -223,15 +223,15 @@ def staff_add_result(request):
 def save_student_result(request):
     if request.method!='POST':
         return HttpResponseRedirect('staff_add_result')
-    student_admin_id=request.POST.get('student_list')
-    assignment_marks=request.POST.get('assignment_marks')
-    exam_marks=request.POST.get('exam_marks')
+    #student_admin_id=request.POST.get('student_list')
+    #assignment_marks=request.POST.get('assignment_marks')
+    #exam_marks=request.POST.get('exam_marks')
     subject_id=request.POST.get('subject')
 
-    student_obj=Students.objects.get(admin=student_admin_id)
+    #student_obj=Students.objects.get(admin=student_admin_id)
     subject_obj=Subjects.objects.get(id=subject_id)
 
-    try:
+    '''try:
         check_exist=StudentResult.objects.filter(subject_id=subject_obj,student_id=student_obj).exists()
         if check_exist:
             result=StudentResult.objects.get(subject_id=subject_obj,student_id=student_obj)
@@ -247,6 +247,47 @@ def save_student_result(request):
             return HttpResponseRedirect(reverse("staff_add_result"))
     except:
         messages.error(request, "Failed to Add Result")
+        return HttpResponseRedirect(reverse("staff_add_result"))'''
+    try:
+        for key, value in request.POST.items():
+            if key.startswith('assignment1_'):
+                student_id = key.split('_')[1]
+                student_obj = Students.objects.get(admin=student_id)
+
+                # Get marks values, converting empty inputs to None or 0
+                assignment1_marks = request.POST.get(f'assignment1_{student_id}')
+                assignment2_marks = request.POST.get(f'assignment2_{student_id}')
+                periodical1_marks = request.POST.get(f'periodical1_{student_id}')
+                periodical2_marks = request.POST.get(f'periodical2_{student_id}')
+
+                # Convert empty values to None or 0
+                assignment1_marks = float(assignment1_marks) if assignment1_marks else None
+                assignment2_marks = float(assignment2_marks) if assignment2_marks else None
+                periodical1_marks = float(periodical1_marks) if periodical1_marks else None
+                periodical2_marks = float(periodical2_marks) if periodical2_marks else None
+
+                # Check if the result already exists
+                result, created = StudentResult.objects.get_or_create(
+                    student_id=student_obj,
+                    subject_id=subject_obj
+                )
+
+                # Update fields only if values are provided
+                if assignment1_marks is not None:
+                    result.assignment1_marks = assignment1_marks
+                if assignment2_marks is not None:
+                    result.assignment2_marks = assignment2_marks
+                if periodical1_marks is not None:
+                    result.periodical1_marks = periodical1_marks
+                if periodical2_marks is not None:
+                    result.periodical2_marks = periodical2_marks
+
+                result.save()
+
+        messages.success(request, "Successfully Added Results")
+        return HttpResponseRedirect(reverse("staff_add_result"))
+    except:
+        messages.error(request, "Failed to Add Results")
         return HttpResponseRedirect(reverse("staff_add_result"))
 
 @login_required

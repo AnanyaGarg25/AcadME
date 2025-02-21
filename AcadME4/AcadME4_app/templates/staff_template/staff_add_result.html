@@ -21,6 +21,7 @@ Add Results
                   <div class="form-group">
                     <label>Subject</label>
                     <select class="form-control" name="subject" id="subject">
+                        <option value="">-- Select Subject --</option>
                        {% for subject in subjects %}
                          <option value="{{subject.id}}">{{ subject.subject_name }}</option>
                        {% endfor %}
@@ -29,6 +30,7 @@ Add Results
                   <div class="form-group">
                     <label>Session Year</label>
                     <select class="form-control" name="session_year" id="session_year">
+                        <option value="">-- Select Session Year --</option>
                        {% for session_year in session_years %}
                          <option value="{{session_year.id}}">{{ session_year.session_start_year }}  to  {{ session_year.session_end_year }}</option>
                        {% endfor %}
@@ -54,8 +56,10 @@ Add Results
                 <div class="card-footer">
                   <button type="button" class="btn btn-primary btn-block" id="fetch_student">Fetch Student</button>
                 </div>
-                <div id="student_data" class="card-footer">
-
+                <div id="student_data" class="card-footer"></div>
+                <!-- Save Results Button (Hidden initially) -->
+                <div class="card-footer" id="save_results_div" style="display: none;">
+                    <button type="submit" class="btn btn-success btn-block">Save Results</button>
                 </div>
             </div>
                   </form>
@@ -77,8 +81,33 @@ Add Results
                 url:'{% url 'get_students' %}',
                 type:'POST',
                 data:{subject:subject,session_year:session_year},
+                headers: { "X-CSRFToken": "{{ csrf_token }}" },
             })
             .done(function(response){
+            var json_data = JSON.parse(response);
+            var table_body = "<table class='table table-bordered'><thead><tr><th>Roll No</th><th>Name</th><th>BTBT ID</th><th>Assignment 1</th><th>Assignment 2</th><th>Periodical 1</th><th>Periodical 2</th></tr></thead><tbody>";
+
+            for (var key in json_data) {
+                table_body += "<tr><td>" + json_data[key]['roll_no'] + "</td><td>" + json_data[key]['name'] + "</td><td>" + json_data[key]['btbt_id'] + "</td>";
+                table_body += "<td><input type='number' name='assignment1_" + json_data[key]['id'] + "' class='form-control'></td>";
+                table_body += "<td><input type='number' name='assignment2_" + json_data[key]['id'] + "' class='form-control'></td>";
+                table_body += "<td><input type='number' name='periodical1_" + json_data[key]['id'] + "' class='form-control'></td>";
+                table_body += "<td><input type='number' name='periodical2_" + json_data[key]['id'] + "' class='form-control'></td></tr>";
+
+
+
+            }
+            table_body += "</tbody></table>";
+            // Show Save Results Button
+            $("#save_results_div").show();
+            $("#student_data").html(table_body);
+        })
+        .fail(function(){
+            alert("Error in Fetching Student")
+        });
+    });
+});
+            /*.done(function(response){
                 var json_data=JSON.parse(response);
                 console.log(json_data)
                 var div_data = "<div class='form-group'><label>Student List</label><select class='student_list form-control' name='student_list'>";
@@ -91,7 +120,7 @@ Add Results
         div_data += "<td>" + json_data[key]['roll_no'] + "</td>";
         div_data += "<td>" + json_data[key]['name'] + "</td>";
         div_data += "<td>" + json_data[key]['btbt_id'] + "</td>";
-        div_data += "<td><option value='" + json_data[key]['id'] + "'>ID : "+json_data[key]['id']+" : "+json_data[key]['name']+"</option></td>";
+        div_data += "<td><option value='" + json_data[key]['id'] + "'>Roll No. : "+json_data[key]['roll_no']+" : "+json_data[key]['name']+"</option></td>";
         div_data += "</tr>";
     }
 
@@ -120,6 +149,7 @@ Add Results
             });
 
         });
-    })
+    })*/
+
 </script>
 {% endblock custom_js %}

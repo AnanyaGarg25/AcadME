@@ -12,40 +12,49 @@ Result
             <!-- /.card -->
                  <div class="card card-primary">
                   <div class="card-header">
-                      <h3 class="card-title">Reult </h3>
+                      <h3 class="card-title">Marks Obtained</h3>
 
                   </div>
-                     <div class="table">
-                         <table class="table">
-                             <tr>
-                                 <th>ID</th>
-                                 <th>Subject</th>
-                                 <th>Assignment Marks</th>
-                                 <th>Exam Marks</th>
-                                 <th>Status</th>
-                             </tr>
+                     <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-dark">
+                                <tr>
+                                     <th>ID</th>
+                                     <th>Subject</th>
+                                        <th>Assignment 1</th>
+                                        <th>Assignment 2</th>
+                                        <th>Periodical 1</th>
+                                        <th>Periodical 2</th>
+                                     <!-- <th>Status</th> -->
+                                </tr>
+                            </thead>
+                        <tbody>
                             {% for row in studentresult %}
                              <tr>
-                                <td>{{ row.id }}</td>
-                               <td>{{ row.subject_id.subject_name }}</td>
-                               <td>{{ row.subject_assignment_marks }}</td>
-                               <td>{{ row.subject_exam_marks }}</td>
-                               <td>
+                                 <td>{{ row.id }}</td>
+                                 <td>{{ row.subject_id.subject_name }}</td>
+                                 <td>{{ row.assignment1_marks|default:"-" }}</td>
+                                 <td>{{ row.assignment2_marks|default:"-" }}</td>
+                                 <td>{{ row.periodical1_marks|default:"-" }}</td>
+                                 <td>{{ row.periodical2_marks|default:"-" }}</td>
+                               <!-- <td>
                                  {% if row.subject_exam_marks|floatformat:0|add:0 >= 40 %}
                                  <span class="alert alert-success">PASS</span>
                                  {% else %}
                                  <span class="alert alert-success">FAIL</span>
                                  {% endif %}
-                               </td>
-
+                               </td> -->
                             </tr>
+                             {% empty %}
+                                <tr><td colspan="9" class="text-center">No Results Available</td></tr>
                              {% endfor %}
-                         </table>
-                         </div>
-                     </div>
-          </div>
-          </div>
-      </div>
+                          </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     </section>
 
 {% endblock main_content %}

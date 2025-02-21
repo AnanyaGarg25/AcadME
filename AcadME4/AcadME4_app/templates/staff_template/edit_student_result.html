@@ -1,125 +1,110 @@
 {% extends 'staff_template/base_template.html' %}
-{% block page_title %}
-Edit Results
-{% endblock page_title %}
+{% block page_title %} Edit Results {% endblock page_title %}
 {% block main_content %}
 <section class="content">
-      <div class="container-fluid">
-          <div class="row">
-              <div class="col-md-12">
-            <!-- general form elements -->
-                  <form action="{% url 'edit_student_result' %}" method="post">
-                      {% csrf_token %}
-            <div class="card card-primary">
-              <div class="card-header">
-                <h3 class="card-title">Edit Results</h3>
-              </div>
-              <!-- /.card-header -->
-              <!-- form start -->
-                <div class="card-body">
-                    {{ form }}
-                      <div class="form-group">
-                      {% if messages %}
-                        {% for message in messages %}
-                        {% if message.tags == 'error' %}
-                        <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
-                        {% endif %}
-                        {% if message.tags == 'success' %}
-                        <div class="alert alert-success" style="margin-top:10px">{{ message }}</div>
-                        {% endif %}
-                        {% endfor %}
-                      {% endif %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- General form elements -->
+                <form action="{% url 'edit_student_result' %}" method="post">
+                    {% csrf_token %}
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Edit Results</h3>
+                        </div>
+
+                        <!-- Form Start -->
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Subject</label>
+                                <select class="form-control" name="subject" id="id_subject_id">
+                                    <option value="">-- Select Subject --</option>
+                                    {% for subject in subjects %}
+                                        <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Session Year</label>
+                                    <select class="form-control" name="session_year" id="id_session_ids">
+                                        <option value="">-- Select Session Year --</option>
+                                        {% for session_year in session_years %}
+                                            <option value="{{ session_year.id }}">{{ session_year.session_start_year }} to {{ session_year.session_end_year }}</option>
+                                        {% endfor %}
+                                    </select>
+                            </div>
+
+                            {% if messages %}
+                                {% for message in messages %}
+                                    {% if message.tags == 'error' %}
+                                        <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
+                                    {% endif %}
+                                    {% if message.tags == 'success' %}
+                                        <div class="alert alert-success" style="margin-top:10px">{{ message }}</div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-primary btn-block" id="fetch_student">Fetch Students</button>
+                        </div>
+
+                        <div id="student_data" class="card-footer"></div>
+
+                        <div class="card-footer" id="save_results_div" style="display: none;">
+                            <button type="submit" class="btn btn-success btn-block">Save Results</button>
+                        </div>
                     </div>
-
-                </div>
-                <!-- /.card-body -->
-
-                <div class="card-footer">
-                  <button type="submit" class="btn btn-primary btn-block" id="fetch_student">Update Result</button>
-                </div>
+                </form>
+                <!-- /.card -->
             </div>
-                  </form>
-            <!-- /.card -->
-          </div>
-          </div>
-      </div>
-
-    </section>
-{% endblock main_content %}
+        </div>
+    </div>
+</section>
+{% endblock %}
 {% block custom_js %}
 <script>
     $(document).ready(function(){
-        $("#id_student_ids").change(function(){
-            fetchStudents();
-        });
-        $("#id_subject_id").change(function(){
+        $("#fetch_student").click(function(){
             fetchStudents();
         });
 
-        $("#id_student_ids").change(function(){
-            fetch_result_student();
-        })
-
-        function fetchStudents(){
-            var session_year=$("#id_session_ids").val()
-            var subject=$("#id_subject_id").val()
+        function fetchStudents() {
+            var session_year = $("#id_session_ids").val();
+            var subject = $("#id_subject_id").val();
 
             $.ajax({
-                url:'{% url 'get_students' %}',
-                type:'POST',
-                data:{subject:subject,session_year:session_year},
+                url: '{% url "get_students" %}',
+                type: 'POST',
+                data: {subject: subject, session_year: session_year},
+                headers: {"X-CSRFToken": "{{ csrf_token }}"},
             })
             .done(function(response){
-                var json_data=JSON.parse(response);
-                console.log(json_data)
-                var div_data = "";
+                var json_data = JSON.parse(response);
+                var table_body = "<div class='table-responsive'><table class='table table-bordered'><thead class='thead-dark'><tr><th>Roll No</th><th>Name</th><th>BTBT ID</th><th>Assignment 1</th><th>Assignment 2</th><th>Periodical 1</th><th>Periodical 2</th></tr></thead><tbody>";
 
-    div_data += "<div class='table-responsive'><table class='table table-bordered'>";
-    div_data += "<thead class='thead-dark'><tr><th>Roll No</th><th>Name</th><th>BTBT ID</th><th>Present</th></tr></thead><tbody>";
+                for (var key in json_data) {
+                    table_body += "<tr>";
+                    table_body += "<td>" + json_data[key]['roll_no'] + "</td>";
+                    table_body += "<td>" + json_data[key]['name'] + "</td>";
+                    table_body += "<td>" + json_data[key]['btbt_id'] + "</td>";
+                    table_body += "<td><input type='number' name='assignment1_" + json_data[key]['id'] + "' class='form-control'></td>";
+                    table_body += "<td><input type='number' name='assignment2_" + json_data[key]['id'] + "' class='form-control'></td>";
+                    table_body += "<td><input type='number' name='periodical1_" + json_data[key]['id'] + "' class='form-control'></td>";
+                    table_body += "<td><input type='number' name='periodical2_" + json_data[key]['id'] + "' class='form-control'></td>";
+                    table_body += "</tr>";
+                }
 
-    for (key in json_data) {
-        div_data += "<tr>";
-        div_data += "<td>" + json_data[key]['roll_no'] + "</td>";
-        div_data += "<td>" + json_data[key]['name'] + "</td>";
-        div_data += "<td>" + json_data[key]['btbt_id'] + "</td>";
-        div_data += "<td><option value='" + json_data[key]['id'] + "'>ID : "+json_data[key]['id']+" : "+json_data[key]['name']+"</option></td>";
-        div_data += "</tr>";
-    }
-
-    div_data += "</tbody></table></div>";  // Close table
-
-                $("#id_student_ids").html(div_data);
+                table_body += "</tbody></table></div>";
+                $("#student_data").html(table_body);
+                $("#save_results_div").show();
             })
             .fail(function(){
-                alert("Error in Fetching Student")
-            });
-
-        }
-        function fetch_result_student(){
-            var id_student_ids=$("#id_student_ids").val()
-            var subject=$("#id_subject_id").val()
-
-            $.ajax({
-                url:'{% url 'fetch_result_student' %}',
-                type:'POST',
-                data:{subject_id:subject,student_id:id_student_ids},
-            })
-            .done(function(response){
-                if(response=="False"){
-                    alert("Result Not Found")
-                }
-                else{
-                    var json_data=JSON.parse(response);
-                    $("#id_assignment_marks").val(json_data['assign_marks'])
-                    $("#id_exam_marks").val(json_data['exam_marks'])
-                }
-                var json_data=JSON.parse(response);
-
-            })
-            .fail(function(){
-                alert("Error in Fetching Student")
+                alert("Error in Fetching Students");
             });
         }
-    })
+    });
 </script>
 {% endblock custom_js %}
