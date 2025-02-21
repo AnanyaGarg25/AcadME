@@ -88,8 +88,10 @@ DATABASES = {
         #'NAME': BASE_DIR / 'db.sqlite3',
 'ENGINE': 'django.db.backends.mysql',
         'NAME': 'acadme4',
-        'USER': 'ananya',
-        'PASSWORD': 'ananya',
+        'USER': 'acadme4',
+        'PASSWORD': 'acadme4',
+        #'USER': 'ananya',
+        #'PASSWORD': 'ananya',
         #'HOST': '172.19.131.135', #hostel
         'HOST': '192.168.115.166', #hotspot
         #'HOST': '172.21.81.118', #lab
