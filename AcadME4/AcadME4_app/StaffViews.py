@@ -372,16 +372,30 @@ def staff_upload_assignment(request):
 
 @csrf_exempt
 def fetch_result_student(request):
-    subject_id=request.POST.get('subject_id')
+    subject_id = request.POST.get('subject_id')
     student_id = request.POST.get('student_id')
-    student_obj=Students.objects.get(admin=student_id)
-    result=StudentResult.objects.filter(student_id=student_obj.id,subject_id=subject_id).exists()
-    if result:
-        result = StudentResult.objects.get(student_id=student_obj.id, subject_id=subject_id).exists()
-        result_data={"exam_marks":result.subject_exam_marks,"assign_marks":result.subject_assignment_marks}
-        return HttpResponse(json.dumps(result_data))
-    else:
-        return HttpResponse("False")
+
+    try:
+        student_obj = Students.objects.get(admin=student_id)
+        result = StudentResult.objects.filter(student_id=student_obj.id, subject_id=subject_id).first()
+
+        if result:
+            result_data = {
+                "assignment1_marks": result.assignment1_marks if result.assignment1_marks is not None else None,
+                "assignment2_marks": result.assignment2_marks if result.assignment2_marks is not None else None,
+                "periodical1_marks": result.periodical1_marks if result.periodical1_marks is not None else None,
+                "periodical2_marks": result.periodical2_marks if result.periodical2_marks is not None else None,
+            }
+            return JsonResponse(result_data)  # Return JSON response
+
+        else:
+            return JsonResponse({"error": "No result found"}, status=404)
+
+    except Students.DoesNotExist:
+        return JsonResponse({"error": "Student not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
 
 @login_required
 def staff_view_submissions(request):

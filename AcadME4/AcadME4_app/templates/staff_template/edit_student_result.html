@@ -71,40 +71,87 @@
             fetchStudents();
         });
 
-        function fetchStudents() {
-            var session_year = $("#id_session_ids").val();
-            var subject = $("#id_subject_id").val();
+    function fetchStudents() {
+    var session_year = $("#id_session_ids").val();
+    var subject = $("#id_subject_id").val();
 
-            $.ajax({
-                url: '{% url "get_students" %}',
+    $.ajax({
+        url: '{% url "get_students" %}',
+        type: 'POST',
+        data: {subject: subject, session_year: session_year},
+        headers: {"X-CSRFToken": "{{ csrf_token }}"},
+    })
+    .done(function(response){
+        var json_data = JSON.parse(response);
+        var table_body = "<div class='table-responsive'><table class='table table-bordered'><thead class='thead-dark'><tr><th>Roll No</th><th>Name</th><th>BTBT ID</th><th>Assignment 1</th><th>Assignment 2</th><th>Periodical 1</th><th>Periodical 2</th></tr></thead><tbody>";
+
+        var requests = [];
+
+        for (var key in json_data) {
+            let student_id = json_data[key]['id'];
+
+            // Fetch existing result for each student
+            let request = $.ajax({
+                url: '{% url "fetch_result_student" %}',
                 type: 'POST',
-                data: {subject: subject, session_year: session_year},
-                headers: {"X-CSRFToken": "{{ csrf_token }}"},
-            })
-            .done(function(response){
-                var json_data = JSON.parse(response);
-                var table_body = "<div class='table-responsive'><table class='table table-bordered'><thead class='thead-dark'><tr><th>Roll No</th><th>Name</th><th>BTBT ID</th><th>Assignment 1</th><th>Assignment 2</th><th>Periodical 1</th><th>Periodical 2</th></tr></thead><tbody>";
+                data: {subject_id: subject, student_id: student_id},
+                headers: {"X-CSRFToken": "{{ csrf_token }}"}
+            });
 
-                for (var key in json_data) {
-                    table_body += "<tr>";
-                    table_body += "<td>" + json_data[key]['roll_no'] + "</td>";
-                    table_body += "<td>" + json_data[key]['name'] + "</td>";
-                    table_body += "<td>" + json_data[key]['btbt_id'] + "</td>";
-                    table_body += "<td><input type='number' name='assignment1_" + json_data[key]['id'] + "' class='form-control'></td>";
-                    table_body += "<td><input type='number' name='assignment2_" + json_data[key]['id'] + "' class='form-control'></td>";
-                    table_body += "<td><input type='number' name='periodical1_" + json_data[key]['id'] + "' class='form-control'></td>";
-                    table_body += "<td><input type='number' name='periodical2_" + json_data[key]['id'] + "' class='form-control'></td>";
-                    table_body += "</tr>";
+            requests.push(request);
+        }
+
+        $.when.apply($, requests).done(function() {
+            for (var i = 0; i < arguments.length; i++) {
+                var result_data = arguments[i][0]; // AJAX response
+                var student = json_data[i];
+
+                table_body += "<tr>";
+                table_body += "<td>" + student['roll_no'] + "</td>";
+                table_body += "<td>" + student['name'] + "</td>";
+                table_body += "<td>" + student['btbt_id'] + "</td>";
+
+                // Use "-" if value is empty, otherwise show the value
+                function formatValue(value) {
+                    return (value === null || value === "" || value === "null" || value === "-") ? "" : value;
+                }
+                function handleEmpty(value) {
+                    return (value === "-" || value === "null") ? "" : value;
                 }
 
-                table_body += "</tbody></table></div>";
-                $("#student_data").html(table_body);
-                $("#save_results_div").show();
-            })
-            .fail(function(){
-                alert("Error in Fetching Students");
+                table_body += `<td><input type='text' name='assignment1_${student['id']}' class='form-control' value='${formatValue(result_data.assignment1_marks)}'></td>`;
+                table_body += `<td><input type='text' name='assignment2_${student['id']}' class='form-control' value='${formatValue(result_data.assignment2_marks)}'></td>`;
+                table_body += `<td><input type='text' name='periodical1_${student['id']}' class='form-control' value='${formatValue(result_data.periodical1_marks)}'></td>`;
+                table_body += `<td><input type='text' name='periodical2_${student['id']}' class='form-control' value='${formatValue(result_data.periodical2_marks)}'></td>`;
+
+                table_body += "</tr>";
+            }
+
+            table_body += "</tbody></table></div>";
+            $("#student_data").html(table_body);
+            $("#save_results_div").show();
+
+
+             // Add event listeners to make "-" editable
+            $(".mark-input").focus(function () {
+                if ($(this).val() === "-") {
+                    $(this).val("");
+                }
             });
-        }
+
+            $(".mark-input").blur(function () {
+                if ($(this).val().trim() === "") {
+                    $(this).val("-");
+                }
+            });
+        });
+    })
+    .fail(function(){
+        alert("Error in Fetching Students");
     });
+}
+
+
+});
 </script>
 {% endblock custom_js %}

@@ -21,6 +21,10 @@ class EditResultViewClass(View):
                     student_id = key.split('_')[1]
                     student_obj = Students.objects.get(admin=student_id)
 
+                    def convert_to_float(value):
+                        """ Convert to float if valid, otherwise None """
+                        return float(value) if value and value.strip() and value != "-" else None
+
                     assignment1_marks = request.POST.get(f'assignment1_{student_id}', None)
                     assignment2_marks = request.POST.get(f'assignment2_{student_id}', None)
                     periodical1_marks = request.POST.get(f'periodical1_{student_id}', None)
