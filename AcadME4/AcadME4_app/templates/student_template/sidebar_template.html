@@ -84,6 +84,14 @@
     </p>
   </a>
 </li>
+
+            <li class="nav-item">
+  {% url 'student_timetable_view' as student_timetable_view %}
+  <a href="{% url 'student_timetable_view' %}" class="nav-link {% if request.path == student_timetable_view %} active {% endif %}">
+    <i class="fa fa-calendar" style="margin-right: 8px;"></i>
+    <p>📅 View Timetable</p>
+  </a>
+</li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

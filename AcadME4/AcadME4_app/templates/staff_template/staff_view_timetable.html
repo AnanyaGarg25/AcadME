@@ -1,0 +1,58 @@
+{% extends 'staff_template/base_template.html' %}
+
+{% block page_title %}
+Your Timetable
+{% endblock page_title %}
+
+{% block main_content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Main Content Column -->
+      <div class="col-md-12">
+        <div class="card card-info">
+          <div class="card-header">
+            <h3 class="card-title">Your Timetable</h3>
+          </div>
+          <div class="card-body">
+            <p class="text-center font-weight-bold">Total entries: {{ timetable_entries|length }}</p>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>Day</th>
+                    <th>Course</th>
+                    <th>Subject</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for entry in timetable_entries %}
+                  <tr>
+                    <td>{{ entry.day_of_week }}</td>
+                    <td>{{ entry.course.course_name }}</td>
+                    <td>{{ entry.subject.subject_name }}</td>
+                    <td>{{ entry.start_time }}</td>
+                    <td>{{ entry.end_time }}</td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="5" class="text-center">No timetable entries found.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+      </div>
+      <!-- /.col-md-12 -->
+    </div>
+    <!-- /.row -->
+  </div>
+  <!-- /.container-fluid -->
+</section>
+{% endblock main_content %}

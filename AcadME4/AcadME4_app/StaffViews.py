@@ -30,6 +30,9 @@ from AcadME4_app.models import Assignment
 from AcadME4_app.models import NotificationStaffs
 
 from AcadME4_app.models import AssignmentSubmission
+from django.shortcuts import render, redirect
+from django.http import HttpResponseNotFound
+from AcadME4_app.models import Staffs, Timetable
 
 
 def staff_home(request):
@@ -437,3 +440,22 @@ def staff_grade_submission(request, submission_id):
         {"submission": submission}
     )
 '''
+
+def staff_view_timetable(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    try:
+        # Explicitly fetch the Staffs instance for the logged‑in user.
+        staff_instance = Staffs.objects.get(admin=request.user)
+    except Staffs.DoesNotExist:
+        return HttpResponseNotFound("Staff profile not found")
+
+    # Filter timetable entries for this teacher and include related subject and course.
+    timetable_entries = Timetable.objects.filter(teacher=staff_instance) \
+        .select_related("subject", "course") \
+        .order_by("day_of_week", "start_time")
+
+    return render(request, "staff_template/staff_view_timetable.html", {
+        "timetable_entries": timetable_entries
+    })

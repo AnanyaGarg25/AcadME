@@ -8,6 +8,12 @@ from django.urls import reverse
 from AcadME4_app.models import CustomUser,Courses,Subjects,Staffs,Students
 from django.core.files.storage import FileSystemStorage
 from AcadME4_app.forms import AddStudentForm,EditStudentForm
+import json
+from datetime import datetime
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from AcadME4_app.models import CustomUser, Subjects, Courses, Timetable, Staffs
 
 from AcadME4_app.models import SessionYearModel
 from django.views.decorators.csrf import csrf_exempt
@@ -550,6 +556,147 @@ def admin_get_monthly_attendance(request):
 
         return JsonResponse(student_data, safe=False)
 
+def admin_timetable(request):
+    """
+    Render the timetable page with subjects, courses, and teachers.
+    Only accessible to superusers.
+    """
+    if not request.user.is_superuser:
+        return render(request, "error_page.html", {"error": "Access Denied"})
 
+    # Fetch only the necessary fields
+    subjects = Subjects.objects.only("id", "subject_name")
+    courses = Courses.objects.only("id", "course_name")
+    teachers = Staffs.objects.select_related("admin").only("id", "admin__first_name", "admin__last_name")
+
+    return render(request, "admin_template/admin_timetable.html", {
+        "subjects": subjects,
+        "courses": courses,
+        "teachers": teachers
+    })
+
+
+def get_timetable_data(request):
+    """
+    Return JSON data for subjects, courses, teachers, and timetable entries.
+    Field names have been standardized to match the frontend.
+    """
+    subjects = list(Subjects.objects.values("id", "subject_name"))
+    courses = list(Courses.objects.values("id", "course_name"))
+
+    teachers = list(Staffs.objects.select_related("admin").values(
+        "id",
+        "admin__first_name",
+        "admin__last_name"
+    ))
+
+    timetable_entries = list(Timetable.objects.values(
+        "id",
+        "day_of_week",
+        "start_time",
+        "end_time",
+        "subject__subject_name",
+        "course__course_name",
+        "teacher__admin__first_name",
+        "teacher__admin__last_name",
+    ))
+
+    formatted_timetable = []
+    for entry in timetable_entries:
+        first_name = entry.get("teacher__admin__first_name", "")
+        last_name = entry.get("teacher__admin__last_name", "")
+        teacher_name = f"{first_name} {last_name}".strip() or "Not Assigned"
+        formatted_timetable.append({
+            "id": entry["id"],
+            "day_of_week": entry["day_of_week"],
+            "start_time": entry["start_time"],
+            "end_time": entry["end_time"],
+            "subject_name": entry["subject__subject_name"],
+            "course_name": entry["course__course_name"],
+            "teacher_name": teacher_name,
+        })
+
+    return JsonResponse({
+        "subjects": subjects,
+        "courses": courses,
+        "teachers": teachers,
+        "timetable": formatted_timetable
+    })
+
+
+@csrf_exempt
+def add_timetable_entry(request):
+    """
+    Create a new timetable entry from a JSON payload.
+    Expects JSON with:
+      - subject_id
+      - course_id
+      - teacher_id (Staffs id)
+      - day_of_week
+      - start_time (HH:MM)
+      - end_time (HH:MM)
+    """
+    if request.method == "POST":
+        try:
+            # Debug: print raw request
+            print("🔹 Raw Request Body:", request.body)
+            data = json.loads(request.body.decode("utf-8"))
+            print("🔹 Parsed Data:", data)
+
+            subject_id = data.get("subject_id")
+            course_id = data.get("course_id")
+            teacher_id = data.get("teacher_id")
+            day_of_week = data.get("day_of_week")
+            start_time_str = data.get("start_time")
+            end_time_str = data.get("end_time")
+
+            # Check required fields are provided
+            if not (subject_id and course_id and teacher_id and day_of_week and start_time_str and end_time_str):
+                return JsonResponse({"error": "All fields are required"}, status=400)
+
+            # Convert time strings to time objects
+            try:
+                start_time = datetime.strptime(start_time_str, "%H:%M").time()
+                end_time = datetime.strptime(end_time_str, "%H:%M").time()
+            except ValueError:
+                return JsonResponse({"error": "Invalid time format. Use HH:MM"}, status=400)
+
+            # Debug: print converted times
+            print(f"Converted start_time: {start_time}, end_time: {end_time}")
+
+            # Fetch related objects
+            subject = Subjects.objects.get(id=subject_id)
+            course = Courses.objects.get(id=course_id)
+
+            # Fetch teacher from Staffs using teacher_id and assign the Staffs instance
+            teacher = Staffs.objects.get(id=teacher_id)
+            print(f"Found teacher (Staffs instance): {teacher}")
+
+            # Create the timetable entry using the Staffs instance for teacher
+            new_entry = Timetable.objects.create(
+                subject=subject,
+                course=course,
+                teacher=teacher,
+                day_of_week=day_of_week,
+                start_time=start_time,
+                end_time=end_time,
+            )
+            print("✅ Timetable Entry Created:", new_entry)
+
+            return JsonResponse({"message": "Timetable entry added successfully"}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+        except Subjects.DoesNotExist:
+            return JsonResponse({"error": "Invalid subject ID"}, status=400)
+        except Courses.DoesNotExist:
+            return JsonResponse({"error": "Invalid course ID"}, status=400)
+        except Staffs.DoesNotExist:
+            return JsonResponse({"error": "Invalid teacher ID"}, status=400)
+        except Exception as e:
+            print("❌ Error:", str(e))
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 

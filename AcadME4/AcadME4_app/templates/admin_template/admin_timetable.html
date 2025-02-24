@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Timetable</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    .timetable-container {
+      width: 80%;
+      margin: auto;
+      padding: 20px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    h2, h3 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    form label {
+      width: 150px;
+      font-weight: bold;
+    }
+    form input, form select {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background: #007BFF;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="timetable-container">
+  <h2>Admin Timetable</h2>
+
+  <form id="timetableForm">
+    {% csrf_token %}
+
+    <label for="day">Day:</label>
+    <select id="day" name="day">
+      <option value="Monday">Monday</option>
+      <option value="Tuesday">Tuesday</option>
+      <option value="Wednesday">Wednesday</option>
+      <option value="Thursday">Thursday</option>
+      <option value="Friday">Friday</option>
+      <option value="Saturday">Saturday</option>
+      <option value="Sunday">Sunday</option>
+    </select>
+
+    <label for="time_slot">Time Slot (HH:MM - HH:MM):</label>
+    <input type="text" id="time_slot" name="time_slot" placeholder="09:00 - 10:00" required>
+
+    <label for="subject">Subject:</label>
+    <select id="subject" name="subject">
+      <option value="">Select Subject</option>
+    </select>
+
+    <label for="course">Course:</label>
+    <select id="course" name="course">
+      <option value="">Select Course</option>
+    </select>
+
+    <label for="teacher">Teacher:</label>
+    <select id="teacher" name="teacher">
+      <option value="">Select Teacher</option>
+    </select>
+
+    <button type="submit">Add Timetable Entry</button>
+  </form>
+
+  <h3>Existing Timetable</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Day</th>
+        <th>Time Slot</th>
+        <th>Subject</th>
+        <th>Course</th>
+        <th>Teacher</th>
+      </tr>
+    </thead>
+    <tbody id="timetableEntries">
+      <!-- Timetable entries will be inserted here via JavaScript -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Fetch data for dropdowns and timetable table
+    fetch('/get_timetable_data/')
+      .then(response => response.json())
+      .then(data => {
+        let subjectDropdown = document.getElementById("subject");
+        let courseDropdown = document.getElementById("course");
+        let teacherDropdown = document.getElementById("teacher");
+        let timetableEntries = document.getElementById("timetableEntries");
+
+        // Populate subjects dropdown using 'subject_name'
+        data.subjects.forEach(subject => {
+          let option = document.createElement("option");
+          option.value = subject.id;
+          option.textContent = subject.subject_name;
+          subjectDropdown.appendChild(option);
+        });
+
+        // Populate courses dropdown using 'course_name'
+        data.courses.forEach(course => {
+          let option = document.createElement("option");
+          option.value = course.id;
+          option.textContent = course.course_name;
+          courseDropdown.appendChild(option);
+        });
+
+        // Populate teachers dropdown by combining first and last names
+        data.teachers.forEach(teacher => {
+          let option = document.createElement("option");
+          option.value = teacher.id;
+          option.textContent = teacher.admin__first_name + " " + teacher.admin__last_name;
+          teacherDropdown.appendChild(option);
+        });
+
+        // Populate timetable entries in the table
+        data.timetable.forEach(entry => {
+          let row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${entry.day_of_week}</td>
+            <td>${entry.start_time} - ${entry.end_time}</td>
+            <td>${entry.subject_name}</td>
+            <td>${entry.course_name}</td>
+            <td>${entry.teacher_name}</td>
+          `;
+          timetableEntries.appendChild(row);
+        });
+      })
+      .catch(error => console.error("Error fetching timetable data:", error));
+
+    // Handle form submission to send JSON via fetch
+    document.getElementById("timetableForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      // Extract and validate time slot (expects format "HH:MM - HH:MM")
+      let timeSlot = document.getElementById("time_slot").value;
+      let times = timeSlot.split("-");
+      if (times.length !== 2) {
+        alert("Please enter a valid time slot in the format HH:MM - HH:MM");
+        return;
+      }
+      let start_time = times[0].trim();
+      let end_time = times[1].trim();
+
+      // Build the data object from form fields
+      const data = {
+        subject_id: document.getElementById("subject").value,
+        course_id: document.getElementById("course").value,
+        teacher_id: document.getElementById("teacher").value,
+        day_of_week: document.getElementById("day").value,
+        start_time: start_time,
+        end_time: end_time,
+      };
+
+      fetch('/add_timetable_entry/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.message) {
+          alert(result.message);
+          location.reload();  // Reload page to show the new timetable entry
+        } else if (result.error) {
+          alert("Error: " + result.error);
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  });
+</script>
+
+</body>
+</html>

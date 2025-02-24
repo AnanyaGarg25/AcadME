@@ -110,5 +110,14 @@ path("student_view_assignments", StudentViews.student_view_assignments, name="st
  # Staff URLs
  path("staff_view_submissions", StaffViews.staff_view_submissions, name="staff_view_submissions"),
 # path("staff_grade_submission/<int:submission_id>", StaffViews.staff_grade_submission,name="staff_grade_submission"),
+
+path('admin_timetable/', AdminViews.admin_timetable, name='admin_timetable'),
+path("get_timetable_data/", AdminViews.get_timetable_data, name="get_timetable_data"),
+path("add_timetable_entry/", AdminViews.add_timetable_entry, name="add_timetable_entry"),
+
+
+
+path('staff_view_timetable', StaffViews.staff_view_timetable, name="staff_view_timetable"),
+path('student_timetable_view', StudentViews.student_timetable_view, name="student_timetable_view"),
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

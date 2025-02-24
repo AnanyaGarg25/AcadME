@@ -1,0 +1,54 @@
+{% extends 'student_template/base_template.html' %}
+
+{% block page_title %}
+Your Timetable
+{% endblock page_title %}
+
+{% block main_content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <!-- Timetable Card -->
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">Your Timetable</h3>
+          </div>
+          <!-- Card Body -->
+          <div class="card-body">
+            <p>Total entries: {{ timetables|length }}</p>
+            <table class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th>Course</th>
+                  <th>Subject</th>
+                  <th>Start Time</th>
+                  <th>End Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in timetables %}
+                <tr>
+                  <td>{{ row.day_of_week }}</td>
+                  <td>{{ row.course.course_name }}</td>
+                  <td>{{ row.subject.subject_name }}</td>
+                  <td>{{ row.start_time }}</td>
+                  <td>{{ row.end_time }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5">No timetable entries found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock main_content %}

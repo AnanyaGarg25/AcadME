@@ -24,6 +24,9 @@ from AcadME4_app.models import NotificationStudent
 from AcadME4_app.models import StudentResult
 
 from AcadME4_app.models import AssignmentSubmission, Assignment
+from django.shortcuts import render, redirect
+from django.http import HttpResponseNotFound
+from AcadME4_app.models import Students, Timetable
 
 
 def student_home(request):
@@ -188,3 +191,22 @@ def student_submit_assignment(request, assignment_id):
         "student_template/submit_assignment.html",
         {"assignment": assignment}
     )
+
+def student_timetable_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    try:
+        # Retrieve the student profile using the admin field
+        student = Students.objects.get(admin=request.user)
+    except Students.DoesNotExist:
+        return HttpResponseNotFound("Student profile not found")
+
+    # Filter timetable entries based on the student's course.
+    # Assumes that Timetable.course is linked to the Courses model,
+    # and student.course_id refers to the course instance.
+    timetables = Timetable.objects.filter(course=student.course_id) \
+        .select_related("subject", "course", "teacher") \
+        .order_by("day_of_week", "start_time")
+
+    return render(request, "student_template/student_timetable_view.html", {"timetables": timetables})
