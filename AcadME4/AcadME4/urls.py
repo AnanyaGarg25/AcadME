@@ -123,6 +123,13 @@ path('student_timetable_view', StudentViews.student_timetable_view, name="studen
 path('college-gallery/', StudentViews.college_gallery, name='college_gallery'),
 path('staff-gallery/', StaffViews.staff_gallery, name='staff_gallery'),
 path('admin-gallery/', AdminViews.admin_gallery, name='admin_gallery'),
+path("upload_syllabus_books/", StaffViews.upload_syllabus_books, name="upload_syllabus_books"),
+
+path('view_syllabus_books', StudentViews.view_syllabus_books, name="view_syllabus_books"),
+
+path('college/about/', StudentViews.student_about, name='student_about'),
+path('staff/about/', StaffViews.staff_about, name='staff_about'),
+     path('custom_admin/about/', AdminViews.admin_about, name='admin_about'),
 
               ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

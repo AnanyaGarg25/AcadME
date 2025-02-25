@@ -1,0 +1,47 @@
+{% extends "staff_template/base_template.html" %}
+{% block page_title %}Upload Handouts and Books{% endblock page_title %}
+{% block main_content %}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="text-center mb-0">Upload Syllabus</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="id_title" class="form-label"><strong>Title</strong></label>
+                    <input type="text" name="title" class="form-control" required id="id_title">
+                </div>
+
+               <div class="mb-3">
+    <label for="id_subject" class="form-label"><strong>Subject</strong></label>
+    <select name="subject" class="form-select" required id="id_subject">
+        {% for subject in subjects %}
+            <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+                <div class="mb-3">
+                    <label for="id_syllabus_file" class="form-label"><strong>Syllabus File</strong></label>
+                    <input type="file" name="syllabus_file" class="form-control" required id="id_syllabus_file">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Upload</button>
+
+                {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

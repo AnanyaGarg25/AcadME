@@ -1,0 +1,203 @@
+{% extends 'staff_template/base_template.html' %}
+{% load static %}
+
+{% block page_title %}About Us{% endblock page_title %}
+
+{% block main_content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<style>
+  /* Vibrant, darker gradient background */
+  .about-card {
+    background: linear-gradient(135deg, #8E24AA, #1E88E5, #43A047, #D81B60);
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    padding: 30px;
+    margin-bottom: 30px;
+    color: #fff; /* White text for contrast */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  /* Hover effect for extra pop */
+  .about-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Header Styling */
+  .about-card .card-header {
+    background: transparent;
+    border: none;
+    padding-bottom: 0;
+  }
+
+  /* Navigation Tabs Styling */
+  .nav-tabs {
+    border-bottom: none;
+    display: flex;
+    justify-content: center;
+  }
+  .nav-tabs .nav-link {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    transition: background 0.3s ease, transform 0.2s;
+  }
+  .nav-tabs .nav-link.active {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    transform: scale(1.05);
+  }
+
+  /* Tab Content Styling */
+  .tab-content {
+    padding-top: 20px;
+  }
+  .tab-content p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #fff;
+    margin-bottom: 15px;
+    animation: fadeInUp 0.8s ease forwards;
+    opacity: 0; /* Start hidden for animation */
+  }
+
+  /* Keyframe Animation for Fade-In Up */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Staggered Animation Delays for Paragraphs */
+  .tab-content p:nth-child(1) {
+    animation-delay: 0.3s;
+  }
+  .tab-content p:nth-child(2) {
+    animation-delay: 0.5s;
+  }
+  .tab-content p:nth-child(3) {
+    animation-delay: 0.7s;
+  }
+  .tab-content p:nth-child(4) {
+    animation-delay: 0.9s;
+  }
+  .tab-content p:nth-child(5) {
+    animation-delay: 1.1s;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .about-card {
+      padding: 20px;
+    }
+    .nav-tabs .nav-link {
+      font-size: 1rem;
+    }
+    .tab-content p {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card about-card animate__animated animate__fadeInUp">
+        <div class="card-header text-center">
+          <h2 class="animate__animated animate__bounceIn">About Us</h2>
+        </div>
+        <div class="card-body">
+         <!-- Nav Tabs -->
+          <ul class="nav nav-tabs justify-content-center" id="aboutUsTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active animate__animated animate__fadeIn" id="basic-tab" data-toggle="tab" href="#basic" role="tab">About Us</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link animate__animated animate__fadeIn" id="history-tab" data-toggle="tab" href="#history" role="tab">History</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link animate__animated animate__fadeIn" id="vision-tab" data-toggle="tab" href="#vision" role="tab">Vision & Mission</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link animate__animated animate__fadeIn" id="management-tab" data-toggle="tab" href="#management" role="tab">Management</a>
+            </li>
+          </ul>
+          <!-- Tab Content -->
+          <div class="tab-content mt-4" id="aboutUsTabContent">
+            <!-- About Us Tab -->
+            <div class="tab-pane fade show active" id="basic" role="tabpanel">
+              <p class="animate__animated animate__fadeInUp" style="animation-delay: 0.5s;">
+                Banasthali Vidyapith is a fully residential women's higher education institute offering an integrated system from primary to Ph.D. levels.
+              </p>
+              <p class="animate__animated animate__fadeInUp" style="animation-delay: 1s;">
+                Founded on October 6, 1935 by Smt. Ratan Shastri and Pandit Hiralal Shastri, the institute was established after the untimely loss of their daughter Shantabai, with aspirations for women’s empowerment.
+              </p>
+              <p class="animate__animated animate__fadeInUp" style="animation-delay: 1.5s;">
+                It emerged not solely from the zeal of educators or reformers, but like a phoenix rising from the ashes of a blossoming flower, Shantabai.
+              </p>
+              <p class="animate__animated animate__fadeInUp" style="animation-delay: 2s;">
+                Over seventy-five years, it has grown into a national center for women’s education with a unique Five-fold Educational Programme nurturing physical, practical, aesthetic, moral, and intellectual growth.
+              </p>
+              <p class="animate__animated animate__fadeInUp" style="animation-delay: 2.5s;">
+                Embracing its rural charm, the institute promotes simple living, self-reliance, and tolerance—empowering women to lead confidently. Accredited with an 'A' Grade by NAAC and honored with the SANTBAL Award, it continues to innovate while preserving its heritage.
+              </p>
+            </div>
+            <!-- History Tab (Placeholder) -->
+            <div class="tab-pane fade" id="history" role="tabpanel">
+            <!--  <p class="animate__animated animate__fadeInUp" style="animation-delay: 0.5s;"><strong>History:</strong> History content will be provided later.</p> -->
+                   <p class="animate__animated animate__fadeInUp" style="animation-delay: 0.5s;">
+              To realize a dream which he had cherished since his boyhood, Pandit Hiralal Shastri, the founding father of Banasthali Vidyapith, resigned his prestigious post of Secretary in the Home and Foreign Department in the erstwhile Jaipur State in 1927 and selected the remote village of Banthali (as Banasthali was originally called) as the centre of his life’s work. His plan was to organize a programme of rural reconstruction on the lines laid down by Gandhiji and also to train public workers through constructive service of the people.
+            </p>
+            <p class="animate__animated animate__fadeInUp" style="animation-delay: 1s;">
+              While so engaged in his work, Shastriji also wanted to train his promising daughter Shantabai as a social worker dedicated to the cause of women’s upliftment. But destiny ordained otherwise. All of a sudden, after a brief illness of a day, Shantabai bade farewell to Banasthali on 25th April, 1935 at the tender age of only 12 years. The loss seemed irreparable at the moment, but soon the mood of despondency gave way to a new hope. If one Shantabai had departed, there were others who could be trained alike. This idea gave solace and opened the path of action.
+            </p>
+            <p class="animate__animated animate__fadeInUp" style="animation-delay: 1.5s;">
+              To complete the unfinished task of his daughter, the Shri Shantabai Shiksha Kutir was started in October 1935 in the mud huts provided by the Jiwan Kutir, with about half-a-dozen girls.
+            </p>
+
+            </div>
+            <!-- Vision & Mission Tab (Placeholder) -->
+            <div class="tab-pane fade" id="vision" role="tabpanel">
+            <!--  <p class="animate__animated animate__fadeInUp" style="animation-delay: 0.5s;"><strong>Vision & Mission:</strong> Vision & Mission content will be provided later.</p> -->
+                     <p class="animate__animated animate__fadeInUp" style="animation-delay: 0.5s;">
+           Banasthali Vidyapith has been conceptualized to materialize the ethos of nation-building and Indian Culture. Banasthali's whole architecture stands upon the twin foundation pillars of Nationalism and Indian Culture. Since its inception, Banasthali Vidyapith has had  a clear  perspective about  its educational efforts and  has possessed a  vivid picture of the  form and pattern of educational programme  to be adopted.
+          </p>
+          <p class="animate__animated animate__fadeInUp" style="animation-delay: 1s;">
+           The architects of the Vidyapith  believed that an educational programme should be able to promote the development of a balanced and harmonious personality of the students. Hence, the educational programme of the Vidyapith was distinct from the form of education prevalent at that time which emphasized book learning to utter neglect of all other aspects of education.  Banasthali Vidyapith’s aim of a full and balanced development of students' personality got concrete expression in the form of 'Panchmukhi Shiksha' which evolved out of initial experimentation.
+          </p>
+          <p class="animate__animated animate__fadeInUp" style="animation-delay: 1.5s;">
+            Panchmukhi Shiksha attempts a balance of the five aspects of education, namely Physical, Practical, Aesthetic, Moral and Intellectual and aims at all round harmonious development of personality.
+          </p>
+          <p class="animate__animated animate__fadeInUp" style="animation-delay: 2s;">
+            Synthesis of spiritual values and scientific achievements of the East and the West is a key feature of the Vidyapith’s  educational programme. Simple living, self-reliance and khadi wearing are hallmarks of life at Banasthali.
+             </p>
+            </div>
+            <!-- Management Tab (Placeholder) -->
+            <div class="tab-pane fade" id="management" role="tabpanel">
+             <!-- <p class="animate__animated animate__fadeInUp" style="animation-delay: 0.5s;"><strong>Management:</strong> Management content will be provided later.</p> -->
+            <p class="animate__animated animate__fadeInUp" style="animation-delay: 2s;">
+              The name ‘Banasthali Vidyapith’ was adopted only in 1943. This also happened to be the year when undergraduate courses were first introduced. The institution was granted the status of a deemed university in 1983 by the UGC. Prof. Sushila Vyas, the first student of Banasthali Vidyapith, was appointed the first Director of Vidyapith. The UGC committee, when recommending the conferment of University status, considered its viable programme for restructuring courses, opportunities for personality development, and initiatives to inculcate spiritual and moral values.
+            </p>
+            <p class="animate__animated animate__fadeInUp" style="animation-delay: 2.5s;">
+              Under the tutelage of the Shastri family, Banasthali Vidyapith has grown from a school catering to only 6 students to the only residential women institute in the country that provides education from the pre-primary stage up to the Doctoral level. Banasthali Vidyapith has been accredited by the National Assessment and Accreditation Council (NAAC) with an ‘A’ Grade (Five Star Rating).
+            </p>
+            <p class="animate__animated animate__fadeInUp" style="animation-delay: 3s;">
+              <strong>Our Source of Inspiration:</strong> Shanta Bai
+            </p>
+            <p class="animate__animated animate__fadeInUp" style="animation-delay: 3.5s;">
+              <strong>Our Founders:</strong> Hiralal Shastri &amp; Smt. Ratan Shastri
+            </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock main_content %}

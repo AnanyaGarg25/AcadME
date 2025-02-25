@@ -218,3 +218,22 @@ def college_gallery(request):
     # If you want to load images dynamically from the database,
     # query your Achievement model here and pass as context.
     return render(request, "student_template/college_gallery.html")
+
+def student_about(request):
+    return render(request, "student_template/college_about.html")
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Syllabus, Students
+
+@login_required
+def view_syllabus_books(request):
+        student = Students.objects.get(admin=request.user)
+
+        # Get subjects the student is enrolled in
+        student_subjects = Subjects.objects.filter(course_id=student.course_id)
+
+        # Get syllabus files related to those subjects
+        syllabus = Syllabus.objects.filter(subject__in=student_subjects)
+
+        return render(request, "student_template/view_syllabus_books.html",
+                      {"subjects": student_subjects, "syllabus": syllabus})

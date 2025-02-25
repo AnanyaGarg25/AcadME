@@ -119,16 +119,29 @@
           {% url 'staff_view_timetable' as staff_view_timetable %}
           <a href="{% url 'staff_view_timetable' %}" class="nav-link {% if request.path == staff_view_timetable %} active {% endif %}">
             <i class="fa fa-calendar" style="margin-right: 8px;"></i>
-            <p>📅 View Timetable</p>
+            <p> View Timetable</p>
           </a>
         </li>
 
+            <li class="nav-item">
+  {% url 'upload_syllabus_books' as upload_syllabus_books %}
+  <a href="{% url 'upload_syllabus_books' %}" class="nav-link {% if request.path == upload_syllabus_books %} active {% endif %}">
+    <i class="fa fa-calendar" style="margin-right: 8px;"></i>
+    <p>Upload Materials</p>
+  </a>
+</li>
 
          <li class="nav-item">
   <a class="nav-link" href="{% url 'staff_gallery' %}">
     <i class="fas fa-award"></i>  Achievements & Gallery
   </a>
 </li>
+            <li class="nav-item">
+  <a class="nav-link" href="{% url 'staff_about' %}">
+    <i class="fas fa-info-circle"></i> About Us
+  </a>
+</li>
+
 
 
         </ul>

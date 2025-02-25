@@ -1,0 +1,79 @@
+{% extends "student_template/base_template.html" %}
+{% block page_title %}
+View Handouts and Books
+{% endblock page_title %}
+{% block main_content %}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="text-center mb-0">Download Syllabus</h4>
+        </div>
+        <div class="card-body">
+
+            <!-- Dropdown for subjects -->
+            <div class="mb-3">
+                <label for="subjectDropdown" class="form-label"><strong>Select Subject:</strong></label>
+                <select id="subjectDropdown" class="form-select" onchange="showSyllabus()">
+                    <option value="">-- Select a Subject --</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Syllabus Table -->
+            <table class="table table-bordered mt-3" id="syllabusTable" style="display: none;">
+                <thead>
+                    <tr class="table-secondary">
+                        <th>Title</th>
+                        <th>Uploaded By</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                <tbody id="syllabusBody">
+                    {% for file in syllabus %}
+                        <tr class="syllabus-row" data-subject="{{ file.subject.id }}">
+                            <td>{{ file.title }}</td>
+                            <td>{{ file.uploaded_by.admin.first_name }} {{ file.uploaded_by.admin.last_name }}</td>
+                            <td>
+                                <a href="{{ file.file.url }}" class="btn btn-success btn-sm" download>Download</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to Show Syllabus Based on Subject Selection -->
+<script>
+    function showSyllabus() {
+        var selectedSubject = document.getElementById("subjectDropdown").value;
+        var table = document.getElementById("syllabusTable");
+        var rows = document.querySelectorAll(".syllabus-row");
+
+        // Hide table if no subject selected
+        if (!selectedSubject) {
+            table.style.display = "none";
+            return;
+        }
+
+        var hasData = false;
+        rows.forEach(row => {
+            if (row.getAttribute("data-subject") === selectedSubject) {
+                row.style.display = "";
+                hasData = true;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        // Show table only if there are matching syllabus files
+        table.style.display = hasData ? "table" : "none";
+    }
+</script>
+
+{% endblock %}

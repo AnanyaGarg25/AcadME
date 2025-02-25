@@ -464,3 +464,36 @@ def staff_gallery(request):
     Renders the staff achievements & gallery page.
     """
     return render(request, "staff_template/staff_gallery.html")
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Syllabus, Subjects, Staffs
+from django.contrib.auth.decorators import login_required
+@login_required
+def upload_syllabus_books(request):
+    staff = Staffs.objects.get(admin=request.user)  # Get the logged-in teacher
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+        subject_id = request.POST.get("subject")
+        file = request.FILES.get("syllabus_file")
+
+        if not title or not file:
+            messages.error(request, "All fields are required.")
+            return redirect("upload_syllabus_books")
+
+        try:
+            # Filter subjects using `staff.admin` (which is a `CustomUser` instance)
+            subject = Subjects.objects.get(id=subject_id, staff_id=staff.admin)
+            syllabus = Syllabus(title=title, subject=subject, file=file, uploaded_by=staff)
+            syllabus.save()
+            messages.success(request, "Syllabus uploaded successfully!")
+        except Subjects.DoesNotExist:
+            messages.error(request, "Invalid subject selected.")
+
+    # Filter subjects using `staff.admin`
+    subjects = Subjects.objects.filter(staff_id=staff.admin)
+
+    return render(request, "staff_template/upload_syllabus_books.html", {"subjects": subjects})
+
+def staff_about(request):
+    return render(request, "staff_template/staff_about.html")

@@ -92,12 +92,24 @@
     <p>📅 View Timetable</p>
   </a>
 </li>
+            <li class="nav-item">
+  {% url 'view_syllabus_books' as view_syllabus_books %}
+  <a href="{% url 'view_syllabus_books' %}" class="nav-link {% if request.path == view_syllabus_books %} active {% endif %}">
+    <i class="fa fa-calendar" style="margin-right: 8px;"></i>
+    <p>View Materials</p>
+  </a>
+</li>
               <li class="nav-item">
           <a class="nav-link" href="{% url 'college_gallery' %}">
             <i class="fas fa-award"></i> Achievements & Gallery
           </a>
         </li>
 
+   <li class="nav-item">
+  <a class="nav-link" href="{% url 'student_about' %}">
+    <i class="fas fa-info-circle"></i> About Us
+  </a>
+</li>
 
         </ul>
       </nav>

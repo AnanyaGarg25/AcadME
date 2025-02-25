@@ -241,3 +241,15 @@ class Timetable(models.Model):
         return f"{self.subject.subject_name} - {self.teacher.admin.first_name} {self.teacher.admin.last_name} ({self.day_of_week})"
 
     objects = models.Manager()
+
+
+class Syllabus(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=255)
+    subject = models.ForeignKey(Subjects, on_delete=models.CASCADE)
+    uploaded_by = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    file = models.FileField(upload_to="syllabus/", validators=[validate_pdf])
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} (Syllabus)"

@@ -704,3 +704,10 @@ def admin_gallery(request):
     Renders the admin achievements & gallery page.
     """
     return render(request, "admin_template/admin_gallery.html")
+
+
+def admin_about(request):
+    # For initial testing, try returning a simple response:
+    # return HttpResponse("Admin About view is working!")
+
+    return render(request, "admin_template/admin_about.html")
