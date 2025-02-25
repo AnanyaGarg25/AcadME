@@ -103,7 +103,7 @@ path('student_view_attendance_post', StudentViews.student_view_attendance_post, 
     path('staff_notifications', StaffViews.staff_notifications, name='staff_notifications'),
     path('send_notification', AdminViews.send_notification,name='send_notification'),
     path('student_view_result', StudentViews.student_view_result, name='student_view_result'),
-path("student_view_assignments", StudentViews.student_view_assignments, name="student_view_assignments"),
+    path("student_view_assignments", StudentViews.student_view_assignments, name="student_view_assignments"),
  path("student_submit_assignment/<int:assignment_id>",StudentViews.student_submit_assignment,
                     name="student_submit_assignment"),
 
@@ -119,5 +119,10 @@ path("add_timetable_entry/", AdminViews.add_timetable_entry, name="add_timetable
 
 path('staff_view_timetable', StaffViews.staff_view_timetable, name="staff_view_timetable"),
 path('student_timetable_view', StudentViews.student_timetable_view, name="student_timetable_view"),
-]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
+
+path('college-gallery/', StudentViews.college_gallery, name='college_gallery'),
+path('staff-gallery/', StaffViews.staff_gallery, name='staff_gallery'),
+path('admin-gallery/', AdminViews.admin_gallery, name='admin_gallery'),
+
+              ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

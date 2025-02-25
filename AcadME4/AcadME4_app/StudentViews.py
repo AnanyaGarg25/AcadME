@@ -210,3 +210,11 @@ def student_timetable_view(request):
         .order_by("day_of_week", "start_time")
 
     return render(request, "student_template/student_timetable_view.html", {"timetables": timetables})
+
+def college_gallery(request):
+    """
+    Renders the college achievements & gallery page.
+    """
+    # If you want to load images dynamically from the database,
+    # query your Achievement model here and pass as context.
+    return render(request, "student_template/college_gallery.html")

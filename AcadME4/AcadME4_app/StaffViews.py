@@ -459,3 +459,8 @@ def staff_view_timetable(request):
     return render(request, "staff_template/staff_view_timetable.html", {
         "timetable_entries": timetable_entries
     })
+def staff_gallery(request):
+    """
+    Renders the staff achievements & gallery page.
+    """
+    return render(request, "staff_template/staff_gallery.html")

@@ -699,4 +699,8 @@ def add_timetable_entry(request):
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
-
+def admin_gallery(request):
+    """
+    Renders the admin achievements & gallery page.
+    """
+    return render(request, "admin_template/admin_gallery.html")
