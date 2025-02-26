@@ -1,3 +1,4 @@
+
 {% load static %}
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
@@ -35,7 +36,7 @@
              {% url 'admin_home' as admin_home %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ admin_home }}" class="nav-link  {% if request.path == admin_home %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="fas fa-chalkboard-teacher" style="margin-right: 8px;"></i>
+              <i class="fas fa-home" style="margin-right: 8px;"></i>
               <p>
                 Home
 
@@ -177,7 +178,7 @@
               {% url 'send_notification' as send_notification %}
             <!--{% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{% url 'send_notification' %}" class="nav-link  {% if request.path == send_notification %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="fa fa-calendar" style="margin-right: 8px;"></i>
+              <i class="fas fa-bell" style="margin-right: 8px;"></i>
               <p>
                     Notifications
               </p>
@@ -187,26 +188,23 @@
           {% url 'admin_timetable' as admin_timetable %}
           <a href="{% url 'admin_timetable' %}" class="nav-link {% if request.path == '/admin_timetable/' %}
          active {% endif %}">
-            <i class="fa fa-calendar" style="margin-right: 8px;"></i>
-            <p>Admin Timetable</p>
+            <i class="fas fa-table" style="margin-right: 8px;"></i>
+            <p>Timetable</p>
           </a>
         </li>
 
-
-
             <li class="nav-item">
   <a class="nav-link" href="{% url 'admin_gallery' %}">
-    <i class="fas fa-award"></i>  Achievements & Gallery
+    <i class="fas fa-award" style="margin-right: 8px;"></i>
+      <p>Achievements & Gallery</p>
   </a>
 </li>
-        <li class="nav-item">
+
+            <li class="nav-item">
   <a class="nav-link" href="{% url 'admin_about' %}">
     <i class="fas fa-info-circle"></i> About Us
   </a>
 </li>
-
-
-
 
         </ul>
       </nav>
@@ -214,3 +212,8 @@
     </div>
     <!-- /.sidebar -->
   </aside>
+
+
+
+
+

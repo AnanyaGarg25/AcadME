@@ -1,4 +1,5 @@
-{% extends 'admin_template/base_template.html' %}
+
+ {% extends 'admin_template/base_template.html' %}
 {% block page_title %}
 Home
 {% endblock page_title %}
@@ -7,49 +8,269 @@ Home
       <div class="container-fluid">
       <div class="row">
           <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-info">
-              <div class="inner">
+        <!-- Small Box with Modern Pastel Design -->
+        <div class="small-box pastel-card">
+            <div class="icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="inner">
                 <h3>{{ student_count }}</h3>
-
                 <p>Total Students</p>
-              </div>
-              <div class="icon">
-                <i class=" ion ion-pie-graph"></i>
-              </div>
-              <a href="{% url 'manage_student' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
-          </div>
+            <a href="{% url 'manage_student' %}" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+<style>
+    /* Light Pink Gradient for Pastel Card */
+    .pastel-card {
+        background: linear-gradient(135deg, #FF85A2, #FFC1D6); /* Light pink to soft pastel pink */
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
+        color: #FFFFFF; /* White text for better visibility */
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hover Effect */
+    .pastel-card:hover {
+        transform: scale(1.05);
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Icon Styling - Top Left Corner */
+    .pastel-card .icon {
+        font-size: 28px; /* Smaller icon */
+        color: rgba(255, 255, 255, 0.8); /* Light white */
+        position: absolute;
+        top: 10px;
+        left: 15px;
+    }
+
+    /* Move Text Up */
+    .pastel-card .inner {
+        margin-top: -10px; /* Move text upwards */
+    }
+
+    /* Text Styling */
+    .pastel-card h3 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #FFF; /* White for better contrast */
+    }
+
+    .pastel-card p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #F8F9FA; /* Slightly lighter white */
+    }
+
+    /* Footer Styling (More Info) */
+    .small-box-footer {
+        display: block;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        text-decoration: none;
+        color: #FFF !important; /* White text */
+        font-weight: bold;
+        border-radius: 0 0 12px 12px;
+        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    .small-box-footer:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: #FFF !important; /* Stays white on hover */
+    }
+</style>
+
           <!-- ./col -->
           <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-success">
-              <div class="inner">
+        <!-- Small Box with Icy Blue Gradient -->
+        <div class="small-box icy-blue-card">
+            <div class="icon">
+                <i class="fas fa-user-tie"></i> <!-- Changed to a more relevant icon -->
+            </div>
+            <div class="inner">
                 <h3>{{ staff_count }}</h3>
-
                 <p>Total Staff</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-pie-graph"></i>
-              </div>
-              <a href="{% url 'manage_staff' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
-          </div>
+            <a href="{% url 'manage_staff' %}" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+<style>
+    /* Icy Blue Gradient for Staff Count Box */
+    .icy-blue-card {
+        background: linear-gradient(135deg, #A0D9F6, #4DA8DA); /* Light icy blue to deep blue */
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
+        color: #FFFFFF; /* White text for better visibility */
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hover Effect */
+    .icy-blue-card:hover {
+        transform: scale(1.05);
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Icon Styling - Top Left Corner */
+    .icy-blue-card .icon {
+        font-size: 28px; /* Smaller icon */
+        color: rgba(255, 255, 255, 0.8); /* Light white */
+        position: absolute;
+        top: 10px;
+        left: 15px;
+    }
+
+    /* Move Text Up */
+    .icy-blue-card .inner {
+        margin-top: -10px; /* Move text upwards */
+    }
+
+    /* Text Styling */
+    .icy-blue-card h3 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #FFF; /* White for better contrast */
+    }
+
+    .icy-blue-card p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #F8F9FA; /* Slightly lighter white */
+    }
+
+    /* Footer Styling (More Info) */
+    .small-box-footer {
+        display: block;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        text-decoration: none;
+        color: #FFF !important; /* White text */
+        font-weight: bold;
+        border-radius: 0 0 12px 12px;
+        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    .small-box-footer:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: #FFF !important; /* Stays white on hover */
+    }
+</style>
+
+
           <!-- ./col -->
           <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-warning">
-              <div class="inner">
-                <h3>{{ course_count }}</h3>
-
-                <p>Total Course</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-pie-graph"></i>
-              </div>
-              <a href="{% url 'manage_course' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+        <!-- Small Box with Pastel Red Gradient -->
+        <div class="small-box bg-warning">
+            <div class="icon">
+                <i class="fas fa-book"></i> <!-- Changed icon for courses -->
             </div>
-          </div>
+            <div class="inner">
+                <h3>{{ course_count }}</h3>
+                <p>Total Courses</p>
+            </div>
+            <a href="{% url 'manage_course' %}" class="small-box-footer">
+                More info <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+<style>
+    /* Ensure all small boxes have the same size */
+    .small-box {
+        height: 160px; /* Uniform height */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hover Effect */
+    .small-box:hover {
+        transform: scale(1.05);
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Pastel Red Gradient */
+    .bg-warning {
+        background: linear-gradient(135deg, #FF9A9E, #F76C6C) !important; /* Soft pastel red */
+    }
+
+    /* Icon Styling - Top Left Corner */
+    .small-box .icon {
+        font-size: 28px;
+        color: rgba(255, 255, 255, 0.8);
+        position: absolute;
+        top: 10px;
+        left: 15px;
+    }
+
+    /* Move Text Up */
+    .small-box .inner {
+        margin-top: -10px;
+    }
+
+    /* Text Styling */
+    .small-box h3 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #FFF;
+    }
+
+    .small-box p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #F8F9FA;
+    }
+
+    /* Force "More info" to be White */
+    .small-box-footer {
+        display: block;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        text-decoration: none;
+        color: #FFF !important; /* Stronger override */
+        font-weight: bold;
+        border-radius: 0 0 12px 12px;
+        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    /* Ensure White on Hover */
+    .small-box-footer:hover,
+    .small-box-footer:focus,
+    .small-box-footer:visited {
+        background: rgba(255, 255, 255, 0.3) !important;
+        color: #FFF !important; /* Absolutely force white */
+    }
+
+    /* Force White on All Links Inside Footer */
+    .small-box-footer i,
+    .small-box-footer span {
+        color: #FFF !important;
+    }
+</style>
+
+
           <!-- ./col -->
           <div class="col-lg-3 col-6">
             <!-- small box -->
@@ -65,11 +286,84 @@ Home
               <a href="{% url 'manage_subject' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
+<style>
+    /* Ensure all small boxes have the same size */
+    .small-box {
+        height: 160px; /* Uniform height */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hover Effect */
+    .small-box:hover {
+        transform: scale(1.05);
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Pastel Teal Gradient */
+    .bg-danger {
+        background: linear-gradient(135deg, #A0E7E5, #5AC8C8) !important; /* Soft pastel teal */
+    }
+
+    /* Icon Styling - Top Left Corner */
+    .small-box .icon {
+        font-size: 28px;
+        color: rgba(255, 255, 255, 0.8);
+        position: absolute;
+        top: 10px;
+        left: 15px;
+    }
+
+    /* Move Text Up */
+    .small-box .inner {
+        margin-top: -10px;
+    }
+
+    /* Text Styling */
+    .small-box h3 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #FFF;
+    }
+
+    .small-box p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #F8F9FA;
+    }
+
+    /* Footer Styling ("More Info" Button) */
+    .small-box-footer {
+        display: block;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        text-decoration: none;
+        color: #FFF !important; /* Force White */
+        font-weight: bold;
+        border-radius: 0 0 12px 12px;
+        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    .small-box-footer:hover,
+    .small-box-footer:focus {
+        background: rgba(255, 255, 255, 0.3);
+        color: #FFF !important; /* Ensure White on Hover */
+    }
+</style>
+
           <!-- ./col -->
         </div>
           <div class="row">
               <div class="col-lg-6">
-                          <div class="card card-danger">
+                    <div class="card card-danger">
                       <div class="card-header">
                         <h3 class="card-title">Student and Staff Chart</h3>
 
@@ -85,6 +379,70 @@ Home
               <!-- /.card-body -->
             </div>
               </div>
+{% block custom_css %}
+<style>
+    /* ✅ Apply soft pastel theme with modern UI */
+    .card {
+        border-radius: 10px; /* Smooth rounded corners */
+        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15); /* Soft shadow */
+        transition: all 0.3s ease-in-out;
+        border: none;
+    }
+
+    .card:hover {
+        box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.2);
+        transform: scale(1.02);
+    }
+
+    /* ✅ Pastel Red Header */
+    .card-danger {
+        background: linear-gradient(135deg, #FFB6C1, #FF6B6B) !important;
+        border: none;
+    }
+    .card-danger .card-header {
+    background: #04b099 !important; /* Pastel Red */
+    }
+
+    /* ✅ Card Header Styling */
+    .card-header {
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+        padding: 15px;
+        /* text-transform: uppercase; */
+    }
+
+    /* ✅ Buttons inside the header */
+    .card-tools button {
+        color: white !important;
+        font-size: 14px;
+    }
+
+    /* ✅ Card Body Background */
+    .card-body {
+        background: #F9F9F9; /* Soft white-gray */
+        padding: 15px;
+        border-radius: 0 0 10px 10px;
+    }
+
+    /* ✅ Chart Styling */
+    #pieChart {
+        min-height: 250px !important;
+        max-height: 250px !important;
+    }
+    .card-success .card-header {
+    background: #5ea3f2 !important;
+    }
+    .card-info .card-header {
+    background: #b587f5 !important;
+    }
+    .card-warning .card-header {
+    background: #f55f76 !important;
+    color: white !important;
+    }
+</style>
+{% endblock custom_css %}
+
              <div class="col-lg-6">
                          <div class="card card-success">
                       <div class="card-header">
@@ -103,6 +461,7 @@ Home
                     </div>
              </div>
           </div>
+
           <div class="row">
               <div class="col-lg-6">
                     <div class="card card-info">
@@ -155,7 +514,7 @@ Home
               datasets: [
                 {
                   data: [{{ student_count }},{{ staff_count }}],
-                  backgroundColor : ['#f56954', '#00a65a','#9575cd','#00796b'],
+                  backgroundColor : ['#FFB6B9', '#A0E7E5','#9575cd','#00796b'],
                 }
               ]
             };
@@ -171,6 +530,7 @@ Home
               data: pieData,
               options: pieOptions
     });
+
     // Second Chart for Total Subject in Each Course
        var subject_count_list={{ subject_count_list }};
        var course_name_list={{ course_name_list|safe }};
@@ -180,7 +540,7 @@ Home
           datasets: [
             {
               data: subject_count_list,
-              backgroundColor : ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#3f51b5','#9575cd','#00796b'],
+              backgroundColor : ['#FF9A9E', '#70D6D4', '#FFD166', '#7BA7FF', '#99C3E0', '#A38ECD', '#BE77D1', '#5EC4B5'],
             }
           ]
         }
@@ -204,7 +564,7 @@ Home
                   datasets: [
                     {
                       data: student_count_list_in_course,
-                      backgroundColor : ['#ff1744','#7c4dff','#f56954', '#00bfa5','#ffeb3b','#ff7043','#607d8b'],
+                      backgroundColor : ['#FF99A2', '#C2A1FF', '#FFB6B9', '#A0E7E5', '#FFF5B2', '#FFB199', '#B0C4D8'],
                     }
                   ]
                 };
@@ -227,7 +587,7 @@ Home
                   datasets: [
                     {
                       data: student_count_list_in_subject,
-                      backgroundColor : ['#ff1744','#7c4dff','#9ccc65', '#00bfa5','#ffeb3b','#ff7043','#607d8b'],
+                      backgroundColor : ['#FF99A2', '#C2A1FF', '#C8E6A0', '#A0E7E5', '#FFF5B2', '#FFB199', '#B0C4D8'],
                     }
                   ]
                 };
@@ -246,4 +606,3 @@ Home
 
 </script>
 {% endblock custom_js %}
-
