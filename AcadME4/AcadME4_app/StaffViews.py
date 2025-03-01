@@ -36,45 +36,66 @@ from AcadME4_app.models import Staffs, Timetable
 
 
 def staff_home(request):
-    #for fetch all students under staff
-    subjects=Subjects.objects.filter(staff_id=request.user.id)
-    course_id_list=[]
-    for subject in subjects:
-        course=Courses.objects.get(id=subject.course_id.id)
-        course_id_list.append(course.id)
-    final_course=[]
-    #removing duplicate course id
-    for course_id in course_id_list:
-        if course_id not in final_course:
-            final_course.append(course_id)
-    students_count=Students.objects.filter(course_id__in=final_course).count()
-    #fetch all attendance count
-    attendance_count=Attendance.objects.filter(subject_id__in=subjects).count()
-    subject_count=subjects.count()
-    #fetch attendance data by subject
-    subject_list=[]
-    attendance_list=[]
-    for subject in subjects:
-        attendance_count1=Attendance.objects.filter(subject_id=subject.id).count()
-        subject_list.append(subject.subject_name)
-        attendance_list.append(attendance_count1)
-    students_attendance = Students.objects.filter(course_id__in=final_course)
-    student_list=[]
-    student_list_attendance_present=[]
-    student_list_attendance_absent = []
-    for student in students_attendance:
-        attendance_present_count = AttendanceReport.objects.filter( status=True,student_id=student.id).count()
+    # Fetch all subjects assigned to the staff
+    subjects = Subjects.objects.filter(staff_id=request.user.id)
+    subject_count = subjects.count()
 
-        attendance_absent_count = AttendanceReport.objects.filter(status=False,student_id=student.id).count()
+    # Get unique course IDs for the subjects taught by the staff
+    course_ids = subjects.values_list('course_id', flat=True).distinct()
+
+    # Count students enrolled in those courses
+    students_count = Students.objects.filter(course_id__in=course_ids).count()
+
+    # Count total attendance records for the subjects
+    attendance_count = Attendance.objects.filter(subject_id__in=subjects).count()
+
+    # Fetch attendance data by subject
+    subject_list = []
+    attendance_list = []
+
+    for subject in subjects:
+        attendance_count_per_subject = Attendance.objects.filter(subject_id=subject.id).count()
+        subject_list.append(subject.subject_name)
+        attendance_list.append(attendance_count_per_subject)
+
+    # Fetch students for attendance analysis
+    students_attendance = Students.objects.filter(course_id__in=course_ids)
+
+    student_list = []
+    student_list_attendance_present = []
+    student_list_attendance_absent = []
+
+    for student in students_attendance:
+        attendance_present_count = AttendanceReport.objects.filter(student_id=student.id, status=True).count()
+        attendance_absent_count = AttendanceReport.objects.filter(student_id=student.id, status=False).count()
+
         student_list.append(student.admin.username)
         student_list_attendance_present.append(attendance_present_count)
         student_list_attendance_absent.append(attendance_absent_count)
-    return render(request,"staff_template/staff_home_template.html",{"students_count":students_count,"attendance_count":attendance_count,"subject_count":subject_count,"subject_list":subject_list,"attendance_list":attendance_list,"student_list":student_list,"present_list":student_list_attendance_present,"absent_list":student_list_attendance_absent})
+
+    # Render the template with the fetched data
+    context = {
+        "students_count": students_count,
+        "attendance_count": attendance_count,
+        "subject_count": subject_count,
+        "subject_list": subject_list,
+        "attendance_list": attendance_list,
+        "student_list": student_list,
+        "present_list": student_list_attendance_present,
+        "absent_list": student_list_attendance_absent
+    }
+
+    return render(request, "staff_template/staff_home_template.html", context)
 
 def staff_take_attendance(request):
     subjects=Subjects.objects.filter(staff_id=request.user.id)
     session_years=SessionYearModel.object.all()
     return render(request,"staff_template/staff_take_attendance.html",{"subjects":subjects,"session_years":session_years})
+
+def staff_subjects(request):
+    subjects = Subjects.objects.filter(staff_id=request.user.id)
+    return render(request, "staff_template/staff_subjects.html", {"subjects": subjects})
+
 
 @csrf_exempt
 def get_students(request):
@@ -117,6 +138,10 @@ def save_attendance_data(request):
         return HttpResponse("OKAY")
     except:
         return HttpResponse("ERROR")
+
+def staff_subjects(request):
+    subjects = Subjects.objects.filter(staff_id=request.user.id)
+    return render(request, "staff_template/staff_subjects.html", {"subjects": subjects})
 
 def staff_update_attendance(request):
     subjects = Subjects.objects.filter(staff_id=request.user.id)
@@ -441,24 +466,71 @@ def staff_grade_submission(request, submission_id):
     )
 '''
 
+from django.shortcuts import render, redirect
+from django.http import HttpResponseNotFound
+
+# Helper function to convert an integer to its ordinal representation.
+def ordinal(n):
+    if 11 <= (n % 100) <= 13:
+        suffix = 'th'
+    else:
+        suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')
+    return str(n) + suffix
+from django.shortcuts import render, redirect
+from django.http import HttpResponseNotFound
+from .models import Students, Timetable, Staffs  # adjust your import as necessary
+
 def staff_view_timetable(request):
     if not request.user.is_authenticated:
         return redirect('login')
 
     try:
-        # Explicitly fetch the Staffs instance for the logged‑in user.
+        # Fetch the Staffs instance for the logged‑in user.
         staff_instance = Staffs.objects.get(admin=request.user)
     except Staffs.DoesNotExist:
         return HttpResponseNotFound("Staff profile not found")
 
-    # Filter timetable entries for this teacher and include related subject and course.
-    timetable_entries = Timetable.objects.filter(teacher=staff_instance) \
-        .select_related("subject", "course") \
+    # Filter timetable entries for this teacher; exclude Tuesday.
+    timetables = Timetable.objects.filter(teacher=staff_instance) \
+        .exclude(day_of_week="Tuesday") \
+        .select_related("subject", "course", "teacher") \
         .order_by("day_of_week", "start_time")
 
-    return render(request, "staff_template/staff_view_timetable.html", {
-        "timetable_entries": timetable_entries
-    })
+    # Define fixed time slots from 09:00 AM to 05:00 PM.
+    fixed_time_slots = [
+        {"key": "09:00", "label": "09:00 AM - 10:00 AM"},
+        {"key": "10:00", "label": "10:00 AM - 11:00 AM"},
+        {"key": "11:00", "label": "11:00 AM - 12:00 PM"},
+        {"key": "12:00", "label": "12:00 PM - 01:00 PM"},
+        {"key": "13:00", "label": "01:00 PM - 02:00 PM"},
+        {"key": "14:00", "label": "02:00 PM - 03:00 PM"},
+        {"key": "15:00", "label": "03:00 PM - 04:00 PM"},
+        {"key": "16:00", "label": "04:00 PM - 05:00 PM"},
+    ]
+    time_slots = fixed_time_slots
+
+    # Define allowed days (excluding Tuesday). Adjust order as needed.
+    allowed_days = ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday']
+
+    # Initialize the timetable matrix: For each allowed day, create a dictionary with each fixed slot key set to None.
+    timetable_matrix = {day: {slot["key"]: None for slot in time_slots} for day in allowed_days}
+
+    # Populate the matrix with timetable entries.
+    # For an entry to appear, its start_time (formatted as "HH:MM") must exactly match one of the fixed slot keys.
+    for entry in timetables:
+        day = entry.day_of_week
+        key = entry.start_time.strftime("%H:%M")
+        if day in timetable_matrix:
+            timetable_matrix[day][key] = entry
+        else:
+            print(f"Entry with day '{day}' is not in allowed_days.")
+
+    context = {
+        "timetable_matrix": timetable_matrix,
+        "time_slots": time_slots,
+    }
+    return render(request, "staff_template/staff_view_timetable.html", context)
+
 def staff_gallery(request):
     """
     Renders the staff achievements & gallery page.

@@ -15,7 +15,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from AcadME4_app.models import CustomUser, Subjects, Courses, Timetable, Staffs
 
-from AcadME4_app.models import SessionYearModel
+from AcadME4_app.models import SessionYearModel,Branch
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -29,30 +29,46 @@ from AcadME4_app.models import NotificationStaffs, NotificationStudent
 from django.contrib import messages
 from django.utils.timezone import now
 def admin_home(request):
-    student_count=Students.objects.all().count()
+    student_count = Students.objects.all().count()  # ✅ Correct total student count
     staff_count = Staffs.objects.all().count()
     subject_count = Subjects.objects.all().count()
     course_count = Courses.objects.all().count()
-    course_all=Courses.objects.all()
-    course_name_list=[]
+
+    course_all = Courses.objects.all()
+    course_name_list = []
     subject_count_list = []
-    student_count_list_in_course=[]
+    student_count_list_in_course = []
+
     for course in course_all:
-        subjects=Subjects.objects.filter(course_id=course.id).count()
-        students=Students.objects.filter(course_id=course.id).count()
+        subjects = Subjects.objects.filter(course_id=course.id).count()
+        students = Students.objects.filter(course_id=course.id).count()
         course_name_list.append(course.course_name)
         subject_count_list.append(subjects)
         student_count_list_in_course.append(students)
-    subjects_all=Subjects.objects.all()
-    subject_list=[]
-    student_count_list_in_subject=[]
-    for subject in subjects_all:
-        course=Courses.objects.get(id=subject.course_id.id)
-        student_count=Students.objects.filter(course_id=course.id).count()
-        subject_list.append(subject.subject_name)
-        student_count_list_in_subject.append(student_count)
 
-    return render(request,"admin_template/home_content.html",{"student_count":student_count,"staff_count":staff_count,"subject_count":subject_count,"course_count":course_count,"course_name_list":course_name_list,"subject_count_list":subject_count_list,"student_count_list_in_course":student_count_list_in_course,"student_count_list_in_subject":student_count_list_in_subject,"subject_list":subject_list})
+    subjects_all = Subjects.objects.all()
+    subject_list = []
+    student_count_list_in_subject = []
+
+    for subject in subjects_all:
+        course = Courses.objects.get(id=subject.course_id.id)
+        student_count_in_subject = Students.objects.filter(course_id=course.id).count()  # ✅ Fix variable name
+        subject_list.append(subject.subject_name)
+        student_count_list_in_subject.append(student_count_in_subject)
+
+    context = {
+        'student_count': student_count,  # ✅ Now this will always be correct
+        'staff_count': staff_count,
+        'subject_count': subject_count,
+        'course_count': course_count,
+        'course_name_list': course_name_list,
+        'subject_count_list': subject_count_list,
+        'student_count_list_in_course': student_count_list_in_course,
+        'subject_list': subject_list,
+        'student_count_list_in_subject': student_count_list_in_subject,
+    }
+
+    return render(request, 'admin_template/home_content.html', context)
 def add_staff(request):
     return render(request,"admin_template/add_staff_template.html")
 def add_staff_save(request):
@@ -94,9 +110,43 @@ def add_course_save(request):
         except:
             messages.error(request,"Failed To Add Course")
             return HttpResponseRedirect(reverse("add_course"))
+
+def add_branch(request):
+    courses = Courses.objects.all()  # Fetch all available courses
+    print(courses)
+    return render(request, 'admin_template/add_branch.html', {'courses': courses})
+
+@csrf_exempt
+def get_branches_by_course(request):
+    course_id = request.POST.get("course_id")
+    print(course_id)
+    branches = Branch.objects.filter(course_id=course_id).values("id", "name")
+    # Get branches for selected course
+    return JsonResponse(list(branches), safe=False)
+
+def add_branch_save(request):
+    if request.method!= "POST":
+        return HttpResponse("<h2>Method Not Allowed</h2>")
+    else:
+        course_id = request.POST.get("course")
+        course = Courses.objects.get(id=course_id)
+        name= request.POST.get("branch_name")
+
+        try:
+            branch = Branch(name=name,course_id=course)
+            branch.save()
+            messages.success(request, "Successfully Added Branch")
+            return HttpResponseRedirect(reverse("add_branch"))
+        except:
+            messages.error(request, "Failed to Add Branch")
+            return HttpResponseRedirect(reverse("add_branch"))
+
+
+
 def add_student(request):
     form = AddStudentForm()
-    return render(request,"admin_template/add_student_template.html",{"form":form})
+    courses = Courses.objects.all()
+    return render(request,"admin_template/add_student_template.html",{"form":form,"courses":courses})
 
 def add_student_save(request):
     if request.method!="POST":
@@ -114,6 +164,7 @@ def add_student_save(request):
                  address=form.cleaned_data["address"]
                  session_year_id=form.cleaned_data["session_year_id"]
                  course_id=form.cleaned_data["course"]
+                 branch_id=form.cleaned_data["branch"]
                  profile_pic=request.FILES['profile_pic']
                  fs=FileSystemStorage()
                  filename=fs.save(profile_pic.name,profile_pic)
@@ -126,6 +177,7 @@ def add_student_save(request):
                      user.students.address=address
                      course_obj=Courses.objects.get(id=course_id)
                      user.students.course_id=course_obj
+                     user.students.branch_id = Branch.objects.get(id=branch_id)
                      session_year=SessionYearModel.object.get(id=session_year_id)
                      user.students.session_year_id=session_year
                      user.students.profile_pic=profile_pic_url
@@ -144,25 +196,51 @@ def add_subject(request):
     staffs=CustomUser.objects.filter(user_type=2)
     return render(request,"admin_template/add_subject_template.html",{"staffs":staffs,"courses":courses})
 
+
 def add_subject_save(request):
-    if request.method!= "POST":
+    if request.method != "POST":
         return HttpResponse("<h2>Method Not Allowed</h2>")
     else:
         subject_name = request.POST.get("subject_name")
         subject_code = request.POST.get("subject_code")
         course_id = request.POST.get("course")
-        course = Courses.objects.get(id=course_id)
+        branch_id = request.POST.get("branch")
         staff_id = request.POST.get("staff")
-        staff = CustomUser.objects.get(id=staff_id)
 
         try:
-            subject = Subjects(subject_name=subject_name,subject_code=subject_code,course_id=course, staff_id=staff)
+            course = Courses.objects.get(id=course_id)
+            branch = Branch.objects.get(id=branch_id) if branch_id else None  # ✅ Fetch branch only if selected
+            staff = CustomUser.objects.get(id=staff_id)
+
+            # ✅ Ensure the subject is created with the selected branch
+            subject = Subjects(
+                subject_name=subject_name,
+                subject_code=subject_code,
+                course_id=course,
+                branch_id=branch,  # ✅ Store branch
+                staff_id=staff
+            )
             subject.save()
+
             messages.success(request, "Successfully Added Subject")
             return HttpResponseRedirect(reverse("add_subject"))
-        except:
-            messages.error(request, "Failed to Add Subject")
+
+        except Courses.DoesNotExist:
+            messages.error(request, "Invalid Course Selected")
             return HttpResponseRedirect(reverse("add_subject"))
+
+        except Branch.DoesNotExist:
+            messages.error(request, "Invalid Branch Selected")
+            return HttpResponseRedirect(reverse("add_subject"))
+
+        except CustomUser.DoesNotExist:
+            messages.error(request, "Invalid Staff Selected")
+            return HttpResponseRedirect(reverse("add_subject"))
+
+        except Exception as e:
+            messages.error(request, f"Failed to Add Subject: {str(e)}")
+            return HttpResponseRedirect(reverse("add_subject"))
+
 
 def manage_staff(request):
         staffs = Staffs.objects.all()
@@ -231,8 +309,9 @@ def edit_student(request,student_id):
     form.fields['username'].initial=student.admin.username
     form.fields['address'].initial=student.address
     form.fields['course'].initial=student.course_id.id
+    form.fields['branch'].initial=student.branch_id.id if student.branch_id else ""
     form.fields['session_year_id'].initial=student.session_year_id.id
-    return render(request,"admin_template/edit_student_template.html",{"form":form,"id":student_id,"username":student.admin.username })#{"username":student.admin.username})
+    return render(request,"admin_template/edit_student_template.html",{"form":form,"id":student_id,"username":student.admin.username, "student_course_id": student.course_id.id,"student_branch_id": student.branch_id.id if student.branch_id else None })#{"username":student.admin.username})
 
 def edit_student_save(request):
      if request.method!="POST":
@@ -253,6 +332,7 @@ def edit_student_save(request):
             address=form.cleaned_data["address"]
             session_year_id=form.cleaned_data["session_year_id"]
             course_id= form.cleaned_data["course"]
+            branch_id = request.POST.get("branch")
             if request.FILES.get('profile_pic',False):
                  profile_pic = request.FILES['profile_pic']
                  fs = FileSystemStorage()
@@ -276,6 +356,7 @@ def edit_student_save(request):
                 student.session_year_id = session_year
                 course=Courses.objects.get(id=course_id)
                 student.course_id = course
+                student.branch_id = Branch.objects.get(id=branch_id) if branch_id else None
                 if profile_pic_url!=None:
                      student.profile_pic=profile_pic_url
                 student.save()
@@ -292,9 +373,12 @@ def edit_student_save(request):
 
 def edit_subject(request,subject_id):
     subject=Subjects.objects.get(id=subject_id)
+
     courses=Courses.objects.all()
+    branches = Branch.objects.filter(course_id=subject.course_id.id)
     staffs=CustomUser.objects.filter(user_type=2)
-    return render(request,"admin_template/edit_subject_template.html",{"subject":subject,"staffs":staffs,"courses":courses,"id": subject_id })
+    return render(request,"admin_template/edit_subject_template.html",{"subject":subject,"staffs":staffs,"courses":courses, "branches": branches,"id": subject_id,"selected_course": subject.course_id.id,
+        "selected_branch": subject.branch_id.id if subject.branch_id else None, })
 
 def edit_subject_save(request):
     if request.method!="POST":
@@ -305,7 +389,7 @@ def edit_subject_save(request):
         subject_code=request.POST.get("subject_code")
         staff_id=request.POST.get("staff")
         course_id=request.POST.get("course")
-
+        branch_id = request.POST.get("branch")
         try:
             subject=Subjects.objects.get(id=subject_id)
             subject.subject_name=subject_name
@@ -313,6 +397,7 @@ def edit_subject_save(request):
             staff=CustomUser.objects.get(id=staff_id)
             subject.staff_id=staff
             course=Courses.objects.get(id=course_id)
+            subject.branch_id = Branch.objects.get(id=branch_id) if branch_id else None
             subject.course_id=course
             subject.save()
 
@@ -564,7 +649,7 @@ def admin_timetable(request):
     if not request.user.is_superuser:
         return render(request, "error_page.html", {"error": "Access Denied"})
 
-    # Fetch only the necessary fields
+    # Fetch only the necessary fields (for initial rendering if needed)
     subjects = Subjects.objects.only("id", "subject_name")
     courses = Courses.objects.only("id", "course_name")
     teachers = Staffs.objects.select_related("admin").only("id", "admin__first_name", "admin__last_name")
@@ -579,13 +664,13 @@ def admin_timetable(request):
 def get_timetable_data(request):
     """
     Return JSON data for subjects, courses, teachers, and timetable entries.
-    Field names have been standardized to match the frontend.
     """
-    subjects = list(Subjects.objects.values("id", "subject_name"))
+    subjects = list(Subjects.objects.values("id", "subject_name", "course_id", "staff_id"))
     courses = list(Courses.objects.values("id", "course_name"))
 
     teachers = list(Staffs.objects.select_related("admin").values(
         "id",
+        "admin_id",
         "admin__first_name",
         "admin__last_name"
     ))
@@ -595,6 +680,7 @@ def get_timetable_data(request):
         "day_of_week",
         "start_time",
         "end_time",
+        "course_id",
         "subject__subject_name",
         "course__course_name",
         "teacher__admin__first_name",
@@ -603,14 +689,20 @@ def get_timetable_data(request):
 
     formatted_timetable = []
     for entry in timetable_entries:
+        start = entry["start_time"]
+        end = entry["end_time"]
+        start_str = start.strftime("%H:%M") if hasattr(start, "strftime") else start
+        end_str = end.strftime("%H:%M") if hasattr(end, "strftime") else end
+
         first_name = entry.get("teacher__admin__first_name", "")
         last_name = entry.get("teacher__admin__last_name", "")
         teacher_name = f"{first_name} {last_name}".strip() or "Not Assigned"
         formatted_timetable.append({
             "id": entry["id"],
             "day_of_week": entry["day_of_week"],
-            "start_time": entry["start_time"],
-            "end_time": entry["end_time"],
+            "start_time": start_str,
+            "end_time": end_str,
+            "course_id": entry["course_id"],
             "subject_name": entry["subject__subject_name"],
             "course_name": entry["course__course_name"],
             "teacher_name": teacher_name,
@@ -622,7 +714,9 @@ def get_timetable_data(request):
         "teachers": teachers,
         "timetable": formatted_timetable
     })
-
+from datetime import datetime
+from django.http import JsonResponse
+# ... your other imports ...
 
 @csrf_exempt
 def add_timetable_entry(request):
@@ -638,11 +732,7 @@ def add_timetable_entry(request):
     """
     if request.method == "POST":
         try:
-            # Debug: print raw request
-            print("🔹 Raw Request Body:", request.body)
             data = json.loads(request.body.decode("utf-8"))
-            print("🔹 Parsed Data:", data)
-
             subject_id = data.get("subject_id")
             course_id = data.get("course_id")
             teacher_id = data.get("teacher_id")
@@ -650,29 +740,25 @@ def add_timetable_entry(request):
             start_time_str = data.get("start_time")
             end_time_str = data.get("end_time")
 
-            # Check required fields are provided
             if not (subject_id and course_id and teacher_id and day_of_week and start_time_str and end_time_str):
                 return JsonResponse({"error": "All fields are required"}, status=400)
 
-            # Convert time strings to time objects
             try:
                 start_time = datetime.strptime(start_time_str, "%H:%M").time()
                 end_time = datetime.strptime(end_time_str, "%H:%M").time()
             except ValueError:
                 return JsonResponse({"error": "Invalid time format. Use HH:MM"}, status=400)
 
-            # Debug: print converted times
-            print(f"Converted start_time: {start_time}, end_time: {end_time}")
-
-            # Fetch related objects
+            # Fetch related objects.
             subject = Subjects.objects.get(id=subject_id)
             course = Courses.objects.get(id=course_id)
-
-            # Fetch teacher from Staffs using teacher_id and assign the Staffs instance
             teacher = Staffs.objects.get(id=teacher_id)
-            print(f"Found teacher (Staffs instance): {teacher}")
 
-            # Create the timetable entry using the Staffs instance for teacher
+            # Check if this teacher is already assigned on the same day at the same start_time.
+            if Timetable.objects.filter(teacher=teacher, day_of_week=day_of_week, start_time=start_time).exists():
+                return JsonResponse({"error": "This teacher is already assigned for that time slot on " + day_of_week}, status=400)
+
+            # Create the timetable entry.
             new_entry = Timetable.objects.create(
                 subject=subject,
                 course=course,
@@ -681,8 +767,6 @@ def add_timetable_entry(request):
                 start_time=start_time,
                 end_time=end_time,
             )
-            print("✅ Timetable Entry Created:", new_entry)
-
             return JsonResponse({"message": "Timetable entry added successfully"}, status=201)
 
         except json.JSONDecodeError:
@@ -694,10 +778,10 @@ def add_timetable_entry(request):
         except Staffs.DoesNotExist:
             return JsonResponse({"error": "Invalid teacher ID"}, status=400)
         except Exception as e:
-            print("❌ Error:", str(e))
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
 
 def admin_gallery(request):
     """

@@ -4,7 +4,7 @@ from AcadME4_app.models import Courses
 
 from AcadME4_app.models import SessionYearModel
 
-from AcadME4_app.models import Subjects
+from AcadME4_app.models import Subjects,Branch
 from django.forms import ChoiceField
 
 
@@ -33,6 +33,7 @@ class AddStudentForm(forms.Form):
 
         #course_list = []
 
+
     session_list = []
 
     sessions = SessionYearModel.object.all()
@@ -42,11 +43,13 @@ class AddStudentForm(forms.Form):
 
         #session_list = []
 
-    course=forms.ChoiceField(label="Course",choices=course_list,widget=forms.Select(attrs={"class":"form-control"}))
-
+    course=forms.ChoiceField(label="Course",choices=course_list,widget=forms.Select(attrs={"class":"form-control","id":"course"}))
+    branch = forms.ChoiceField(label="Branch", choices=[], widget=forms.Select(attrs={"class": "form-control", "id": "branch"}), required=False)
     session_year_id=forms.ChoiceField(label="Session Year",widget=forms.Select(attrs={"class":"form-control"}),choices=session_list)
 
     profile_pic=forms.FileField(label="Profile Pic",max_length=50,widget=forms.FileInput(attrs={"class":"form-control"}))
+
+
 
 class EditStudentForm(forms.Form):
     email=forms.EmailField(label="Email",max_length=50,widget=forms.EmailInput(attrs={"class":"form-control"}))
@@ -68,6 +71,8 @@ class EditStudentForm(forms.Form):
     except:
         course_list = []
 
+
+
     session_list = []
 
     sessions = SessionYearModel.object.all()
@@ -76,10 +81,27 @@ class EditStudentForm(forms.Form):
         session_list.append(small_ses)
 
         #session_list = []
-    course=forms.ChoiceField(label="Course",choices=course_list,widget=forms.Select(attrs={"class":"form-control"}))
-
+    course=forms.ChoiceField(label="Course",choices=course_list,widget=forms.Select(attrs={"class":"form-control","id":"id_course"}))
+    branch = forms.ChoiceField(label="Branch", choices=[],
+                               widget=forms.Select(attrs={"class": "form-control","id":"id_branch"}))
     session_year_id=forms.ChoiceField(label="Session Year",widget=forms.Select(attrs={"class":"form-control"}),choices=session_list)
     profile_pic=forms.FileField(label="Profile Pic",max_length=50,widget=forms.FileInput(attrs={"class":"form-control"}),required=False)
+
+    def __init__(self, *args, **kwargs):
+        student_course_id = kwargs.pop("student_course_id", None)  # Get student’s current course
+        super(EditStudentForm, self).__init__(*args, **kwargs)
+
+        # 🛠️ Ensure branches are loaded correctly both when rendering & submitting
+        if "course" in self.data:  # When form is submitted
+            try:
+                course_id = int(self.data.get("course"))  # Get selected course from form data
+                self.fields["branch"].choices = [(branch.id, branch.name) for branch in
+                                                 Branch.objects.filter(course_id=course_id)]
+            except (ValueError, TypeError):
+                self.fields["branch"].choices = []
+        elif student_course_id:  # When form is first loaded
+            self.fields["branch"].choices = [(branch.id, branch.name) for branch in
+                                             Branch.objects.filter(course_id=student_course_id)]
 
 class EditResultForm(forms.Form):
     def __init__(self,*args,**kwargs):

@@ -6,62 +6,92 @@
   <title>Admin Timetable</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #d0e8f2, #edf7f9);
       margin: 0;
       padding: 20px;
     }
     .timetable-container {
-      width: 80%;
+      width: 95%;
       margin: auto;
       padding: 20px;
-      border-radius: 8px;
       background: #fff;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
     h2, h3 {
       text-align: center;
       color: #333;
+      margin-bottom: 10px;
     }
     form {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 15px;
       justify-content: center;
+      margin-bottom: 20px;
+      background: #f7fbff;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #dce4ec;
     }
     form label {
-      width: 150px;
+      width: 160px;
       font-weight: bold;
+      color: #555;
     }
-    form input, form select {
+    form select, form input {
       flex: 1;
       padding: 8px;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 6px;
+      font-size: 14px;
     }
     button {
       background: #007BFF;
-      color: white;
-      padding: 10px;
+      color: #fff;
+      padding: 10px 20px;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
+      transition: background 0.3s;
     }
     button:hover {
       background: #0056b3;
     }
+    /* Responsive table container */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+    /* Table styling */
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-    }
-    table, th, td {
-      border: 1px solid #ddd;
     }
     th, td {
-      padding: 10px;
       text-align: center;
+      padding: 12px;
+      border: 1px solid #ddd;
     }
+    th {
+      background-color: #4CAF50;
+      color: #fff;
+    }
+    td {
+      min-width: 120px;
+    }
+    tr:hover td {
+      background: #dcedc8;
+    }
+    /* Day-specific pastel row colors (bright and subtle) */
+    .day-Monday { background-color: #FFF9C4; }       /* Light Yellow */
+    .day-Wednesday { background-color: #E1F5FE; }    /* Light Blue */
+    .day-Thursday { background-color: #E8F5E9; }     /* Light Green */
+    .day-Friday { background-color: #FFECB3; }       /* Light Amber */
+    .day-Saturday { background-color: #F3E5F5; }     /* Light Lavender */
+    .day-Sunday { background-color: #FCE4EC; }       /* Light Pink */
   </style>
 </head>
 <body>
@@ -69,13 +99,27 @@
 <div class="timetable-container">
   <h2>Admin Timetable</h2>
 
+  <!-- Timetable Entry Form -->
   <form id="timetableForm">
     {% csrf_token %}
+    <label for="course">Course:</label>
+    <select id="course" name="course" required>
+      <option value="">Select Course</option>
+    </select>
+
+    <label for="subject">Subject:</label>
+    <select id="subject" name="subject" required>
+      <option value="">Select Subject</option>
+    </select>
+
+    <label for="teacher">Teacher:</label>
+    <select id="teacher" name="teacher" required>
+      <option value="">Select Teacher</option>
+    </select>
 
     <label for="day">Day:</label>
-    <select id="day" name="day">
+    <select id="day" name="day" required>
       <option value="Monday">Monday</option>
-      <option value="Tuesday">Tuesday</option>
       <option value="Wednesday">Wednesday</option>
       <option value="Thursday">Thursday</option>
       <option value="Friday">Friday</option>
@@ -83,138 +127,279 @@
       <option value="Sunday">Sunday</option>
     </select>
 
-    <label for="time_slot">Time Slot (HH:MM - HH:MM):</label>
-    <input type="text" id="time_slot" name="time_slot" placeholder="09:00 - 10:00" required>
-
-    <label for="subject">Subject:</label>
-    <select id="subject" name="subject">
-      <option value="">Select Subject</option>
-    </select>
-
-    <label for="course">Course:</label>
-    <select id="course" name="course">
-      <option value="">Select Course</option>
-    </select>
-
-    <label for="teacher">Teacher:</label>
-    <select id="teacher" name="teacher">
-      <option value="">Select Teacher</option>
+    <label for="time_slot">Time Slot:</label>
+    <select id="time_slot" name="time_slot" required>
+      <option value="">Select Time Slot</option>
+      <option value="09:00-10:00">09:00 AM - 10:00 AM</option>
+      <option value="10:00-11:00">10:00 AM - 11:00 AM</option>
+      <option value="11:00-12:00">11:00 AM - 12:00 PM</option>
+      <option value="12:00-13:00">12:00 PM - 01:00 PM</option>
+      <option value="13:00-14:00">01:00 PM - 02:00 PM</option>
+      <option value="14:00-15:00">02:00 PM - 03:00 PM</option>
+      <option value="15:00-16:00">03:00 PM - 04:00 PM</option>
+      <option value="16:00-17:00">04:00 PM - 05:00 PM</option>
     </select>
 
     <button type="submit">Add Timetable Entry</button>
   </form>
 
-  <h3>Existing Timetable</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Day</th>
-        <th>Time Slot</th>
-        <th>Subject</th>
-        <th>Course</th>
-        <th>Teacher</th>
-      </tr>
-    </thead>
-    <tbody id="timetableEntries">
-      <!-- Timetable entries will be inserted here via JavaScript -->
-    </tbody>
-  </table>
+  <!-- Dropdown to Filter Timetable Grid by Course -->
+  <div class="grid-filter">
+    <label for="gridCourseFilter">Filter Grid by Course:</label>
+    <select id="gridCourseFilter">
+      <option value="">All Courses</option>
+    </select>
+  </div>
+
+  <!-- Timetable Grid Display -->
+  <h3>Timetable Grid</h3>
+  <div class="table-container" id="timetableGridContainer"></div>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Fetch data for dropdowns and timetable table
-    fetch('/get_timetable_data/')
-      .then(response => response.json())
-      .then(data => {
-        let subjectDropdown = document.getElementById("subject");
-        let courseDropdown = document.getElementById("course");
-        let teacherDropdown = document.getElementById("teacher");
-        let timetableEntries = document.getElementById("timetableEntries");
+// Helper: Convert "HH:MM" to minutes.
+function timeToMinutes(t) {
+  let [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
 
-        // Populate subjects dropdown using 'subject_name'
-        data.subjects.forEach(subject => {
-          let option = document.createElement("option");
-          option.value = subject.id;
-          option.textContent = subject.subject_name;
-          subjectDropdown.appendChild(option);
-        });
+// Helper: Format "HH:MM" (24-hr) to 12-hr format.
+function formatTime(timeStr) {
+  let [h, m] = timeStr.split(":").map(Number);
+  let ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return h + ":" + (m < 10 ? "0" + m : m) + " " + ampm;
+}
 
-        // Populate courses dropdown using 'course_name'
-        data.courses.forEach(course => {
-          let option = document.createElement("option");
-          option.value = course.id;
-          option.textContent = course.course_name;
-          courseDropdown.appendChild(option);
-        });
+document.addEventListener("DOMContentLoaded", function () {
+  let subjectsData = [];
+  let coursesData = [];
+  let teachersData = [];
+  let timetableData = [];
 
-        // Populate teachers dropdown by combining first and last names
-        data.teachers.forEach(teacher => {
-          let option = document.createElement("option");
-          option.value = teacher.id;
-          option.textContent = teacher.admin__first_name + " " + teacher.admin__last_name;
-          teacherDropdown.appendChild(option);
-        });
+  // Fixed time slots (09:00 to 17:00).
+  const fixedTimeSlots = [
+    { start: "09:00", end: "10:00" },
+    { start: "10:00", end: "11:00" },
+    { start: "11:00", end: "12:00" },
+    { start: "12:00", end: "13:00" },
+    { start: "13:00", end: "14:00" },
+    { start: "14:00", end: "15:00" },
+    { start: "15:00", end: "16:00" },
+    { start: "16:00", end: "17:00" }
+  ];
 
-        // Populate timetable entries in the table
-        data.timetable.forEach(entry => {
-          let row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${entry.day_of_week}</td>
-            <td>${entry.start_time} - ${entry.end_time}</td>
-            <td>${entry.subject_name}</td>
-            <td>${entry.course_name}</td>
-            <td>${entry.teacher_name}</td>
-          `;
-          timetableEntries.appendChild(row);
-        });
-      })
-      .catch(error => console.error("Error fetching timetable data:", error));
+  // Mapping day names to pastel colors.
+  const dayColors = {
+    "Monday": "#FFF9C4",
+    "Wednesday": "#E1F5FE",
+    "Thursday": "#E8F5E9",
+    "Friday": "#FFECB3",
+    "Saturday": "#F3E5F5",
+    "Sunday": "#FCE4EC",
+    "Tuesday": "#E0F7FA"  // In case Tuesday is ever used.
+  };
 
-    // Handle form submission to send JSON via fetch
-    document.getElementById("timetableForm").addEventListener("submit", function(e) {
-      e.preventDefault();
+  // Fetch JSON data.
+  fetch('/get_timetable_data/')
+    .then(response => response.json())
+    .then(data => {
+      subjectsData = data.subjects;      // { id, subject_name, course_id, staff_id }
+      coursesData = data.courses;          // { id, course_name }
+      teachersData = data.teachers;        // { id, admin_id, admin__first_name, admin__last_name }
+      timetableData = data.timetable;      // Timetable entries with course_id, day_of_week, etc.
+      populateCourseDropdown();
+      populateGridCourseDropdown();
+      clearSubjectDropdown();
+      populateTeacherDropdown(); // Initially, show all teachers.
+      buildTimetableGrid();      // Build grid for all courses by default.
+    })
+    .catch(error => console.error("Error fetching data:", error));
 
-      // Extract and validate time slot (expects format "HH:MM - HH:MM")
-      let timeSlot = document.getElementById("time_slot").value;
-      let times = timeSlot.split("-");
-      if (times.length !== 2) {
-        alert("Please enter a valid time slot in the format HH:MM - HH:MM");
-        return;
-      }
-      let start_time = times[0].trim();
-      let end_time = times[1].trim();
-
-      // Build the data object from form fields
-      const data = {
-        subject_id: document.getElementById("subject").value,
-        course_id: document.getElementById("course").value,
-        teacher_id: document.getElementById("teacher").value,
-        day_of_week: document.getElementById("day").value,
-        start_time: start_time,
-        end_time: end_time,
-      };
-
-      fetch('/add_timetable_entry/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        },
-        body: JSON.stringify(data)
-      })
-      .then(response => response.json())
-      .then(result => {
-        if (result.message) {
-          alert(result.message);
-          location.reload();  // Reload page to show the new timetable entry
-        } else if (result.error) {
-          alert("Error: " + result.error);
-        }
-      })
-      .catch(error => console.error('Error:', error));
+  function populateCourseDropdown() {
+    let courseDropdown = document.getElementById("course");
+    coursesData.forEach(course => {
+      let option = document.createElement("option");
+      option.value = String(course.id);
+      option.textContent = course.course_name;
+      courseDropdown.appendChild(option);
     });
+  }
+
+  function populateGridCourseDropdown() {
+    let gridCourseDropdown = document.getElementById("gridCourseFilter");
+    coursesData.forEach(course => {
+      let option = document.createElement("option");
+      option.value = String(course.id);
+      option.textContent = course.course_name;
+      gridCourseDropdown.appendChild(option);
+    });
+  }
+
+  function clearSubjectDropdown() {
+    document.getElementById("subject").innerHTML = '<option value="">Select Subject</option>';
+  }
+
+  // When a course is selected in the entry form, populate the subject dropdown.
+  document.getElementById("course").addEventListener("change", function () {
+    let selectedCourse = this.value;
+    let subjectDropdown = document.getElementById("subject");
+    clearSubjectDropdown();
+
+    // Filter subjects by course_id.
+    let filteredSubjects = subjectsData.filter(subject => String(subject.course_id) === selectedCourse);
+    filteredSubjects.forEach(subject => {
+      let option = document.createElement("option");
+      option.value = subject.id;
+      option.textContent = subject.subject_name;
+      subjectDropdown.appendChild(option);
+    });
+
+    // Clear teacher dropdown; will be populated when a subject is selected.
+    document.getElementById("teacher").innerHTML = '<option value="">Select Teacher</option>';
   });
+
+  // When a subject is selected, filter teachers to show only the teacher assigned to that subject.
+  document.getElementById("subject").addEventListener("change", function () {
+    let selectedSubject = this.value;
+    let teacherDropdown = document.getElementById("teacher");
+    teacherDropdown.innerHTML = '<option value="">Select Teacher</option>';
+    let subject = subjectsData.find(sub => String(sub.id) === selectedSubject);
+    if (subject) {
+      // Filter teachers where teacher.admin_id equals subject.staff_id.
+      let filteredTeachers = teachersData.filter(teacher => teacher.admin_id == subject.staff_id);
+      filteredTeachers.forEach(teacher => {
+        let option = document.createElement("option");
+        option.value = teacher.id;
+        option.textContent = teacher.admin__first_name + " " + teacher.admin__last_name;
+        teacherDropdown.appendChild(option);
+      });
+    }
+  });
+
+  // Populate teacher dropdown with all teachers.
+  function populateTeacherDropdown() {
+    let teacherDropdown = document.getElementById("teacher");
+    teacherDropdown.innerHTML = '<option value="">Select Teacher</option>';
+    teachersData.forEach(teacher => {
+      let option = document.createElement("option");
+      option.value = teacher.id;
+      option.textContent = teacher.admin__first_name + " " + teacher.admin__last_name;
+      teacherDropdown.appendChild(option);
+    });
+  }
+
+  // Rebuild grid when grid course filter changes.
+  document.getElementById("gridCourseFilter").addEventListener("change", buildTimetableGrid);
+
+  // Build the timetable grid.
+  function buildTimetableGrid() {
+    let allowedDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    let gridCourseFilter = document.getElementById("gridCourseFilter").value;
+    // Filter timetableData by course.
+    let filteredTimetable = gridCourseFilter ?
+      timetableData.filter(entry => String(entry.course_id) === gridCourseFilter) :
+      timetableData;
+    console.log("Filtered timetable:", filteredTimetable);
+
+    let timeSlots = fixedTimeSlots;
+
+    // Create grid matrix: for each day and each fixed slot, store an array of entries.
+    let gridMatrix = {};
+    allowedDays.forEach(day => {
+      gridMatrix[day] = {};
+      timeSlots.forEach(slot => {
+        gridMatrix[day][slot.start] = [];
+      });
+    });
+
+    // For each timetable entry, map it to the fixed slot it falls into.
+    filteredTimetable.forEach(entry => {
+      let day = entry.day_of_week;
+      let entryTime = entry.start_time.slice(0, 5);
+      let entryMinutes = timeToMinutes(entryTime);
+      for (let slot of timeSlots) {
+        let slotStart = timeToMinutes(slot.start);
+        let slotEnd = timeToMinutes(slot.end);
+        if (entryMinutes >= slotStart && entryMinutes < slotEnd) {
+          if (gridMatrix[day] && gridMatrix[day][slot.start] !== undefined) {
+            gridMatrix[day][slot.start].push(entry);
+          }
+          break;
+        }
+      }
+    });
+
+    // Build HTML for the grid.
+    let html = '<table>';
+    html += '<thead><tr><th>Day / Time</th>';
+    timeSlots.forEach(slot => {
+      html += `<th>${formatTime(slot.start)} - ${formatTime(slot.end)}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+    allowedDays.forEach(day => {
+      let rowColor = dayColors[day] || "#ffffff";
+      html += `<tr style="background-color: ${rowColor};"><td>${day}</td>`;
+      timeSlots.forEach(slot => {
+        let entries = gridMatrix[day][slot.start];
+        if (entries.length > 0) {
+          let cellContent = entries.map(entry => {
+            return `<strong>${entry.subject_name}</strong><br>
+                    <em>${entry.teacher_name}</em><br>
+                    <span>${entry.course_name}</span>`;
+          }).join("<hr>");
+          html += `<td>${cellContent}</td>`;
+        } else {
+          html += `<td>&nbsp;</td>`;
+        }
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById("timetableGridContainer").innerHTML = html;
+  }
+
+  // Handle form submission.
+  document.getElementById("timetableForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    let timeSlotVal = document.getElementById("time_slot").value;
+    if (!timeSlotVal) {
+      alert("Please select a time slot.");
+      return;
+    }
+    let [start_time, end_time] = timeSlotVal.split("-");
+    start_time = start_time.trim();
+    end_time = end_time.trim();
+
+    const data = {
+      subject_id: document.getElementById("subject").value,
+      course_id: document.getElementById("course").value,
+      teacher_id: document.getElementById("teacher").value,
+      day_of_week: document.getElementById("day").value,
+      start_time: start_time,
+      end_time: end_time,
+    };
+
+    fetch('/add_timetable_entry/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.message) {
+        alert(result.message);
+        location.reload();
+      } else if (result.error) {
+        alert("Error: " + result.error);
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  });
+});
 </script>
 
 </body>

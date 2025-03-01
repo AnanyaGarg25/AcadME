@@ -27,6 +27,11 @@ from AcadME4_app.models import AssignmentSubmission, Assignment
 from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
 from AcadME4_app.models import Students, Timetable
+from django.http import JsonResponse
+from AcadME4_app.models import Attendance, AttendanceReport
+import calendar
+import datetime
+
 
 
 def student_home(request):
@@ -55,20 +60,45 @@ def student_view_attendance(request):
     subjects=Subjects.objects.filter(course_id=course)
     return render(request,"student_template/student_view_attendance.html",{"subjects":subjects})
 
-def student_view_attendance_post(request):
-    subject_id=request.POST.get("subject")
-    start_date=request.POST.get("start_date")
-    end_date = request.POST.get("end_date")
-    start_data_parse=datetime.strptime(start_date, "%Y-%m-%d").date()
-    end_data_parse=datetime.strptime(end_date, "%Y-%m-%d").date()
-    subject_obj=Subjects.objects.get(id=subject_id)
-    user_object=CustomUser.objects.get(id=request.user.id)
-    stud_obj=Students.objects.get(admin=user_object)
-    attendance=Attendance.objects.filter(attendance_date__range=(start_data_parse,end_data_parse),subject_id=subject_obj)
-    print("Attendance records:", attendance)
-    attendance_reports=AttendanceReport.objects.filter(attendance_id__in=attendance,student_id=stud_obj)
-    print("Attendance Reports:", attendance_reports)
-    return render(request,"student_template/student_attendance_data.html",{"attendance_reports":attendance_reports})
+
+def get_attendance_data(request):
+    student = Students.objects.get(admin=request.user.id)  # Get the logged-in student
+    subject_id = request.GET.get('subject')
+    month_year = request.GET.get('month')
+
+    if not subject_id or not month_year:
+        return JsonResponse({'error': 'Invalid request parameters'}, status=400)
+
+    year, month = map(int, month_year.split('-'))
+    last_day = calendar.monthrange(year, month)[1]
+
+    start_date = datetime.date(year, month, 1)
+    end_date = datetime.date(year, month, last_day)
+
+    # Fetch all attendance records for the given subject & date range
+    attendance_records = Attendance.objects.filter(
+        subject_id=subject_id, attendance_date__range=[start_date, end_date]
+    ).order_by("attendance_date")  # ✅ Sort by date
+
+    data = []
+    seen_dates = set()  # ✅ Store already added dates
+
+    for record in attendance_records:
+        # Filter attendance reports for the logged-in student
+        report = AttendanceReport.objects.filter(attendance_id=record, student_id=student).first()
+
+        if report:
+            attendance_date_str = record.attendance_date.strftime('%Y-%m-%d')
+            if attendance_date_str in seen_dates:  # ✅ Avoid duplicate dates
+                continue
+            seen_dates.add(attendance_date_str)
+
+            data.append({
+                'date': attendance_date_str,
+                'status': 'Present' if report.status else 'Absent'
+            })
+
+    return JsonResponse(sorted(data, key=lambda x: x["date"]), safe=False)  # ✅ Ensure sorted order
 
 
 def student_feedback(request):
@@ -192,25 +222,65 @@ def student_submit_assignment(request, assignment_id):
         {"assignment": assignment}
     )
 
+from django.shortcuts import render, redirect
+from django.http import HttpResponseNotFound
+
+# Helper function to convert an integer to its ordinal representation.
+def ordinal(n):
+    if 11 <= (n % 100) <= 13:
+        suffix = 'th'
+    else:
+        suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')
+    return str(n) + suffix
+
 def student_timetable_view(request):
     if not request.user.is_authenticated:
         return redirect('login')
 
     try:
-        # Retrieve the student profile using the admin field
         student = Students.objects.get(admin=request.user)
     except Students.DoesNotExist:
         return HttpResponseNotFound("Student profile not found")
 
-    # Filter timetable entries based on the student's course.
-    # Assumes that Timetable.course is linked to the Courses model,
-    # and student.course_id refers to the course instance.
+    # Fetch timetable entries for the student's course (excluding Tuesday)
     timetables = Timetable.objects.filter(course=student.course_id) \
+        .exclude(day_of_week="Tuesday") \
         .select_related("subject", "course", "teacher") \
         .order_by("day_of_week", "start_time")
 
-    return render(request, "student_template/student_timetable_view.html", {"timetables": timetables})
+    # Define fixed time slots from 09:00 AM to 05:00 PM.
+    fixed_time_slots = [
+        {"key": "09:00", "label": "09:00 AM - 10:00 AM"},
+        {"key": "10:00", "label": "10:00 AM - 11:00 AM"},
+        {"key": "11:00", "label": "11:00 AM - 12:00 PM"},
+        {"key": "12:00", "label": "12:00 PM - 01:00 PM"},
+        {"key": "13:00", "label": "01:00 PM - 02:00 PM"},
+        {"key": "14:00", "label": "02:00 PM - 03:00 PM"},
+        {"key": "15:00", "label": "03:00 PM - 04:00 PM"},
+        {"key": "16:00", "label": "04:00 PM - 05:00 PM"},
+    ]
+    time_slots = fixed_time_slots
 
+    # Define allowed days (excluding Tuesday) – you can adjust the order as needed.
+    allowed_days = ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday']
+
+    # Initialize the timetable matrix: for each allowed day, create a dictionary with fixed slots set to None.
+    timetable_matrix = { day: { slot["key"]: None for slot in time_slots } for day in allowed_days }
+
+    # Populate the matrix: For an entry to appear, its start_time (formatted as "HH:MM") must exactly match one of the fixed slot keys.
+    for entry in timetables:
+        day = entry.day_of_week
+        key = entry.start_time.strftime("%H:%M")
+        if day in timetable_matrix:
+            timetable_matrix[day][key] = entry
+        else:
+            print(f"Entry with day '{day}' is not in allowed_days.")
+
+    context = {
+        "timetable_matrix": timetable_matrix,
+        "time_slots": time_slots,
+    }
+    return render(request, "student_template/student_timetable_view.html", context)
 def college_gallery(request):
     """
     Renders the college achievements & gallery page.

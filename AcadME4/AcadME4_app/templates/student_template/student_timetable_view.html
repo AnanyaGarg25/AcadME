@@ -1,54 +1,95 @@
 {% extends 'student_template/base_template.html' %}
+{% load dict_extras %}
 
 {% block page_title %}
 Your Timetable
 {% endblock page_title %}
 
 {% block main_content %}
+<style>
+  /* Responsive container for the table */
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+  /* Bright and subtle pastel colors for each day */
+  .day-Monday { background-color: #FFF9C4; }      /* Light Yellow */
+  .day-Wednesday { background-color: #E1F5FE; }   /* Light Blue */
+  .day-Thursday { background-color: #E8F5E9; }    /* Light Green */
+  .day-Friday { background-color: #FFECB3; }      /* Light Amber */
+  .day-Saturday { background-color: #F3E5F5; }    /* Light Lavender */
+  .day-Sunday { background-color: #FFE0B2; }      /* Light Orange */
+
+  /* Table styling tweaks */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  th, td {
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #ddd;
+  }
+  th {
+    background-color: #4CAF50;
+    color: white;
+  }
+  td {
+    min-width: 120px;
+  }
+  tr:hover td {
+    background: #dcedc8;
+  }
+</style>
+
 <section class="content">
   <div class="container-fluid">
     <div class="row">
       <div class="col-md-12">
-        <!-- Timetable Card -->
         <div class="card card-primary">
           <div class="card-header">
             <h3 class="card-title">Your Timetable</h3>
           </div>
-          <!-- Card Body -->
           <div class="card-body">
-            <p>Total entries: {{ timetables|length }}</p>
-            <table class="table table-bordered table-striped">
-              <thead>
-                <tr>
-                  <th>Day</th>
-                  <th>Course</th>
-                  <th>Subject</th>
-                  <th>Start Time</th>
-                  <th>End Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in timetables %}
-                <tr>
-                  <td>{{ row.day_of_week }}</td>
-                  <td>{{ row.course.course_name }}</td>
-                  <td>{{ row.subject.subject_name }}</td>
-                  <td>{{ row.start_time }}</td>
-                  <td>{{ row.end_time }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                  <td colspan="5">No timetable entries found.</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div class="table-container">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>Day / Period</th>
+                    {% for slot in time_slots %}
+                      <th>{{ slot.label }}</th>
+                    {% endfor %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for day, slots in timetable_matrix.items %}
+                    {% with day_class="day-"|add:day %}
+                    <tr class="{{ day_class }}">
+                      <td>{{ day }}</td>
+                      {% for slot in time_slots %}
+                        <td>
+                          {% with entry=slots|get_item:slot.key %}
+                            {% if entry %}
+                              <strong>{{ entry.subject.subject_name }}</strong><br>
+                              <em>{{ entry.teacher.admin.first_name }} {{ entry.teacher.admin.last_name }}</em>
+                            {% else %}
+                              &nbsp;
+                            {% endif %}
+                          {% endwith %}
+                        </td>
+                      {% endfor %}
+                    </tr>
+                    {% endwith %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <!-- /.card-body -->
         </div>
-        <!-- /.card -->
       </div>
     </div>
   </div>
 </section>
 {% endblock main_content %}
+

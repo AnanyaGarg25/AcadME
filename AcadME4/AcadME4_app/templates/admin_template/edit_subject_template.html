@@ -35,6 +35,17 @@ Edit Subject
                        {% endfor %}
                     </select>
                   </div>
+                    <div class="form-group">
+                                <label>Branch</label>
+                                <select class="form-control" name="branch" id="id_branch">
+                                    <option value="">Select Branch</option>
+                                    {% for branch in branches %}
+                                    <option value="{{ branch.id }}" {% if branch.id == selected_branch %}selected{% endif %}>
+                                        {{ branch.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                   <div class="form-group">
                     <label>Staff</label>
                     <select class="form-control" name="staff">
@@ -73,3 +84,45 @@ Edit Subject
       </div>
     </section>
 {% endblock main_content %}
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+        var selectedCourseId = "{{ selected_course }}";
+        var selectedBranchId = "{{ selected_branch }}";
+
+        function loadBranches(courseId, selectedBranchId = null) {
+            if (courseId) {
+                $.ajax({
+                    url: "{% url 'get_branches_by_course' %}",
+                    type: "POST",
+                    data: {
+                        course_id: courseId,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function (response) {
+                        console.log("✅ Branches received:", response);
+                        $("#id_branch").empty();
+                        $("#id_branch").append('<option value="">Select Branch</option>');
+                        $.each(response, function (index, branch) {
+                            var selected = (branch.id == selectedBranchId) ? "selected" : "";
+                            $("#id_branch").append('<option value="' + branch.id + '" ' + selected + '>' + branch.name + '</option>');
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("❌ Error fetching branches:", error);
+                    }
+                });
+            }
+        }
+
+        $("#id_course").change(function () {
+            var selectedCourse = $(this).val();
+            loadBranches(selectedCourse);
+        });
+
+        if (selectedCourseId) {
+            loadBranches(selectedCourseId, selectedBranchId);
+        }
+    });
+</script>
+{% endblock custom_js %}

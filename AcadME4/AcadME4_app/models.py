@@ -5,6 +5,8 @@ from django.dispatch import receiver
 
 
 # Create your models here.
+
+
 class SessionYearModel(models.Model):
     id=models.AutoField(primary_key=True)
     session_start_year = models.DateField()
@@ -62,11 +64,21 @@ class Courses(models.Model):
     updated_at = models.DateTimeField(auto_now_add=True)
     objects = models.Manager()
 
+class Branch(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255, unique=True)
+    course_id = models.ForeignKey(Courses, on_delete=models.CASCADE, default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
 class Subjects(models.Model):
     id = models.AutoField(primary_key=True)
     subject_name = models.CharField(max_length=255)
     subject_code=models.CharField(max_length=50,default="")
     course_id = models.ForeignKey(Courses,on_delete=models.CASCADE,default=1)
+    branch_id = models.ForeignKey(Branch, on_delete=models.DO_NOTHING,default=1)
     staff_id=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
@@ -80,7 +92,9 @@ class Students(models.Model):
     profile_pic=models.FileField()
     address = models.TextField()
     course_id=models.ForeignKey(Courses,on_delete=models.DO_NOTHING)
+    #branch_id=models.ForeignKey(Branch,on_delete=models.DO_NOTHING)
     session_year_id=models.ForeignKey(SessionYearModel,on_delete=models.CASCADE)
+    branch_id = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)  # New field
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     objects = models.Manager()

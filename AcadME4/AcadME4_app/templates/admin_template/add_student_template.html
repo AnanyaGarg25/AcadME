@@ -29,6 +29,7 @@ Add Student
 {% block custom_js %}
 <script>
     $(document).ready(function(){
+
         $("#id_email").keyup(function(){
             var email=$(this).val();
             if(email!=""){
@@ -83,6 +84,30 @@ Add Student
             }
              else{
                 $(".username_error").remove();
+            }
+        });
+        $("#course").change(function () {
+            var course_id = $(this).val();  // Get selected course ID
+            console.log("Selected Course ID:", course_id);
+            if (course_id) {
+                $.ajax({
+                    url: "{% url 'get_branches_by_course' %}",  // Django URL for fetching branches
+                    type: "POST",
+                    data: {
+                        course_id: course_id,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function (response) {
+                        $("#branch").empty();  // Clear previous options
+                        $("#branch").append('<option value="">Select Branch</option>');  // Default option
+                        $.each(response, function (index, branch) {
+                            $("#branch").append('<option value="' + branch.id + '">' + branch.name + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $("#branch").empty();
+                $("#branch").append('<option value="">Select Branch</option>');
             }
         });
     });

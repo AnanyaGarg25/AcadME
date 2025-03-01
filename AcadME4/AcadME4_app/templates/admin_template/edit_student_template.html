@@ -27,3 +27,51 @@ Edit Student | Username: {{ username }} | #ID : {{ id }}
       </div>
 </section>
 {% endblock main_content %}
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+        var studentCourseId = "{{ student_course_id }}";  // Student's current course
+        var studentBranchId = "{{ student_branch_id }}";  // Student's current branch
+
+        function loadBranches(courseId, selectedBranchId = null) {
+            if (courseId) {
+                $.ajax({
+                    url: "{% url 'get_branches_by_course' %}",
+                    type: "POST",
+                    data: {
+                        course_id: courseId,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function (response) {
+                        console.log("✅ Branches received:", response);
+                        $("#id_branch").empty();
+                        $("#id_branch").append('<option value="">Select Branch</option>');
+                        $.each(response, function (index, branch) {
+                            var selected = (branch.id == selectedBranchId) ? "selected" : "";
+                            $("#id_branch").append('<option value="' + branch.id + '" ' + selected + '>' + branch.name + '</option>');
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("❌ Error fetching branches:", error);
+                    }
+                });
+            } else {
+                $("#id_branch").empty();
+                $("#id_branch").append('<option value="">Select Branch</option>');
+            }
+        }
+
+        // On course change, load branches dynamically
+        $("#id_course").change(function () {
+            var selectedCourse = $(this).val();
+            loadBranches(selectedCourse);
+        });
+
+        // Load branches for the student's current course when the page loads
+        if (studentCourseId) {
+            loadBranches(studentCourseId, studentBranchId);
+        }
+    });
+</script>
+{% endblock custom_js %}
+
