@@ -78,7 +78,6 @@
         </div>
     </div>
 </section>
-
 {% endblock main_content %}
 
 {% block custom_js %}
@@ -94,7 +93,6 @@ $(document).ready(function () {
         success: function (data) {
             let courseDropdown = $("#id_course");
             courseDropdown.html('<option value="">-- Select Course --</option>');
-
             $.each(data, function (key, value) {
                 courseDropdown.append(`<option value="${value.id}">${value.course_name}</option>`);
             });
@@ -134,9 +132,7 @@ $(document).ready(function () {
     $("#id_branch").change(function () {
         let branchId = $(this).val();
         let subjectDropdown = $("#id_subject");
-
         subjectDropdown.html('<option value="">-- Select Subject --</option>');
-
         if (branchId) {
             $.ajax({
                 url: `/get-subjects/${branchId}/`,
@@ -154,37 +150,41 @@ $(document).ready(function () {
         }
     });
 
-    // ✅ Fetch students when Fetch Students button is clicked
+    // ✅ Fetch students when Fetch Students button is clicked.
+    // Now include the branch value in the AJAX call.
     $("#fetch_student").click(function () {
         let subjectId = $("#id_subject").val();
         let sessionYearId = $("#id_session_year").val();
+        let branchId = $("#id_branch").val();
 
-        if (!subjectId || !sessionYearId) {
-            alert("Please select Subject and Session Year.");
+        if (!subjectId || !sessionYearId || !branchId) {
+            alert("Please select Subject, Branch and Session Year.");
             return;
         }
 
         $.ajax({
             url: '{% url "get_students" %}',
             type: 'POST',
-            data: { subject: subjectId, session_year: sessionYearId },
+            dataType: "json",
+            data: { subject: subjectId, session_year: sessionYearId, branch: branchId },
             headers: { "X-CSRFToken": "{{ csrf_token }}" },
         })
         .done(function (response) {
-            let json_data = JSON.parse(response);
+            // Directly use the parsed response.
+            let json_data = response;
             let table_body = "<table class='table table-bordered'><thead><tr><th>Roll No</th><th>Name</th><th>BTBT ID</th><th>Assignment 1</th><th>Assignment 2</th><th>Periodical 1</th><th>Periodical 2</th></tr></thead><tbody>";
 
-            for (let key in json_data) {
+            $.each(json_data, function (key, student) {
                 table_body += `<tr>
-                    <td>${json_data[key]['roll_no']}</td>
-                    <td>${json_data[key]['name']}</td>
-                    <td>${json_data[key]['btbt_id']}</td>
-                    <td><input type='number' name='assignment1_${json_data[key]['id']}' class='form-control'></td>
-                    <td><input type='number' name='assignment2_${json_data[key]['id']}' class='form-control'></td>
-                    <td><input type='number' name='periodical1_${json_data[key]['id']}' class='form-control'></td>
-                    <td><input type='number' name='periodical2_${json_data[key]['id']}' class='form-control'></td>
+                    <td>${student.roll_no}</td>
+                    <td>${student.name}</td>
+                    <td>${student.btbt_id}</td>
+                    <td><input type='number' name='assignment1_${student.id}' class='form-control'></td>
+                    <td><input type='number' name='assignment2_${student.id}' class='form-control'></td>
+                    <td><input type='number' name='periodical1_${student.id}' class='form-control'></td>
+                    <td><input type='number' name='periodical2_${student.id}' class='form-control'></td>
                 </tr>`;
-            }
+            });
 
             table_body += "</tbody></table>";
             $("#save_results_div").show();
@@ -194,7 +194,6 @@ $(document).ready(function () {
             alert("Error in Fetching Students.");
         });
     });
-
 });
 </script>
 {% endblock custom_js %}

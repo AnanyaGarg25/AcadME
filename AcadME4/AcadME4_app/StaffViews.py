@@ -35,7 +35,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
 from AcadME4_app.models import Staffs, Timetable
 
-
+@csrf_exempt
 def staff_home(request):
     # Fetch all subjects assigned to the staff
     subjects = Subjects.objects.filter(staff_id=request.user.id)
@@ -88,7 +88,7 @@ def staff_home(request):
     }
 
     return render(request, "staff_template/staff_home_template.html", context)
-
+@csrf_exempt
 def staff_take_attendance(request):
     subjects = Subjects.objects.filter(staff_id=request.user.id).values("id", "subject_name", "has_lab")
     session_years=SessionYearModel.object.all()
@@ -103,18 +103,28 @@ def staff_subjects(request):
 def get_students(request):
     subject_id = request.POST.get("subject")
     session_year = request.POST.get("session_year")
+    branch_id = request.POST.get("branch")  # ✅ Get branch from request
+
     try:
-        subject = Subjects.objects.select_related('course_id').get(id=subject_id)
+        subject = Subjects.objects.select_related('course_id', 'branch_id').get(id=subject_id)
         session_model = SessionYearModel.object.get(id=session_year)
     except (Subjects.DoesNotExist, SessionYearModel.DoesNotExist):
         return JsonResponse({"error": "Invalid Subject or Session Year"}, status=400)
-    students = Students.objects.filter(course_id=subject.course_id, session_year_id=session_model)
+
+    students = Students.objects.filter(course_id=subject.course_id, session_year_id=session_model, branch_id=branch_id)  # ✅ Filter by branch
+
     list_data = []
     for student in students:
-        data_small = {"id": student.admin.id, "name": student.admin.first_name + " " + student.admin.last_name,
-                      "roll_no": student.roll_no, "btbt_id": student.btbt_id}
+        data_small = {
+            "id": student.admin.id,
+            "name": f"{student.admin.first_name} {student.admin.last_name}",
+            "roll_no": student.roll_no,
+            "btbt_id": student.btbt_id
+        }
         list_data.append(data_small)
-    return JsonResponse(list_data, safe=False)  # ✅ Correct
+
+    return JsonResponse(list_data, safe=False)
+
 
 
 @csrf_exempt
@@ -151,15 +161,15 @@ def save_attendance_data(request):
     except Exception as e:
         print(f"Error while saving attendance: {str(e)}")
         return HttpResponse(f"ERROR: {str(e)}")
-
+@csrf_exempt
 def staff_subjects(request):
     subjects = Subjects.objects.filter(staff_id=request.user.id)
     return render(request, "staff_template/staff_subjects.html", {"subjects": subjects})
-
+@csrf_exempt
 def staff_update_attendance(request):
     subjects = Subjects.objects.filter(staff_id=request.user.id)
-    session_year_id = SessionYearModel.object.all()
-    return render(request,"staff_template/staff_update_attendance.html",{"subjects":subjects,"session_year_id":session_year_id})
+    session_years = SessionYearModel.object.all()
+    return render(request,"staff_template/staff_update_attendance.html",{"subjects":subjects,"session_years":session_years})
 
 @csrf_exempt
 def get_attendance_dates(request):
@@ -264,12 +274,12 @@ def staff_profile_save(request):
         except:
             messages.error(request, "Failed to Update Profile")
             return HttpResponseRedirect(reverse("staff_profile"))
-
+@csrf_exempt
 def staff_add_result(request):
     subjects=Subjects.objects.filter(staff_id=request.user.id)
     session_years = SessionYearModel.object.all()
     return render(request,"staff_template/staff_add_result.html",{"subjects":subjects,"session_years":session_years})
-
+@csrf_exempt
 def save_student_result(request):
     if request.method!='POST':
         return HttpResponseRedirect('staff_add_result')
@@ -500,7 +510,7 @@ def ordinal(n):
     return str(n) + suffix
 from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
-from .models import Students, Timetable, Staffs  # adjust your import as necessary
+from .models import Students, Timetable, Staffs
 
 def staff_view_timetable(request):
     if not request.user.is_authenticated:
@@ -513,10 +523,18 @@ def staff_view_timetable(request):
         return HttpResponseNotFound("Staff profile not found")
 
     # Filter timetable entries for this teacher; exclude Tuesday.
+    # We use select_related to prefetch subject, course, teacher, and the branch (via subject__branch_id).
     timetables = Timetable.objects.filter(teacher=staff_instance) \
         .exclude(day_of_week="Tuesday") \
-        .select_related("subject", "course", "teacher") \
+        .select_related("subject", "course", "teacher", "subject__branch_id") \
         .order_by("day_of_week", "start_time")
+
+    # Annotate each timetable entry with branch_name (if available)
+    for entry in timetables:
+        if entry.subject and entry.subject.branch_id:
+            entry.branch_name = entry.subject.branch_id.name
+        else:
+            entry.branch_name = ""
 
     # Define fixed time slots from 09:00 AM to 05:00 PM.
     fixed_time_slots = [
@@ -531,14 +549,14 @@ def staff_view_timetable(request):
     ]
     time_slots = fixed_time_slots
 
-    # Define allowed days (excluding Tuesday). Adjust order as needed.
+    # Define allowed days (excluding Tuesday).
     allowed_days = ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday']
 
     # Initialize the timetable matrix: For each allowed day, create a dictionary with each fixed slot key set to None.
     timetable_matrix = {day: {slot["key"]: None for slot in time_slots} for day in allowed_days}
 
     # Populate the matrix with timetable entries.
-    # For an entry to appear, its start_time (formatted as "HH:MM") must exactly match one of the fixed slot keys.
+    # Each entry's start_time (formatted as "HH:MM") must match one of the fixed slot keys.
     for entry in timetables:
         day = entry.day_of_week
         key = entry.start_time.strftime("%H:%M")
@@ -552,7 +570,6 @@ def staff_view_timetable(request):
         "time_slots": time_slots,
     }
     return render(request, "staff_template/staff_view_timetable.html", context)
-
 def staff_gallery(request):
     """
     Renders the staff achievements & gallery page.
@@ -591,7 +608,7 @@ def upload_syllabus_books(request):
 
 def staff_about(request):
     return render(request, "staff_template/staff_about.html")
-
+@csrf_exempt
 def get_branches(request, course_id):
     """ Fetch only branches where the logged-in teacher teaches subjects """
     try:
@@ -606,7 +623,7 @@ def get_branches(request, course_id):
 
     except Staffs.DoesNotExist:
         return JsonResponse({"error": "Staff record not found"}, status=400)
-
+@csrf_exempt
 def get_subjects(request, branch_id):
     """ Fetch subjects of the selected branch that are taught by the logged-in teacher. """
     try:
@@ -621,7 +638,7 @@ def get_subjects(request, branch_id):
 
     except Staffs.DoesNotExist:
         return JsonResponse({"error": "Staff record not found"}, status=400)
-
+@csrf_exempt
 def get_teacher_courses(request):
     """ Fetch courses assigned to the logged-in teacher """
     try:
@@ -671,7 +688,7 @@ def get_filtered_submissions(request, subject_id):
     except Staffs.DoesNotExist:
         return JsonResponse({"error": "Staff record not found"}, status=400)
 
-
+@csrf_exempt
 def get_session_years(request):
     session_years = SessionYearModel.object.all().values("id", "session_start_year", "session_end_year")
     return JsonResponse(list(session_years), safe=False)

@@ -4,15 +4,14 @@ Take Attendance
 {% endblock page_title %}
 {% block main_content %}
 <section class="content">
-      <div class="container-fluid">
-          <div class="row">
-              <div class="col-md-12">
+  <div class="container-fluid">
+      <div class="row">
+          <div class="col-md-12">
             <div class="card card-primary">
               <div class="card-header">
                 <h3 class="card-title">Take Attendance</h3>
               </div>
-
-                <div class="card-body">
+              <div class="card-body">
                   <!-- ✅ Course Dropdown -->
                   <div class="form-group">
                         <label>Course</label>
@@ -52,22 +51,22 @@ Take Attendance
                     <select class="form-control" name="session_year" id="session_year">
                         <option value="">-- Select Session Year --</option>
                        {% for session_year in session_years %}
-                         <option value="{{session_year.id}}">{{ session_year.session_start_year }} to {{ session_year.session_end_year }}</option>
+                         <option value="{{ session_year.id }}">{{ session_year.session_start_year }} to {{ session_year.session_end_year }}</option>
                        {% endfor %}
                     </select>
                   </div>
-                </div>
+              </div>
 
-                <div class="card-footer">
-                  <button type="button" class="btn btn-primary btn-block" id="fetch_student">Fetch Students</button>
-                </div>
+              <div class="card-footer">
+                <button type="button" class="btn btn-primary btn-block" id="fetch_student">Fetch Students</button>
+              </div>
 
-                <div id="student_data" class="card-footer"></div>
+              <div id="student_data" class="card-footer"></div>
             </div>
           </div>
       </div>
+  </div>
 </section>
-
 {% endblock main_content %}
 
 {% block custom_js %}
@@ -139,7 +138,7 @@ Take Attendance
             }
         });
 
-        // ✅ Show/Hide Theory or Lab Selection
+        // ✅ Show/Hide Theory or Lab Selection based on subject's has_lab attribute
         $("#subject").change(function () {
             let hasLab = $("#subject option:selected").data("has-lab");
             if (hasLab) {
@@ -149,21 +148,24 @@ Take Attendance
             }
         });
 
-        // ✅ Fetch Students
+        // ✅ Fetch Students (including branch in the request)
         $("#fetch_student").click(function () {
             let subject = $("#subject").val();
             let session_year = $("#session_year").val();
             let class_type = $("#class_type").val();
+            let branch = $("#branch").val();  // ✅ Added branch value
 
             $.ajax({
                 url: '{% url "get_students" %}',
                 type: "POST",
-                data: {subject: subject, session_year: session_year, class_type: class_type},
+                dataType: "json", // jQuery will parse JSON automatically.
+                data: {subject: subject, session_year: session_year, class_type: class_type, branch: branch},
+                headers: { "X-CSRFToken": "{{ csrf_token }}" }
             })
             .done(function (response) {
-                let json_data = JSON.parse(response);
+                // Use response directly as it is already parsed.
+                let json_data = response;
                 let div_data = "<div class='form-group'><label>Attendance Date:</label><input type='date' name='attendance_date' id='attendance_date' class='form-control'></div>";
-
                 div_data += "<div class='table-responsive'><table class='table table-bordered'>";
                 div_data += "<thead class='thead-dark'><tr><th>Roll No</th><th>Name</th><th>BTBT ID</th><th>Present</th></tr></thead><tbody>";
 
@@ -177,8 +179,6 @@ Take Attendance
                 });
 
                 div_data += "</tbody></table></div>";
-
-                // Add Save Attendance Button
                 div_data += "<div class='form-group text-center'>";
                 div_data += "<button id='save_attendance' class='btn btn-success' type='button'><i class='fas fa-save'></i> Save Attendance</button>";
                 div_data += "</div>";
@@ -193,7 +193,6 @@ Take Attendance
         // ✅ Save Attendance
         $(document).on("click", "#save_attendance", function () {
             $(this).attr("disabled", "disabled").text("Saving Attendance...");
-
             let student_data = $("input[name='student_data[]']").map(function () {
                 return {id: $(this).val(), status: $(this).is(":checked") ? 1 : 0};
             }).get();
@@ -206,14 +205,15 @@ Take Attendance
             $.ajax({
                 url: '{% url "save_attendance_data" %}',
                 type: "POST",
-                data: {student_ids: JSON.stringify(student_data), attendance_date, subject_id, session_year_id, class_type},
+                data: {student_ids: JSON.stringify(student_data), attendance_date: attendance_date, subject_id: subject_id, session_year_id: session_year_id, class_type: class_type},
+                headers: { "X-CSRFToken": "{{ csrf_token }}" }
             })
             .done(function (response) {
                 alert(response === "OKAY" ? "Attendance Saved" : "Error in Saving Data");
                 location.reload();
             })
             .fail(function () {
-                alert("Error in Saving Students");
+                alert("Error in Saving Attendance");
             });
         });
     });

@@ -142,6 +142,8 @@ path("get-subjects/<int:branch_id>/", StaffViews.get_subjects, name="get_subject
 path("get-teacher-courses/", StaffViews.get_teacher_courses, name="get_teacher_courses"),
 path("student_subjects", StudentViews.student_subjects, name="student_subjects"),
                   path('get-submissions/<int:subject_id>/', StaffViews.get_filtered_submissions, name='get_submissions'),
+path('get_subjects_by_course_and_branch/',  AdminViews.get_subjects_by_course_and_branch,name='get_subjects_by_course_and_branch'),
+path('get_teachers_by_subject/',  AdminViews.get_teachers_by_subject, name='get_teachers_by_subject'),
                   path('get-session-years/', StaffViews.get_session_years, name='get_session_years'),
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

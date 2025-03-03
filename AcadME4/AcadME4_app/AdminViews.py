@@ -711,40 +711,41 @@ def admin_get_monthly_attendance(request):
 
         return JsonResponse(student_data, safe=False)
 
+import json
+from datetime import datetime
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from AcadME4_app.models import Subjects, Courses, Timetable, Staffs, Branch
+
 def admin_timetable(request):
     """
-    Render the timetable page with subjects, courses, and teachers.
+    Renders the timetable page with subjects, courses, teachers, and branches.
     Only accessible to superusers.
     """
     if not request.user.is_superuser:
         return render(request, "error_page.html", {"error": "Access Denied"})
-
-    # Fetch only the necessary fields (for initial rendering if needed)
     subjects = Subjects.objects.only("id", "subject_name")
     courses = Courses.objects.only("id", "course_name")
     teachers = Staffs.objects.select_related("admin").only("id", "admin__first_name", "admin__last_name")
-
+    branches = Branch.objects.all()  # Pass branches for grid filtering and (if needed) for initial context
     return render(request, "admin_template/admin_timetable.html", {
         "subjects": subjects,
         "courses": courses,
-        "teachers": teachers
+        "teachers": teachers,
+        "branches": branches,
     })
-
 
 def get_timetable_data(request):
     """
-    Return JSON data for subjects, courses, teachers, and timetable entries.
+    Returns JSON data for subjects, courses, teachers, and timetable entries.
+    Each timetable entry now includes branch id and branch name.
     """
     subjects = list(Subjects.objects.values("id", "subject_name", "course_id", "staff_id"))
     courses = list(Courses.objects.values("id", "course_name"))
-
     teachers = list(Staffs.objects.select_related("admin").values(
-        "id",
-        "admin_id",
-        "admin__first_name",
-        "admin__last_name"
+        "id", "admin_id", "admin__first_name", "admin__last_name"
     ))
-
     timetable_entries = list(Timetable.objects.values(
         "id",
         "day_of_week",
@@ -755,15 +756,15 @@ def get_timetable_data(request):
         "course__course_name",
         "teacher__admin__first_name",
         "teacher__admin__last_name",
+        "subject__branch_id",           # Branch id from subject
+        "subject__branch_id__name"      # Branch name
     ))
-
     formatted_timetable = []
     for entry in timetable_entries:
         start = entry["start_time"]
         end = entry["end_time"]
         start_str = start.strftime("%H:%M") if hasattr(start, "strftime") else start
         end_str = end.strftime("%H:%M") if hasattr(end, "strftime") else end
-
         first_name = entry.get("teacher__admin__first_name", "")
         last_name = entry.get("teacher__admin__last_name", "")
         teacher_name = f"{first_name} {last_name}".strip() or "Not Assigned"
@@ -776,29 +777,27 @@ def get_timetable_data(request):
             "subject_name": entry["subject__subject_name"],
             "course_name": entry["course__course_name"],
             "teacher_name": teacher_name,
+            "branch_id": entry["subject__branch_id"],
+            "branch_name": entry["subject__branch_id__name"],
         })
-
     return JsonResponse({
         "subjects": subjects,
         "courses": courses,
         "teachers": teachers,
         "timetable": formatted_timetable
     })
-from datetime import datetime
-from django.http import JsonResponse
-# ... your other imports ...
 
 @csrf_exempt
 def add_timetable_entry(request):
     """
-    Create a new timetable entry from a JSON payload.
-    Expects JSON with:
+    Creates a new timetable entry based on a JSON payload.
+    Expected JSON keys:
       - subject_id
       - course_id
       - teacher_id (Staffs id)
       - day_of_week
-      - start_time (HH:MM)
-      - end_time (HH:MM)
+      - start_time (in HH:MM format)
+      - end_time (in HH:MM format)
     """
     if request.method == "POST":
         try:
@@ -809,27 +808,19 @@ def add_timetable_entry(request):
             day_of_week = data.get("day_of_week")
             start_time_str = data.get("start_time")
             end_time_str = data.get("end_time")
-
             if not (subject_id and course_id and teacher_id and day_of_week and start_time_str and end_time_str):
                 return JsonResponse({"error": "All fields are required"}, status=400)
-
             try:
                 start_time = datetime.strptime(start_time_str, "%H:%M").time()
                 end_time = datetime.strptime(end_time_str, "%H:%M").time()
             except ValueError:
                 return JsonResponse({"error": "Invalid time format. Use HH:MM"}, status=400)
-
-            # Fetch related objects.
             subject = Subjects.objects.get(id=subject_id)
             course = Courses.objects.get(id=course_id)
             teacher = Staffs.objects.get(id=teacher_id)
-
-            # Check if this teacher is already assigned on the same day at the same start_time.
             if Timetable.objects.filter(teacher=teacher, day_of_week=day_of_week, start_time=start_time).exists():
                 return JsonResponse({"error": "This teacher is already assigned for that time slot on " + day_of_week}, status=400)
-
-            # Create the timetable entry.
-            new_entry = Timetable.objects.create(
+            Timetable.objects.create(
                 subject=subject,
                 course=course,
                 teacher=teacher,
@@ -838,7 +829,6 @@ def add_timetable_entry(request):
                 end_time=end_time,
             )
             return JsonResponse({"message": "Timetable entry added successfully"}, status=201)
-
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
         except Subjects.DoesNotExist:
@@ -849,9 +839,73 @@ def add_timetable_entry(request):
             return JsonResponse({"error": "Invalid teacher ID"}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
-
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+@csrf_exempt
+def get_subjects_by_course_and_branch(request):
+    """
+    Returns the subjects for a given course and branch.
+    Expects POST parameters: 'course_id' and 'branch_id'.
+    """
+    if request.method == "POST":
+        course_id = request.POST.get("course_id")
+        branch_id = request.POST.get("branch_id")
+        if not (course_id and branch_id):
+            return JsonResponse([], safe=False)
+        subjects = Subjects.objects.filter(course_id=course_id, branch_id=branch_id).values("id", "subject_name", "staff_id")
+        return JsonResponse(list(subjects), safe=False)
+    return JsonResponse({"error": "Invalid method"}, status=405)
+
+@csrf_exempt
+def get_teachers_by_subject(request):
+    """
+    Retrieves the teacher associated with the given subject.
+    It checks various possible fields on the Subject model:
+      - "teacher"
+      - "staff"
+      - "staff_id"
+    Expects a POST parameter: 'subject_id'.
+    """
+    if request.method == "POST":
+        subject_id = request.POST.get("subject_id")
+        if not subject_id:
+            return JsonResponse([], safe=False)
+        try:
+            subject = Subjects.objects.get(id=subject_id)
+        except Subjects.DoesNotExist:
+            return JsonResponse([], safe=False)
+        teacher = None
+        if hasattr(subject, "teacher") and subject.teacher:
+            teacher = subject.teacher
+        elif hasattr(subject, "staff") and subject.staff:
+            teacher = subject.staff
+        elif hasattr(subject, "staff_id") and subject.staff_id:
+            teacher_val = subject.staff_id
+            if isinstance(teacher_val, int):
+                try:
+                    teacher = Staffs.objects.get(id=teacher_val)
+                except Staffs.DoesNotExist:
+                    teacher = None
+            else:
+                try:
+                    teacher = Staffs.objects.get(admin=teacher_val)
+                except Staffs.DoesNotExist:
+                    teacher = None
+        if teacher:
+            if hasattr(teacher, "admin"):
+                first_name = teacher.admin.first_name
+                last_name = teacher.admin.last_name
+            else:
+                first_name = teacher.first_name
+                last_name = teacher.last_name
+            teacher_data = {
+                "id": teacher.pk,
+                "admin__first_name": first_name,
+                "admin__last_name": last_name,
+            }
+            return JsonResponse([teacher_data], safe=False)
+        return JsonResponse([], safe=False)
+    return JsonResponse({"error": "Invalid method"}, status=405)
 
 def admin_gallery(request):
     """

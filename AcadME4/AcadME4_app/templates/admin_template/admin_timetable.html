@@ -1,406 +1,523 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Timetable</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #d0e8f2, #edf7f9);
-      margin: 0;
-      padding: 20px;
-    }
-    .timetable-container {
-      width: 95%;
-      margin: auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    }
-    h2, h3 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 10px;
-    }
-    form {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-      margin-bottom: 20px;
-      background: #f7fbff;
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid #dce4ec;
-    }
-    form label {
-      width: 160px;
-      font-weight: bold;
-      color: #555;
-    }
-    form select, form input {
-      flex: 1;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-    button {
-      background: #007BFF;
-      color: #fff;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    /* Responsive table container */
-    .table-container {
-      width: 100%;
-      overflow-x: auto;
-      margin-top: 20px;
-    }
-    /* Table styling */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      text-align: center;
-      padding: 12px;
-      border: 1px solid #ddd;
-    }
-    th {
-      background-color: #4CAF50;
-      color: #fff;
-    }
-    td {
-      min-width: 120px;
-    }
-    tr:hover td {
-      background: #dcedc8;
-    }
-    /* Day-specific pastel row colors (bright and subtle) */
-    .day-Monday { background-color: #FFF9C4; }       /* Light Yellow */
-    .day-Wednesday { background-color: #E1F5FE; }    /* Light Blue */
-    .day-Thursday { background-color: #E8F5E9; }     /* Light Green */
-    .day-Friday { background-color: #FFECB3; }       /* Light Amber */
-    .day-Saturday { background-color: #F3E5F5; }     /* Light Lavender */
-    .day-Sunday { background-color: #FCE4EC; }       /* Light Pink */
-  </style>
-</head>
-<body>
+{% extends 'admin_template/base_template.html' %}
+{% load static %}
+{% block page_title %}
+Admin Timetable
+{% endblock page_title %}
 
-<div class="timetable-container">
+{% block custom_css %}
+<style>
+  /* Global Styles with Gradient Background */
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+  .container {
+    max-width: 1200px;
+    margin: auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  }
+  h2, h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #444;
+  }
+  /* Form Styles */
+  .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  .form-group {
+    flex: 1;
+    min-width: 280px;
+    display: flex;
+    align-items: center;
+  }
+  .form-group label {
+    width: 150px;
+    font-weight: bold;
+    color: #555;
+  }
+  .form-group select,
+  .form-group input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: border 0.3s ease;
+  }
+  .form-group select:focus,
+  .form-group input:focus {
+    border-color: #6e8efb;
+  }
+  button {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: linear-gradient(135deg, #556cd6, #8e44ad);
+  }
+  /* Grid Filter Styles */
+  .grid-filter {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin: 20px 0;
+  }
+  .grid-filter label {
+    font-weight: bold;
+    color: #555;
+  }
+  .grid-filter select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: border 0.3s ease;
+  }
+  .grid-filter select:focus {
+    border-color: #6e8efb;
+  }
+  /* Timetable Grid Styles */
+  .table-container {
+    overflow-x: auto;
+    margin-top: 30px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+  }
+  th {
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    color: #fff;
+    font-weight: 600;
+  }
+  tr:nth-child(even) {
+    background: #f9f9f9;
+  }
+  tr:hover td {
+    background: #f1f1f1;
+  }
+</style>
+{% endblock custom_css %}
+
+{% block main_content %}
+<div class="container">
   <h2>Admin Timetable</h2>
 
   <!-- Timetable Entry Form -->
   <form id="timetableForm">
     {% csrf_token %}
-    <label for="course">Course:</label>
-    <select id="course" name="course" required>
-      <option value="">Select Course</option>
-    </select>
-
-    <label for="subject">Subject:</label>
-    <select id="subject" name="subject" required>
-      <option value="">Select Subject</option>
-    </select>
-
-    <label for="teacher">Teacher:</label>
-    <select id="teacher" name="teacher" required>
-      <option value="">Select Teacher</option>
-    </select>
-
-    <label for="day">Day:</label>
-    <select id="day" name="day" required>
-      <option value="Monday">Monday</option>
-      <option value="Wednesday">Wednesday</option>
-      <option value="Thursday">Thursday</option>
-      <option value="Friday">Friday</option>
-      <option value="Saturday">Saturday</option>
-      <option value="Sunday">Sunday</option>
-    </select>
-
-    <label for="time_slot">Time Slot:</label>
-    <select id="time_slot" name="time_slot" required>
-      <option value="">Select Time Slot</option>
-      <option value="09:00-10:00">09:00 AM - 10:00 AM</option>
-      <option value="10:00-11:00">10:00 AM - 11:00 AM</option>
-      <option value="11:00-12:00">11:00 AM - 12:00 PM</option>
-      <option value="12:00-13:00">12:00 PM - 01:00 PM</option>
-      <option value="13:00-14:00">01:00 PM - 02:00 PM</option>
-      <option value="14:00-15:00">02:00 PM - 03:00 PM</option>
-      <option value="15:00-16:00">03:00 PM - 04:00 PM</option>
-      <option value="16:00-17:00">04:00 PM - 05:00 PM</option>
-    </select>
-
-    <button type="submit">Add Timetable Entry</button>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="course">Course:</label>
+        <select id="course" name="course" required>
+          <option value="">Select Course</option>
+          {% for course in courses %}
+            <option value="{{ course.id }}">{{ course.course_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="branch">Branch:</label>
+        <!-- Branch dropdown will be populated via AJAX -->
+        <select id="branch" name="branch" required>
+          <option value="">Select Branch</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="subject">Subject:</label>
+        <select id="subject" name="subject" required>
+          <option value="">Select Subject</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="teacher">Teacher:</label>
+        <select id="teacher" name="teacher" required>
+          <option value="">Select Teacher</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="day">Day:</label>
+        <select id="day" name="day" required>
+          <option value="Monday">Monday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+          <option value="Sunday">Sunday</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="time_slot">Time Slot:</label>
+        <select id="time_slot" name="time_slot" required>
+          <option value="">Select Time Slot</option>
+          <option value="09:00-10:00">09:00 AM - 10:00 AM</option>
+          <option value="10:00-11:00">10:00 AM - 11:00 AM</option>
+          <option value="11:00-12:00">11:00 AM - 12:00 PM</option>
+          <option value="12:00-13:00">12:00 PM - 01:00 PM</option>
+          <option value="13:00-14:00">01:00 PM - 02:00 PM</option>
+          <option value="14:00-15:00">02:00 PM - 03:00 PM</option>
+          <option value="15:00-16:00">03:00 PM - 04:00 PM</option>
+          <option value="16:00-17:00">04:00 PM - 05:00 PM</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row" style="justify-content: center;">
+      <button type="submit">Add Timetable Entry</button>
+    </div>
   </form>
 
-  <!-- Dropdown to Filter Timetable Grid by Course -->
+  <!-- Grid Filters -->
   <div class="grid-filter">
-    <label for="gridCourseFilter">Filter Grid by Course:</label>
-    <select id="gridCourseFilter">
-      <option value="">All Courses</option>
-    </select>
+    <div>
+      <label for="gridCourseFilter">Filter by Course:</label>
+      <select id="gridCourseFilter">
+        <option value="">All Courses</option>
+        {% for course in courses %}
+          <option value="{{ course.id }}">{{ course.course_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="gridBranchFilter">Filter by Branch:</label>
+      <select id="gridBranchFilter">
+        <option value="">All Branches</option>
+        {% for branch in branches %}
+          <option value="{{ branch.id }}">{{ branch.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
   </div>
 
   <!-- Timetable Grid Display -->
   <h3>Timetable Grid</h3>
-  <div class="table-container" id="timetableGridContainer"></div>
+  <div class="table-container" id="timetableGridContainer">
+    <!-- Grid will be built here -->
+  </div>
 </div>
+{% endblock main_content %}
 
+{% block custom_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-// Helper: Convert "HH:MM" to minutes.
-function timeToMinutes(t) {
-  let [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
-}
+  $(document).ready(function(){
 
-// Helper: Format "HH:MM" (24-hr) to 12-hr format.
-function formatTime(timeStr) {
-  let [h, m] = timeStr.split(":").map(Number);
-  let ampm = h >= 12 ? "PM" : "AM";
-  h = h % 12 || 12;
-  return h + ":" + (m < 10 ? "0" + m : m) + " " + ampm;
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  let subjectsData = [];
-  let coursesData = [];
-  let teachersData = [];
-  let timetableData = [];
-
-  // Fixed time slots (09:00 to 17:00).
-  const fixedTimeSlots = [
-    { start: "09:00", end: "10:00" },
-    { start: "10:00", end: "11:00" },
-    { start: "11:00", end: "12:00" },
-    { start: "12:00", end: "13:00" },
-    { start: "13:00", end: "14:00" },
-    { start: "14:00", end: "15:00" },
-    { start: "15:00", end: "16:00" },
-    { start: "16:00", end: "17:00" }
-  ];
-
-  // Mapping day names to pastel colors.
-  const dayColors = {
-    "Monday": "#FFF9C4",
-    "Wednesday": "#E1F5FE",
-    "Thursday": "#E8F5E9",
-    "Friday": "#FFECB3",
-    "Saturday": "#F3E5F5",
-    "Sunday": "#FCE4EC",
-    "Tuesday": "#E0F7FA"  // In case Tuesday is ever used.
-  };
-
-  // Fetch JSON data.
-  fetch('/get_timetable_data/')
-    .then(response => response.json())
-    .then(data => {
-      subjectsData = data.subjects;      // { id, subject_name, course_id, staff_id }
-      coursesData = data.courses;          // { id, course_name }
-      teachersData = data.teachers;        // { id, admin_id, admin__first_name, admin__last_name }
-      timetableData = data.timetable;      // Timetable entries with course_id, day_of_week, etc.
-      populateCourseDropdown();
-      populateGridCourseDropdown();
-      clearSubjectDropdown();
-      populateTeacherDropdown(); // Initially, show all teachers.
-      buildTimetableGrid();      // Build grid for all courses by default.
-    })
-    .catch(error => console.error("Error fetching data:", error));
-
-  function populateCourseDropdown() {
-    let courseDropdown = document.getElementById("course");
-    coursesData.forEach(course => {
-      let option = document.createElement("option");
-      option.value = String(course.id);
-      option.textContent = course.course_name;
-      courseDropdown.appendChild(option);
-    });
-  }
-
-  function populateGridCourseDropdown() {
-    let gridCourseDropdown = document.getElementById("gridCourseFilter");
-    coursesData.forEach(course => {
-      let option = document.createElement("option");
-      option.value = String(course.id);
-      option.textContent = course.course_name;
-      gridCourseDropdown.appendChild(option);
-    });
-  }
-
-  function clearSubjectDropdown() {
-    document.getElementById("subject").innerHTML = '<option value="">Select Subject</option>';
-  }
-
-  // When a course is selected in the entry form, populate the subject dropdown.
-  document.getElementById("course").addEventListener("change", function () {
-    let selectedCourse = this.value;
-    let subjectDropdown = document.getElementById("subject");
-    clearSubjectDropdown();
-
-    // Filter subjects by course_id.
-    let filteredSubjects = subjectsData.filter(subject => String(subject.course_id) === selectedCourse);
-    filteredSubjects.forEach(subject => {
-      let option = document.createElement("option");
-      option.value = subject.id;
-      option.textContent = subject.subject_name;
-      subjectDropdown.appendChild(option);
-    });
-
-    // Clear teacher dropdown; will be populated when a subject is selected.
-    document.getElementById("teacher").innerHTML = '<option value="">Select Teacher</option>';
-  });
-
-  // When a subject is selected, filter teachers to show only the teacher assigned to that subject.
-  document.getElementById("subject").addEventListener("change", function () {
-    let selectedSubject = this.value;
-    let teacherDropdown = document.getElementById("teacher");
-    teacherDropdown.innerHTML = '<option value="">Select Teacher</option>';
-    let subject = subjectsData.find(sub => String(sub.id) === selectedSubject);
-    if (subject) {
-      // Filter teachers where teacher.admin_id equals subject.staff_id.
-      let filteredTeachers = teachersData.filter(teacher => teacher.admin_id == subject.staff_id);
-      filteredTeachers.forEach(teacher => {
-        let option = document.createElement("option");
-        option.value = teacher.id;
-        option.textContent = teacher.admin__first_name + " " + teacher.admin__last_name;
-        teacherDropdown.appendChild(option);
-      });
+    // -------------------------
+    // Helper Functions
+    // -------------------------
+    function timeToMinutes(t) {
+      const parts = t.split(":");
+      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
     }
-  });
-
-  // Populate teacher dropdown with all teachers.
-  function populateTeacherDropdown() {
-    let teacherDropdown = document.getElementById("teacher");
-    teacherDropdown.innerHTML = '<option value="">Select Teacher</option>';
-    teachersData.forEach(teacher => {
-      let option = document.createElement("option");
-      option.value = teacher.id;
-      option.textContent = teacher.admin__first_name + " " + teacher.admin__last_name;
-      teacherDropdown.appendChild(option);
-    });
-  }
-
-  // Rebuild grid when grid course filter changes.
-  document.getElementById("gridCourseFilter").addEventListener("change", buildTimetableGrid);
-
-  // Build the timetable grid.
-  function buildTimetableGrid() {
-    let allowedDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    let gridCourseFilter = document.getElementById("gridCourseFilter").value;
-    // Filter timetableData by course.
-    let filteredTimetable = gridCourseFilter ?
-      timetableData.filter(entry => String(entry.course_id) === gridCourseFilter) :
-      timetableData;
-    console.log("Filtered timetable:", filteredTimetable);
-
-    let timeSlots = fixedTimeSlots;
-
-    // Create grid matrix: for each day and each fixed slot, store an array of entries.
-    let gridMatrix = {};
-    allowedDays.forEach(day => {
-      gridMatrix[day] = {};
-      timeSlots.forEach(slot => {
-        gridMatrix[day][slot.start] = [];
-      });
-    });
-
-    // For each timetable entry, map it to the fixed slot it falls into.
-    filteredTimetable.forEach(entry => {
-      let day = entry.day_of_week;
-      let entryTime = entry.start_time.slice(0, 5);
-      let entryMinutes = timeToMinutes(entryTime);
-      for (let slot of timeSlots) {
-        let slotStart = timeToMinutes(slot.start);
-        let slotEnd = timeToMinutes(slot.end);
-        if (entryMinutes >= slotStart && entryMinutes < slotEnd) {
-          if (gridMatrix[day] && gridMatrix[day][slot.start] !== undefined) {
-            gridMatrix[day][slot.start].push(entry);
-          }
-          break;
-        }
-      }
-    });
-
-    // Build HTML for the grid.
-    let html = '<table>';
-    html += '<thead><tr><th>Day / Time</th>';
-    timeSlots.forEach(slot => {
-      html += `<th>${formatTime(slot.start)} - ${formatTime(slot.end)}</th>`;
-    });
-    html += '</tr></thead><tbody>';
-    allowedDays.forEach(day => {
-      let rowColor = dayColors[day] || "#ffffff";
-      html += `<tr style="background-color: ${rowColor};"><td>${day}</td>`;
-      timeSlots.forEach(slot => {
-        let entries = gridMatrix[day][slot.start];
-        if (entries.length > 0) {
-          let cellContent = entries.map(entry => {
-            return `<strong>${entry.subject_name}</strong><br>
-                    <em>${entry.teacher_name}</em><br>
-                    <span>${entry.course_name}</span>`;
-          }).join("<hr>");
-          html += `<td>${cellContent}</td>`;
-        } else {
-          html += `<td>&nbsp;</td>`;
-        }
-      });
-      html += '</tr>';
-    });
-    html += '</tbody></table>';
-    document.getElementById("timetableGridContainer").innerHTML = html;
-  }
-
-  // Handle form submission.
-  document.getElementById("timetableForm").addEventListener("submit", function (e) {
-    e.preventDefault();
-    let timeSlotVal = document.getElementById("time_slot").value;
-    if (!timeSlotVal) {
-      alert("Please select a time slot.");
-      return;
+    function formatTime(timeStr) {
+      let [h, m] = timeStr.split(":").map(Number);
+      let ampm = h >= 12 ? "PM" : "AM";
+      h = h % 12 || 12;
+      return h + ":" + (m < 10 ? "0" + m : m) + " " + ampm;
     }
-    let [start_time, end_time] = timeSlotVal.split("-");
-    start_time = start_time.trim();
-    end_time = end_time.trim();
+    function getCSRFToken() {
+      return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+    function logResponse(endpoint, data) {
+      console.log(`Response from ${endpoint}:`, data);
+    }
 
-    const data = {
-      subject_id: document.getElementById("subject").value,
-      course_id: document.getElementById("course").value,
-      teacher_id: document.getElementById("teacher").value,
-      day_of_week: document.getElementById("day").value,
-      start_time: start_time,
-      end_time: end_time,
+    // -------------------------
+    // Global Data and Grid Setup
+    // -------------------------
+    let timetableData = [];
+    const fixedTimeSlots = [
+      { start: "09:00", end: "10:00" },
+      { start: "10:00", end: "11:00" },
+      { start: "11:00", end: "12:00" },
+      { start: "12:00", end: "13:00" },
+      { start: "13:00", end: "14:00" },
+      { start: "14:00", end: "15:00" },
+      { start: "15:00", end: "16:00" },
+      { start: "16:00", end: "17:00" }
+    ];
+    const dayColors = {
+      "Monday": "#FFF9C4",
+      "Tuesday": "#E0F7FA",
+      "Wednesday": "#E1F5FE",
+      "Thursday": "#E8F5E9",
+      "Friday": "#FFECB3",
+      "Saturday": "#F3E5F5",
+      "Sunday": "#FCE4EC"
     };
 
-    fetch('/add_timetable_entry/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      },
-      body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(result => {
-      if (result.message) {
-        alert(result.message);
-        location.reload();
-      } else if (result.error) {
-        alert("Error: " + result.error);
+    // -------------------------
+    // Fetch and Build Timetable Grid
+    // -------------------------
+    function fetchTimetableData() {
+      $.ajax({
+        url: "/get_timetable_data/",
+        type: "GET",
+        success: function(data) {
+          timetableData = data.timetable || [];
+          logResponse('get_timetable_data', timetableData);
+          buildTimetableGrid();
+        },
+        error: function(err) {
+          console.error("Error fetching timetable data:", err);
+        }
+      });
+    }
+    function buildTimetableGrid() {
+      const allowedDays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      const gridCourse = $("#gridCourseFilter").val();
+      const gridBranch = $("#gridBranchFilter").val();
+      let filtered = timetableData;
+      if (gridCourse) {
+        filtered = filtered.filter(e => String(e.course_id) === gridCourse);
       }
-    })
-    .catch(error => console.error('Error:', error));
-  });
-});
-</script>
+      if (gridBranch) {
+        filtered = filtered.filter(e => String(e.branch_id) === gridBranch);
+      }
+      const gridMatrix = {};
+      allowedDays.forEach(day => {
+        gridMatrix[day] = {};
+        fixedTimeSlots.forEach(slot => {
+          gridMatrix[day][slot.start] = [];
+        });
+      });
+      filtered.forEach(entry => {
+        const day = entry.day_of_week;
+        const entryTime = entry.start_time.slice(0,5);
+        const minutes = timeToMinutes(entryTime);
+        for (let slot of fixedTimeSlots) {
+          const slotStart = timeToMinutes(slot.start);
+          const slotEnd = timeToMinutes(slot.end);
+          if (minutes >= slotStart && minutes < slotEnd) {
+            if (gridMatrix[day] && gridMatrix[day][slot.start] !== undefined) {
+              gridMatrix[day][slot.start].push(entry);
+            }
+            break;
+          }
+        }
+      });
+      let html = '<table>';
+      html += '<thead><tr><th>Day / Time</th>';
+      fixedTimeSlots.forEach(slot => {
+        html += `<th>${formatTime(slot.start)} - ${formatTime(slot.end)}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+      allowedDays.forEach(day => {
+        html += `<tr style="background-color: ${dayColors[day]}"><td>${day}</td>`;
+        fixedTimeSlots.forEach(slot => {
+          const entries = gridMatrix[day][slot.start];
+          if (entries.length > 0) {
+            const cellContent = entries.map(e => {
+              return `<strong>${e.subject_name}</strong><br>
+                      <em>${e.teacher_name}</em><br>
+                      <span>${e.course_name}</span><br>
+                      <span>${e.branch_name || ''}</span>`;
+            }).join("<hr>");
+            html += `<td>${cellContent}</td>`;
+          } else {
+            html += `<td>&nbsp;</td>`;
+          }
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      $("#timetableGridContainer").html(html);
+    }
 
-</body>
-</html>
+    // -------------------------
+    // Form Dropdown Handlers (Using jQuery AJAX)
+    // -------------------------
+    // When a course is selected, fetch branches
+    $("#course").change(function(){
+      var course_id = $(this).val();
+      console.log("Course selected:", course_id);
+      if(course_id){
+        $.ajax({
+          url: "{% url 'get_branches_by_course' %}",
+          type: "POST",
+          data: {
+            course_id: course_id,
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+          },
+          success: function(response){
+            $("#branch").empty().append('<option value="">Select Branch</option>');
+            $.each(response, function(index, branch){
+              $("#branch").append('<option value="'+branch.id+'">'+branch.name+'</option>');
+            });
+            // Clear subject and teacher dropdowns
+            $("#subject").empty().append('<option value="">Select Subject</option>');
+            $("#teacher").empty().append('<option value="">Select Teacher</option>');
+          },
+          error: function(xhr, status, error){
+            console.error("Error fetching branches:", error);
+          }
+        });
+      } else {
+        $("#branch").empty().append('<option value="">Select Branch</option>');
+      }
+    });
+
+    // When a branch is selected, fetch subjects for the given course and branch
+    $("#branch").change(function(){
+      var course_id = $("#course").val();
+      var branch_id = $(this).val();
+      console.log("Branch selected:", branch_id);
+      if(course_id && branch_id){
+        $.ajax({
+          url: "{% url 'get_subjects_by_course_and_branch' %}",
+          type: "POST",
+          data: {
+            course_id: course_id,
+            branch_id: branch_id,
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+          },
+          success: function(response){
+            $("#subject").empty().append('<option value="">Select Subject</option>');
+            $.each(response, function(index, subject){
+              $("#subject").append('<option value="'+subject.id+'">'+subject.subject_name+'</option>');
+            });
+            // Clear teacher dropdown
+            $("#teacher").empty().append('<option value="">Select Teacher</option>');
+          },
+          error: function(xhr, status, error){
+            console.error("Error fetching subjects:", error);
+          }
+        });
+      } else {
+        $("#subject").empty().append('<option value="">Select Subject</option>');
+      }
+    });
+
+    // When a subject is selected, fetch teacher for that subject
+    $("#subject").change(function(){
+      var subject_id = $(this).val();
+      console.log("Subject selected:", subject_id);
+      if(subject_id){
+        $.ajax({
+          url: "{% url 'get_teachers_by_subject' %}",
+          type: "POST",
+          data: {
+            subject_id: subject_id,
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+          },
+          success: function(response){
+            $("#teacher").empty().append('<option value="">Select Teacher</option>');
+            $.each(response, function(index, teacher){
+              $("#teacher").append('<option value="'+teacher.id+'">'+teacher.admin__first_name+' '+teacher.admin__last_name+'</option>');
+            });
+          },
+          error: function(xhr, status, error){
+            console.error("Error fetching teacher:", error);
+          }
+        });
+      } else {
+        $("#teacher").empty().append('<option value="">Select Teacher</option>');
+      }
+    });
+
+    // -------------------------
+    // Grid Filter Handlers (Using jQuery AJAX)
+    // -------------------------
+    $("#gridCourseFilter").change(function(){
+      var course_id = $(this).val();
+      var gridBranchSelect = $("#gridBranchFilter");
+      gridBranchSelect.empty().append('<option value="">All Branches</option>');
+      if(course_id){
+        $.ajax({
+          url: "{% url 'get_branches_by_course' %}",
+          type: "POST",
+          data: {
+            course_id: course_id,
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+          },
+          success: function(response){
+            $.each(response, function(index, branch){
+              gridBranchSelect.append('<option value="'+branch.id+'">'+branch.name+'</option>');
+            });
+            buildTimetableGrid();
+          },
+          error: function(xhr, status, error){
+            console.error("Error fetching grid branches:", error);
+          }
+        });
+      } else {
+        buildTimetableGrid();
+      }
+    });
+    $("#gridBranchFilter").change(function(){
+      buildTimetableGrid();
+    });
+
+    // -------------------------
+    // Form Submission
+    // -------------------------
+    $("#timetableForm").submit(function(e){
+      e.preventDefault();
+      var timeSlotVal = $("#time_slot").val();
+      if(!timeSlotVal){
+        alert("Please select a time slot.");
+        return;
+      }
+      var times = timeSlotVal.split("-");
+      var start_time = $.trim(times[0]);
+      var end_time = $.trim(times[1]);
+      var data = {
+        subject_id: $("#subject").val(),
+        course_id: $("#course").val(),
+        teacher_id: $("#teacher").val(),
+        day_of_week: $("#day").val(),
+        start_time: start_time,
+        end_time: end_time
+      };
+      $.ajax({
+        url: "/add_timetable_entry/",
+        type: "POST",
+        data: JSON.stringify(data),
+        contentType: "application/json",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        success: function(response){
+          logResponse('add_timetable_entry', response);
+          if(response.message){
+            alert(response.message);
+            fetchTimetableData();
+          } else if(response.error){
+            alert("Error: " + response.error);
+          }
+        },
+        error: function(err){
+          console.error("Error submitting timetable entry:", err);
+        }
+      });
+    });
+
+    // -------------------------
+    // Initial Data Fetch
+    // -------------------------
+    fetchTimetableData();
+  });
+</script>
+{% endblock custom_js %}

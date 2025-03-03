@@ -14,14 +14,13 @@ Your Timetable
     margin-bottom: 20px;
   }
   /* Bright, subtle pastel background colors for each day */
-  .day-Monday { background-color: #FFF9C4; }      /* Light Yellow */
-  .day-Tuesday { background-color: #E0F7FA; }     /* Light Cyan */
-  .day-Wednesday { background-color: #E1F5FE; }   /* Light Blue */
-  .day-Thursday { background-color: #E8F5E9; }    /* Light Green */
-  .day-Friday { background-color: #FFECB3; }      /* Light Amber */
-  .day-Saturday { background-color: #F3E5F5; }    /* Light Lavender */
-  .day-Sunday { background-color: #FFE0B2; }      /* Light Orange */
-
+  .day-Monday { background-color: #FFF9C4; }
+  .day-Tuesday { background-color: #E0F7FA; }
+  .day-Wednesday { background-color: #E1F5FE; }
+  .day-Thursday { background-color: #E8F5E9; }
+  .day-Friday { background-color: #FFECB3; }
+  .day-Saturday { background-color: #F3E5F5; }
+  .day-Sunday { background-color: #FFE0B2; }
   table {
     width: 100%;
     border-collapse: collapse;
@@ -57,13 +56,19 @@ Your Timetable
     <tbody>
       {% for day, slots in timetable_matrix.items %}
         {% with day_class="day-"|add:day|cut:" " %}
-        <tr class="{{ day_class }}"><td>{{ day }}</td>
+        <tr class="{{ day_class }}">
+          <td>{{ day }}</td>
           {% for slot in time_slots %}
             <td>
               {% with entry=slots|get_item:slot.key %}
                 {% if entry %}
                   <strong>{{ entry.subject.subject_name }}</strong><br>
-                  <em>{{ entry.course.course_name }}</em>
+                  <em>{{ entry.course.course_name }}</em><br>
+                  {% if entry.branch_name %}
+                    <span>{{ entry.branch_name }}</span>
+                  {% else %}
+                    <span>&nbsp;</span>
+                  {% endif %}
                 {% else %}
                   &nbsp;
                 {% endif %}

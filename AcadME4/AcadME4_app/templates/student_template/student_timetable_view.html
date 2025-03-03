@@ -7,89 +7,117 @@ Your Timetable
 
 {% block main_content %}
 <style>
-  /* Responsive container for the table */
+  /* Import a modern font */
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+  body {
+    font-family: 'Poppins', sans-serif;
+  }
   .table-container {
     width: 100%;
     overflow-x: auto;
+    margin: 20px auto;
+    background: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    padding: 20px;
   }
-  /* Bright and subtle pastel colors for each day */
-  .day-Monday { background-color: #FFF9C4; }      /* Light Yellow */
-  .day-Wednesday { background-color: #E1F5FE; }   /* Light Blue */
-  .day-Thursday { background-color: #E8F5E9; }    /* Light Green */
-  .day-Friday { background-color: #FFECB3; }      /* Light Amber */
-  .day-Saturday { background-color: #F3E5F5; }    /* Light Lavender */
-  .day-Sunday { background-color: #FFE0B2; }      /* Light Orange */
-
-  /* Table styling tweaks */
   table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    background: #fff;
   }
   th, td {
     text-align: center;
-    padding: 12px;
-    border: 1px solid #ddd;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
   }
   th {
-    background-color: #4CAF50;
-    color: white;
+    background: linear-gradient(90deg, #4caf50, #81c784);
+    color: #fff;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   td {
+    font-size: 13px;
+    color: #555;
     min-width: 120px;
+    vertical-align: top;
   }
   tr:hover td {
-    background: #dcedc8;
+    background: #f1f8e9;
+    transition: background 0.3s ease;
+  }
+  /* Day color backgrounds (using pastel gradients) */
+  .day-Wednesday { background: linear-gradient(135deg, #E1F5FE, #BBDEFB); }
+  .day-Thursday  { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); }
+  .day-Friday    { background: linear-gradient(135deg, #FFECB3, #FFE082); }
+  .day-Saturday  { background: linear-gradient(135deg, #F3E5F5, #E1BEE7); }
+  .day-Sunday    { background: linear-gradient(135deg, #FFE0B2, #FFCC80); }
+  .day-Monday    { background: linear-gradient(135deg, #FFF9C4, #FFF59D); }
+  /* Entry styling */
+  .entry {
+    margin-bottom: 5px;
+    padding: 3px;
+    border-radius: 4px;
+    background: rgba(76, 175, 80, 0.1);
+  }
+  .entry strong {
+    color: #2e7d32;
+  }
+  .entry em {
+    color: #555;
+  }
+  .entry span {
+    color: #0277bd;
+    font-size: 12px;
+  }
+  hr {
+    border: 0;
+    border-top: 1px dashed #ccc;
+    margin: 4px 0;
   }
 </style>
 
-<section class="content">
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="card card-primary">
-          <div class="card-header">
-            <h3 class="card-title">Your Timetable</h3>
-          </div>
-          <div class="card-body">
-            <div class="table-container">
-              <table class="table table-bordered table-striped">
-                <thead>
-                  <tr>
-                    <th>Day / Period</th>
-                    {% for slot in time_slots %}
-                      <th>{{ slot.label }}</th>
-                    {% endfor %}
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for day, slots in timetable_matrix.items %}
-                    {% with day_class="day-"|add:day %}
-                    <tr class="{{ day_class }}">
-                      <td>{{ day }}</td>
-                      {% for slot in time_slots %}
-                        <td>
-                          {% with entry=slots|get_item:slot.key %}
-                            {% if entry %}
-                              <strong>{{ entry.subject.subject_name }}</strong><br>
-                              <em>{{ entry.teacher.admin.first_name }} {{ entry.teacher.admin.last_name }}</em>
-                            {% else %}
-                              &nbsp;
-                            {% endif %}
-                          {% endwith %}
-                        </td>
-                      {% endfor %}
-                    </tr>
-                    {% endwith %}
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Day / Period</th>
+        {% for slot in time_slots %}
+          <th>{{ slot.label }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for day, slots in timetable_matrix.items %}
+        {% with day_class="day-"|add:day|cut:" " %}
+        <tr class="{{ day_class }}">
+          <td><strong>{{ day }}</strong></td>
+          {% for slot in time_slots %}
+            <td>
+              {% with entries=slots|get_item:slot.key %}
+                {% if entries %}
+                  {% for entry in entries %}
+                    <div class="entry">
+                      <strong>{{ entry.subject.subject_name }}</strong><br>
+                      <em>{{ entry.course.course_name }}</em><br>
+                      {% if entry.subject.branch_id %}
+                        <span>{{ entry.subject.branch_id.name }}</span>
+                      {% endif %}
+                    </div>
                   {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+                {% else %}
+                  &nbsp;
+                {% endif %}
+              {% endwith %}
+            </td>
+          {% endfor %}
+        </tr>
+        {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock main_content %}
-

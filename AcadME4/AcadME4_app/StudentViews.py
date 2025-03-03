@@ -257,6 +257,7 @@ def student_submit_assignment(request, assignment_id):
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
+from .models import Students, Timetable
 
 # Helper function to convert an integer to its ordinal representation.
 def ordinal(n):
@@ -275,11 +276,13 @@ def student_timetable_view(request):
     except Students.DoesNotExist:
         return HttpResponseNotFound("Student profile not found")
 
-    # Fetch timetable entries for the student's course (excluding Tuesday)
-    timetables = Timetable.objects.filter(course=student.course_id) \
-        .exclude(day_of_week="Tuesday") \
-        .select_related("subject", "course", "teacher") \
-        .order_by("day_of_week", "start_time")
+    # Filter timetable entries for the student's course and branch.
+    timetables = Timetable.objects.filter(
+        course=student.course_id,
+        subject__branch_id=student.branch_id  # Only show entries for the student's branch.
+    ).exclude(day_of_week="Tuesday") \
+     .select_related("subject", "course", "teacher", "subject__branch_id") \
+     .order_by("day_of_week", "start_time")
 
     # Define fixed time slots from 09:00 AM to 05:00 PM.
     fixed_time_slots = [
@@ -294,18 +297,19 @@ def student_timetable_view(request):
     ]
     time_slots = fixed_time_slots
 
-    # Define allowed days (excluding Tuesday) – you can adjust the order as needed.
+    # Define allowed days (excluding Tuesday); adjust order as needed.
     allowed_days = ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday']
 
-    # Initialize the timetable matrix: for each allowed day, create a dictionary with fixed slots set to None.
-    timetable_matrix = { day: { slot["key"]: None for slot in time_slots } for day in allowed_days }
+    # Initialize the timetable matrix as a dictionary:
+    # For each allowed day, each time slot is a list (so multiple entries can appear).
+    timetable_matrix = {day: {slot["key"]: [] for slot in time_slots} for day in allowed_days}
 
-    # Populate the matrix: For an entry to appear, its start_time (formatted as "HH:MM") must exactly match one of the fixed slot keys.
+    # Populate the matrix: For each timetable entry, append it to the list for its day and timeslot.
     for entry in timetables:
         day = entry.day_of_week
         key = entry.start_time.strftime("%H:%M")
         if day in timetable_matrix:
-            timetable_matrix[day][key] = entry
+            timetable_matrix[day][key].append(entry)
         else:
             print(f"Entry with day '{day}' is not in allowed_days.")
 

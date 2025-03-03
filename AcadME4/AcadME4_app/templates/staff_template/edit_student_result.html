@@ -12,8 +12,6 @@
                         <div class="card-header">
                             <h3 class="card-title">Edit Results</h3>
                         </div>
-
-                        <!-- Form Start -->
                         <div class="card-body">
                             <!-- Course Dropdown -->
                             <div class="form-group">
@@ -22,7 +20,6 @@
                                     <option value="">-- Select Course --</option>
                                 </select>
                             </div>
-
                             <!-- Branch Dropdown -->
                             <div class="form-group">
                                 <label>Branch</label>
@@ -30,7 +27,6 @@
                                     <option value="">-- Select Branch --</option>
                                 </select>
                             </div>
-
                             <!-- Subject Dropdown -->
                             <div class="form-group">
                                 <label>Subject</label>
@@ -38,7 +34,6 @@
                                     <option value="">-- Select Subject --</option>
                                 </select>
                             </div>
-
                             <!-- Session Year Dropdown -->
                             <div class="form-group">
                                 <label>Session Year</label>
@@ -49,12 +44,13 @@
                                     {% endfor %}
                                 </select>
                             </div>
-
-                            {% if messages %}
-                                {% for message in messages %}
-                                    <div class="alert alert-{{ message.tags }}" style="margin-top:10px">{{ message }}</div>
-                                {% endfor %}
-                            {% endif %}
+                            <div class="form-group">
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-{{ message.tags }}" style="margin-top:10px">{{ message }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
                         </div>
 
                         <!-- Fetch Student Button -->
@@ -62,8 +58,10 @@
                             <button type="button" class="btn btn-primary btn-block" id="fetch_student">Fetch Students</button>
                         </div>
 
+                        <!-- Student List -->
                         <div id="student_data" class="card-footer"></div>
 
+                        <!-- Save Results Button (Initially Hidden) -->
                         <div class="card-footer" id="save_results_div" style="display: none;">
                             <button type="submit" class="btn btn-success btn-block">Save Results</button>
                         </div>
@@ -74,14 +72,14 @@
         </div>
     </div>
 </section>
-{% endblock %}
+{% endblock main_content %}
 
 {% block custom_js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function () {
 
-    // ✅ Fetch teacher's courses on page load
+    // Fetch teacher's courses on page load
     $.ajax({
         url: "/get-teacher-courses/",
         type: "GET",
@@ -89,7 +87,6 @@ $(document).ready(function () {
         success: function (data) {
             let courseDropdown = $("#id_course");
             courseDropdown.html('<option value="">-- Select Course --</option>');
-
             $.each(data, function (key, value) {
                 courseDropdown.append(`<option value="${value.id}">${value.course_name}</option>`);
             });
@@ -99,15 +96,13 @@ $(document).ready(function () {
         }
     });
 
-    // ✅ Fetch branches when a course is selected
+    // Fetch branches when a course is selected
     $("#id_course").change(function () {
         let courseId = $(this).val();
         let branchDropdown = $("#id_branch");
         let subjectDropdown = $("#id_subject");
-
         branchDropdown.html('<option value="">-- Select Branch --</option>');
         subjectDropdown.html('<option value="">-- Select Subject --</option>');
-
         if (courseId) {
             $.ajax({
                 url: `/get-branches/${courseId}/`,
@@ -125,13 +120,11 @@ $(document).ready(function () {
         }
     });
 
-    // ✅ Fetch subjects when a branch is selected
+    // Fetch subjects when a branch is selected
     $("#id_branch").change(function () {
         let branchId = $(this).val();
         let subjectDropdown = $("#id_subject");
-
         subjectDropdown.html('<option value="">-- Select Subject --</option>');
-
         if (branchId) {
             $.ajax({
                 url: `/get-subjects/${branchId}/`,
@@ -149,68 +142,68 @@ $(document).ready(function () {
         }
     });
 
-    // ✅ Fetch students when Fetch Students button is clicked
+    // Fetch students when Fetch Students button is clicked.
     $("#fetch_student").click(function () {
         let subjectId = $("#id_subject").val();
         let sessionYearId = $("#id_session_year").val();
+        let branchId = $("#id_branch").val();
 
-        if (!subjectId || !sessionYearId) {
-            alert("Please select Subject and Session Year.");
+        if (!subjectId || !sessionYearId || !branchId) {
+            alert("Please select Subject, Branch, and Session Year.");
             return;
         }
 
         $.ajax({
             url: '{% url "get_students" %}',
             type: 'POST',
-            data: {subject: subjectId, session_year: sessionYearId},
+            dataType: "json", // jQuery auto-parses response as JSON.
+            data: { subject: subjectId, session_year: sessionYearId, branch: branchId },
             headers: { "X-CSRFToken": "{{ csrf_token }}" },
         })
-        .done(function (response) {
-            let json_data = JSON.parse(response);
+        .done(function (json_data) {
             let table_body = "<table class='table table-bordered'><thead><tr><th>Roll No</th><th>Name</th><th>BTBT ID</th><th>Assignment 1</th><th>Assignment 2</th><th>Periodical 1</th><th>Periodical 2</th></tr></thead><tbody>";
 
             let requests = [];
-
-            for (let key in json_data) {
-                let student_id = json_data[key]['id'];
-
+            // Create an array of AJAX requests to fetch existing result data for each student.
+            $.each(json_data, function (index, student) {
                 let request = $.ajax({
                     url: '{% url "fetch_result_student" %}',
                     type: 'POST',
-                    data: {subject_id: subjectId, student_id: student_id},
+                    dataType: "json",
+                    data: { subject_id: subjectId, student_id: student.id },
                     headers: { "X-CSRFToken": "{{ csrf_token }}" }
                 });
-
                 requests.push(request);
-            }
+            });
 
+            // When all student result requests complete:
             $.when.apply($, requests).done(function () {
-                for (let i = 0; i < arguments.length; i++) {
-                    let result_data = arguments[i][0];
-                    let student = json_data[i];
+                // If there's only one request, arguments will not be an array of arrays.
+                let results = (requests.length === 1) ? [arguments] : arguments;
 
+                $.each(json_data, function (index, student) {
+                    let result_data = results[index][0]; // Each response is in [response, statusText, jqXHR]
                     table_body += "<tr>";
-                    table_body += `<td>${student['roll_no']}</td>`;
-                    table_body += `<td>${student['name']}</td>`;
-                    table_body += `<td>${student['btbt_id']}</td>`;
+                    table_body += `<td>${student.roll_no}</td>`;
+                    table_body += `<td>${student.name}</td>`;
+                    table_body += `<td>${student.btbt_id}</td>`;
 
+                    // A helper function to format result values.
                     function formatValue(value) {
                         return (value === null || value === "" || value === "null" || value === "-") ? "" : value;
                     }
 
-                    table_body += `<td><input type='text' name='assignment1_${student['id']}' class='form-control' value='${formatValue(result_data.assignment1_marks)}'></td>`;
-                    table_body += `<td><input type='text' name='assignment2_${student['id']}' class='form-control' value='${formatValue(result_data.assignment2_marks)}'></td>`;
-                    table_body += `<td><input type='text' name='periodical1_${student['id']}' class='form-control' value='${formatValue(result_data.periodical1_marks)}'></td>`;
-                    table_body += `<td><input type='text' name='periodical2_${student['id']}' class='form-control' value='${formatValue(result_data.periodical2_marks)}'></td>`;
-
+                    table_body += `<td><input type='text' name='assignment1_${student.id}' class='form-control' value='${formatValue(result_data.assignment1_marks)}'></td>`;
+                    table_body += `<td><input type='text' name='assignment2_${student.id}' class='form-control' value='${formatValue(result_data.assignment2_marks)}'></td>`;
+                    table_body += `<td><input type='text' name='periodical1_${student.id}' class='form-control' value='${formatValue(result_data.periodical1_marks)}'></td>`;
+                    table_body += `<td><input type='text' name='periodical2_${student.id}' class='form-control' value='${formatValue(result_data.periodical2_marks)}'></td>`;
                     table_body += "</tr>";
-                }
+                });
 
                 table_body += "</tbody></table>";
                 $("#student_data").html(table_body);
                 $("#save_results_div").show();
             });
-
         })
         .fail(function () {
             alert("Error in Fetching Students.");
