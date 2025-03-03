@@ -271,7 +271,7 @@ class Timetable(models.Model):
     course = models.ForeignKey(Courses, on_delete=models.CASCADE)
     teacher = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     day_of_week = models.CharField(max_length=10, choices=DAYS_OF_WEEK)
-    lab = models.ForeignKey(Labs, on_delete=models.CASCADE, null=True, blank=True)  # ✅ New field for lab timetable
+    #lab = models.ForeignKey(Labs, on_delete=models.CASCADE, null=True, blank=True)  # ✅ New field for lab timetable
     start_time = models.TimeField()
     end_time = models.TimeField()
 

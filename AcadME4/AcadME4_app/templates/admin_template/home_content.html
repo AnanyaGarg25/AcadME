@@ -1,177 +1,135 @@
 {% extends 'admin_template/base_template.html' %}
 {% block page_title %}
 Home
+    <div id="greeting" style="font-size: 1.2em; color: #333; margin-top: 10px;"></div>
+
 {% endblock page_title %}
 {% block main_content %}
 <section class="content">
-      <div class="container-fluid">
-      <div class="row">
-          <div class="col-lg-3 col-6">
+  <div class="container-fluid">
+    <!-- Small Boxes Row -->
+    <div class="row">
+      <div class="col-lg-3 col-6">
         <!-- Small Box with Modern Pastel Design -->
         <div class="small-box pastel-card">
-            <div class="icon">
-                <i class="fas fa-user-graduate"></i>
-            </div>
-            <div class="inner">
-                <h3>{{ student_count }}</h3>
-                <p>Total Students</p>
-            </div>
-            <a href="{% url 'manage_student' %}" class="small-box-footer">
-                More info <i class="fas fa-arrow-circle-right"></i>
-            </a>
+          <div class="icon">
+            <i class="fas fa-user-graduate"></i>
+          </div>
+          <div class="inner">
+            <h3>{{ student_count }}</h3>
+            <p>Total Students</p>
+          </div>
+          <a href="{% url 'manage_student' %}" class="small-box-footer">
+            More info <i class="fas fa-arrow-circle-right"></i>
+          </a>
         </div>
-    </div>
+      </div>
+      <style>
+        /* Light Pink Gradient for Pastel Card */
+        .pastel-card {
+          background: linear-gradient(135deg, #FF85A2, #FFC1D6);
+          border-radius: 12px;
+          padding: 25px;
+          text-align: center;
+          box-shadow: 3px 3px 15px rgba(0,0,0,0.15);
+          transition: all 0.3s ease-in-out;
+          color: #FFF;
+          position: relative;
+          overflow: hidden;
+        }
+        .pastel-card:hover {
+          transform: scale(1.05);
+          box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+        }
+        .pastel-card .icon {
+          font-size: 28px;
+          color: rgba(255,255,255,0.8);
+          position: absolute;
+          top: 10px;
+          left: 15px;
+        }
+        .pastel-card .inner {
+          margin-top: -10px;
+        }
+        .pastel-card h3 {
+          font-size: 30px;
+          font-weight: bold;
+          margin-bottom: 5px;
+        }
+        .pastel-card p {
+          font-size: 16px;
+          font-weight: 500;
+        }
+        .small-box-footer {
+          display: block;
+          padding: 12px;
+          background: rgba(255,255,255,0.2);
+          text-decoration: none;
+          color: #FFF !important;
+          font-weight: bold;
+          border-radius: 0 0 12px 12px;
+          transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+        }
+        .small-box-footer:hover {
+          background: rgba(255,255,255,0.3);
+        }
+      </style>
 
-<style>
-    /* Light Pink Gradient for Pastel Card */
-    .pastel-card {
-        background: linear-gradient(135deg, #FF6B89, #FFA6C0); /* Light pink to soft pastel pink */
-        border-radius: 12px;
-        padding: 25px;
-        text-align: center;
-        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s ease-in-out;
-        color: #FFFFFF; /* White text for better visibility */
-        position: relative;
-        overflow: hidden;
-    }
-
-    /* Hover Effect */
-    .pastel-card:hover {
-        transform: scale(1.05);
-        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Icon Styling - Top Left Corner */
-    .pastel-card .icon {
-        font-size: 28px; /* Smaller icon */
-        color: rgba(255, 255, 255, 0.8); /* Light white */
-        position: absolute;
-        top: 10px;
-        left: 15px;
-    }
-
-    /* Move Text Up */
-    .pastel-card .inner {
-        margin-top: -10px; /* Move text upwards */
-    }
-
-    /* Text Styling */
-    .pastel-card h3 {
-        font-size: 30px;
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #FFF; /* White for better contrast */
-    }
-
-    .pastel-card p {
-        font-size: 16px;
-        font-weight: 500;
-        color: #F8F9FA; /* Slightly lighter white */
-    }
-
-    /* Footer Styling (More Info) */
-    .small-box-footer {
-        display: block;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.2);
-        text-decoration: none;
-        color: #FFF !important; /* White text */
-        font-weight: bold;
-        border-radius: 0 0 12px 12px;
-        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-    }
-
-    .small-box-footer:hover {
-        background: rgba(255, 255, 255, 0.3);
-        color: #FFF !important; /* Stays white on hover */
-    }
-</style>
-
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
+      <!-- ./col -->
+      <div class="col-lg-3 col-6">
         <!-- Small Box with Icy Blue Gradient -->
         <div class="small-box icy-blue-card">
-            <div class="icon">
-                <i class="fas fa-user-tie"></i> <!-- Changed to a more relevant icon -->
-            </div>
-            <div class="inner">
-                <h3>{{ staff_count }}</h3>
-                <p>Total Staff</p>
-            </div>
-            <a href="{% url 'manage_staff' %}" class="small-box-footer">
-                More info <i class="fas fa-arrow-circle-right"></i>
-            </a>
+          <div class="icon">
+            <i class="fas fa-user-tie"></i>
+          </div>
+          <div class="inner">
+            <h3>{{ staff_count }}</h3>
+            <p>Total Staff</p>
+          </div>
+          <a href="{% url 'manage_staff' %}" class="small-box-footer">
+            More info <i class="fas fa-arrow-circle-right"></i>
+          </a>
         </div>
-    </div>
-<style>
-    /* Icy Blue Gradient for Staff Count Box */
-    .icy-blue-card {
-        background: linear-gradient(135deg, #A0D9F6, #4DA8DA); /* Light icy blue to deep blue */
-        border-radius: 12px;
-        padding: 25px;
-        text-align: center;
-        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s ease-in-out;
-        color: #FFFFFF; /* White text for better visibility */
-        position: relative;
-        overflow: hidden;
-    }
+      </div>
+      <style>
+        /* Icy Blue Gradient for Staff Count Box */
+        .icy-blue-card {
+          background: linear-gradient(135deg, #A0D9F6, #4DA8DA);
+          border-radius: 12px;
+          padding: 25px;
+          text-align: center;
+          box-shadow: 3px 3px 15px rgba(0,0,0,0.15);
+          transition: all 0.3s ease-in-out;
+          color: #FFF;
+          position: relative;
+          overflow: hidden;
+        }
+        .icy-blue-card:hover {
+          transform: scale(1.05);
+          box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+        }
+        .icy-blue-card .icon {
+          font-size: 28px;
+          color: rgba(255,255,255,0.8);
+          position: absolute;
+          top: 10px;
+          left: 15px;
+        }
+        .icy-blue-card .inner {
+          margin-top: -10px;
+        }
+        .icy-blue-card h3 {
+          font-size: 30px;
+          font-weight: bold;
+          margin-bottom: 5px;
+        }
+        .icy-blue-card p {
+          font-size: 16px;
+          font-weight: 500;
+        }
+      </style>
 
-    /* Hover Effect */
-    .icy-blue-card:hover {
-        transform: scale(1.05);
-        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Icon Styling - Top Left Corner */
-    .icy-blue-card .icon {
-        font-size: 28px; /* Smaller icon */
-        color: rgba(255, 255, 255, 0.8); /* Light white */
-        position: absolute;
-        top: 10px;
-        left: 15px;
-    }
-
-    /* Move Text Up */
-    .icy-blue-card .inner {
-        margin-top: -10px; /* Move text upwards */
-    }
-
-    /* Text Styling */
-    .icy-blue-card h3 {
-        font-size: 30px;
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #FFF; /* White for better contrast */
-    }
-
-    .icy-blue-card p {
-        font-size: 16px;
-        font-weight: 500;
-        color: #F8F9FA; /* Slightly lighter white */
-    }
-
-    /* Footer Styling (More Info) */
-    .small-box-footer {
-        display: block;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.2);
-        text-decoration: none;
-        color: #FFF !important; /* White text */
-        font-weight: bold;
-        border-radius: 0 0 12px 12px;
-        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-    }
-
-    .small-box-footer:hover {
-        background: rgba(255, 255, 255, 0.3);
-        color: #FFF !important; /* Stays white on hover */
-    }
-</style>
-
-
-          <!-- ./col -->
+     <!-- ./col -->
           <div class="col-lg-3 col-6">
         <!-- Small Box with Pastel Red Gradient -->
         <div class="small-box bg-warning">
@@ -356,30 +314,31 @@ Home
         background: rgba(255, 255, 255, 0.3);
         color: #FFF !important; /* Ensure White on Hover */
     }
-</style>
+      </style>
+    </div>
+    <!-- ./row -->
 
-          <!-- ./col -->
-        </div>
-          <div class="row">
-              <div class="col-lg-6">
-                    <div class="card card-danger">
-                      <div class="card-header">
-                        <h3 class="card-title">Student and Staff Chart</h3>
-
-                        <div class="card-tools">
-                          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-                          </button>
-                          <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
-                        </div>
-                      </div>
-                      <div class="card-body">
-                        <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; "></canvas>
-                      </div>
-              <!-- /.card-body -->
+    <!-- Charts Row -->
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card card-danger">
+          <div class="card-header">
+            <h3 class="card-title">Student and Staff Chart</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+              <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+              </button>
             </div>
-              </div>
-{% block custom_css %}
-<style>
+          </div>
+          <div class="card-body">
+            <canvas id="pieChart" style="min-height:250px; height:250px; max-height:250px; max-width:100%;"></canvas>
+          </div>
+        </div>
+      </div>
+      <style>
     /* ✅ Apply soft pastel theme with modern UI */
     .card {
         border-radius: 10px; /* Smooth rounded corners */
@@ -440,171 +399,523 @@ Home
     color: white !important;
     }
 </style>
+      <div class="col-lg-6">
+        <div class="card card-success">
+          <div class="card-header">
+            <h3 class="card-title">Total Subject in Each Courses</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+              <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="donutChart" style="min-height:250px; height:250px; max-height:250px; max-width:100%;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /.row -->
+
+    <!-- Second Charts Row -->
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card card-info">
+          <div class="card-header">
+            <h3 class="card-title">Total Student in Each Course</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+              <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="pieChart2" style="min-height:250px; height:250px; max-height:250px; max-width:100%;"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card card-warning">
+          <div class="card-header">
+            <h3 class="card-title">Total Student in Each Subject</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+              <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="pieChart4" style="min-height:250px; height:250px; max-height:250px; max-width:100%;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /.row -->
+
+    <!-- Mini Calendar Row -->
+    <div class="row">
+      <!-- Increase column width to half the row -->
+      <div class="col-lg-6 col-12">
+        <div class="card card-primary card-mini-calendar">
+          <div class="card-header">
+            <h3 class="card-title">Mini Calendar</h3>
+
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+              <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="miniCalendar"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- /.row -->
+
+  </div>
+  <!-- /.container-fluid -->
+   </div>
+            <div id="digitalClock" style="font-size: 1.2em; font-weight: bold; color: #333;">Loading time...</div>
+
+<div style="background: linear-gradient(135deg, #FFDEE9, #B5FFFC); width: 100%; height: 50px; display: flex; align-items: center; justify-content: space-around;">
+
+  <div id="inspirationalQuote" style="font-size: 1.2em; font-weight: bold; font-style: italic; color: #555;">Your inspirational quote goes here.</div>
+</div>
+
+
+</section>
+{% endblock main_content %}
+
+{% block custom_css %}
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+<style>
+  /* Common Card Styles */
+  .card {
+    border-radius: 10px;
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease-in-out;
+    border: none;
+  }
+  .card:hover {
+    box-shadow: 6px 6px 18px rgba(0,0,0,0.2);
+    transform: scale(1.02);
+  }
+  .card-danger .card-header {
+    background: #04b099 !important;
+  }
+  .card-header {
+    color: #FFF;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 15px;
+  }
+  .card-tools button {
+    color: #FFF !important;
+    font-size: 14px;
+  }
+  .card-body {
+    padding: 15px;
+    border-radius: 0 0 10px 10px;
+  }
+  /* Mini Calendar Specific Styling */
+  .card-mini-calendar {
+    background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
+    color: #333;
+  }
+  #miniCalendar .fc {
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+  }
+  /* Wrap long event text */
+  #miniCalendar .fc-event-title {
+    white-space: normal;
+    word-break: break-word;
+  }
+  /* Darker header and day numbers for readability */
+  #miniCalendar .fc-col-header-cell-cushion,
+  #miniCalendar .fc-daygrid-day-number {
+    color: #333 !important;
+  }
+</style>
 {% endblock custom_css %}
 
-             <div class="col-lg-6">
-                         <div class="card card-success">
-                      <div class="card-header">
-                        <h3 class="card-title">Total Subject in Each Course</h3>
-
-                        <div class="card-tools">
-                          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-                          </button>
-                          <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
-                        </div>
-                      </div>
-                      <div class="card-body">
-                        <canvas id="donutChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                      </div>
-                      <!-- /.card-body -->
-                    </div>
-             </div>
-          </div>
-
-          <div class="row">
-              <div class="col-lg-6">
-                    <div class="card card-info">
-                      <div class="card-header">
-                        <h3 class="card-title">Total Student in Each Course </h3>
-
-                        <div class="card-tools">
-                          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-                          </button>
-                          <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
-                        </div>
-                      </div>
-                      <div class="card-body">
-                        <canvas id="pieChart2" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; "></canvas>
-                      </div>
-              <!-- /.card-body -->
-            </div>
-              </div>
-          <div class="col-lg-6">
-                    <div class="card card-warning">
-                      <div class="card-header">
-                        <h3 class="card-title">Total Student in Each Subject </h3>
-
-                        <div class="card-tools">
-                          <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-                          </button>
-                          <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
-                        </div>
-                      </div>
-                      <div class="card-body">
-                        <canvas id="pieChart4" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; "></canvas>
-                      </div>
-              <!-- /.card-body -->
-            </div>
-              </div>
-          </div>
-
-      </div>
-
-    </section>
-{% endblock main_content %}
 {% block custom_js %}
+<!-- FullCalendar JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 <script>
-    $(document).ready(function(){
-            var pieData        = {
-              labels: [
-                  'Students',
-                  'Staffs'
-              ],
-              datasets: [
-                {
-                  data: [{{ student_count }},{{ staff_count }}],
-                  backgroundColor : ['#FF9A9D', '#79D6D3','#7D5AB8','#006456'],
-                }
-              ]
-            };
-            var pieChartCanvas = $('#pieChart').get(0).getContext('2d')
-            var pieOptions     = {
-              maintainAspectRatio : false,
-              responsive : true,
-            }
-            //Create pie or douhnut chart
-            // You can switch between pie and douhnut using the method below.
-            var pieChart = new Chart(pieChartCanvas, {
-              type: 'pie',
-              data: pieData,
-              options: pieOptions
+  $(document).ready(function(){
+  function greetUser() {
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = "";
+    if(hour < 12){
+      greeting = "Good Morning!";
+    } else if(hour < 18) {
+      greeting = "Good Afternoon!";
+    } else {
+      greeting = "Good Evening!";
+    }
+    document.getElementById("greeting").innerText = greeting;
+  }
+  greetUser();
+  // Digital Clock: update every second
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const seconds = now.getSeconds().toString().padStart(2, '0');
+      document.getElementById('digitalClock').innerText = hours + ":" + minutes + ":" + seconds;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Inspirational Quote: display a random quote
+    const quotes = [
+      "Believe you can and you're halfway there. – Theodore Roosevelt",
+      "The only way to do great work is to love what you do. – Steve Jobs",
+      "The future belongs to those who believe in the beauty of their dreams. – Eleanor Roosevelt",
+      "You miss 100% of the shots you don't take. – Wayne Gretzky",
+      "Success is not final, failure is not fatal: It is the courage to continue that counts. – Winston Churchill"
+    ];
+    document.getElementById('inspirationalQuote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
+
+    // Pie Chart for Students and Staff
+    var pieData = {
+      labels: ['Students', 'Staffs'],
+      datasets: [{
+        data: [{{ student_count }}, {{ staff_count }}],
+        backgroundColor: ['#FF9A9D', '#79D6D3', '#7D5AB8', '#006456'],
+      }]
+    };
+    var pieChartCanvas = $('#pieChart').get(0).getContext('2d');
+    var pieOptions = {
+      maintainAspectRatio: false,
+      responsive: true,
+    };
+    var pieChart = new Chart(pieChartCanvas, {
+      type: 'pie',
+      data: pieData,
+      options: pieOptions
     });
 
-    // Second Chart for Total Subject in Each Course
-       var subject_count_list={{ subject_count_list }};
-       var course_name_list={{ course_name_list|safe }};
-       var donutChartCanvas = $('#donutChart').get(0).getContext('2d')
-        var donutData        = {
-          labels: course_name_list,
-          datasets: [
-            {
-              data: subject_count_list,
-              backgroundColor : ['#FF7F83', '#5BC1C0', '#E6B94D', '#6294FF', '#85AAC9', '#8F79B8', '#A662B9', '#4AA99D'],
-            }
-          ]
-        }
-        var donutOptions     = {
-          maintainAspectRatio : false,
-          responsive : true,
-        }
-        //Create pie or douhnut chart
-        // You can switch between pie and douhnut using the method below.
-        var donutChart = new Chart(donutChartCanvas, {
-          type: 'doughnut',
-          data: donutData,
-          options: donutOptions
-        });
-
-        //show total student in each course
-         var student_count_list_in_course={{ student_count_list_in_course }};
-
-            var pieData2        = {
-                  labels: course_name_list,
-                  datasets: [
-                    {
-                      data: student_count_list_in_course,
-                      backgroundColor : ['#f5d173', '#AC88FF', '#FF9A9E', '#70D6D4', '#FFE98A', '#FF947D', '#96AEC6'],
-                    }
-                  ]
-                };
-                var pieChartCanvas2 = $('#pieChart2').get(0).getContext('2d')
-                var pieOptions2     = {
-                  maintainAspectRatio : false,
-                  responsive : true,
-                }
-                var pieChart = new Chart(pieChartCanvas2, {
-                      type: 'pie',
-                      data: pieData2,
-                      options: pieOptions2
+    // Donut Chart for Subjects in Each Course
+    var subject_count_list = {{ subject_count_list }};
+    var course_name_list = {{ course_name_list|safe }};
+    var donutChartCanvas = $('#donutChart').get(0).getContext('2d');
+    var donutData = {
+      labels: course_name_list,
+      datasets: [{
+        data: subject_count_list,
+        backgroundColor: ['#FF7F83', '#5BC1C0', '#E6B94D', '#6294FF', '#85AAC9', '#8F79B8', '#A662B9', '#4AA99D'],
+      }]
+    };
+    var donutOptions = {
+      maintainAspectRatio: false,
+      responsive: true,
+    };
+    var donutChart = new Chart(donutChartCanvas, {
+      type: 'doughnut',
+      data: donutData,
+      options: donutOptions
     });
-        //show total student in each subject
-         var student_count_list_in_subject={{ student_count_list_in_subject }};
-         var subject_list={{ subject_list|safe }};
 
-            var pieData3        = {
-                  labels: subject_list,
-                  datasets: [
-                    {
-                      data: student_count_list_in_subject,
-                      backgroundColor : [ '#FF7F89', '#AA82FF', '#B0D684', '#70D6D4', '#FFEB88', '#FF947D', '#96AEC6',
+    // Pie Chart for Total Students in Each Course
+    var student_count_list_in_course = {{ student_count_list_in_course }};
+    var pieData2 = {
+      labels: course_name_list,
+      datasets: [{
+        data: student_count_list_in_course,
+        backgroundColor: ['#f5d173', '#AC88FF', '#FF9A9E', '#70D6D4', '#FFE98A', '#FF947D', '#96AEC6'],
+      }]
+    };
+    var pieChartCanvas2 = $('#pieChart2').get(0).getContext('2d');
+    var pieOptions2 = {
+      maintainAspectRatio: false,
+      responsive: true,
+    };
+    var pieChart2 = new Chart(pieChartCanvas2, {
+      type: 'pie',
+      data: pieData2,
+      options: pieOptions2
+    });
+
+    // Pie Chart for Total Students in Each Subject
+    var student_count_list_in_subject = {{ student_count_list_in_subject }};
+    var subject_list = {{ subject_list|safe }};
+    var pieData3 = {
+      labels: subject_list,
+      datasets: [{
+        data: student_count_list_in_subject,
+        backgroundColor: [ '#FF7F89', '#AA82FF', '#B0D684', '#70D6D4', '#FFEB88', '#FF947D', '#96AEC6',
                         '#FFC3A0', '#A0E7E5', '#B4A7D6', '#FFD3B6', '#E2F0CB', '#FEC8D8', '#D4A5A5','#FFB6C1', '#D1A3FF', '#A5E6E6', '#B0E0E6', '#F3E5AB', '#FFBB9E', '#A0C4FF',
                         '#FFDAC1', '#A2D2FF', '#C6D57E', '#FFCF81', '#E0BBE4', '#D8F3DC', '#FFAFCC','#FDE4CF', '#A9DEF9', '#B5CDA3', '#F5E1DA', '#F3B8A8', '#D5AAFF', '#B8E2F2',
                         '#F1E1A6', '#FBC4AB', '#C5D9E2', '#FFCCCB', '#D9F2D9', '#FEC5E5', '#D4A373','#F2CC8F', '#F4BFBF', '#D6E5FA', '#FFD166', '#99E2B4', '#EAC7C7', '#C4B0FF'],
-                    }
-                  ]
-                };
-                var pieChartCanvas3 = $('#pieChart4').get(0).getContext('2d')
-                var pieOptions3    = {
-                  maintainAspectRatio : false,
-                  responsive : true,
-                }
-                var pieChart = new Chart(pieChartCanvas3, {
-                      type: 'pie',
-                      data: pieData3,
-                      options: pieOptions3
+      }]
+    };
+    var pieChartCanvas3 = $('#pieChart4').get(0).getContext('2d');
+    var pieOptions3 = {
+      maintainAspectRatio: false,
+      responsive: true,
+    };
+    var pieChart3 = new Chart(pieChartCanvas3, {
+      type: 'pie',
+      data: pieData3,
+      options: pieOptions3
     });
 
-        });
-
+    // Initialize Mini Calendar with Indian Festivals & Recurring Tuesday Holiday
+    var miniCalendarEl = document.getElementById('miniCalendar');
+    var miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
+      initialView: 'dayGridMonth',
+      height: 350,
+      fixedWeekCount: false,
+      events: [
+        // 2025 Events
+        {
+          title: 'Tuesday Holiday',
+          daysOfWeek: [2],
+          allDay: true,
+          color: '#FFCCCC'
+        },
+        {
+          title: 'Republic Day',
+          start: '2025-01-26',
+          allDay: true,
+          color: '#FFD700'
+        },
+        {
+          title: 'Makar Sankranti',
+          start: '2025-01-14',
+          allDay: true,
+          color: '#FFA500'
+        },
+        {
+          title: 'Holi',
+          start: '2025-03-18',
+          allDay: true,
+          color: '#FF69B4'
+        },
+        {
+          title: 'Raksha Bandhan',
+          start: '2025-08-19',
+          allDay: true,
+          color: '#FF1493'
+        },
+        {
+          title: 'Independence Day',
+          start: '2025-08-15',
+          allDay: true,
+          color: '#00BFFF'
+        },
+        {
+          title: 'Janmashtami',
+          start: '2025-08-31',
+          allDay: true,
+          color: '#FF6347'
+        },
+        {
+          title: 'Gandhi Jayanti',
+          start: '2025-10-02',
+          allDay: true,
+          color: '#32CD32'
+        },
+        {
+          title: 'Navratri',
+          start: '2025-10-07',
+          allDay: true,
+          color: '#FFD700'
+        },
+        {
+          title: 'Durga Puja',
+          start: '2025-10-08',
+          allDay: true,
+          color: '#FF69B4'
+        },
+        {
+          title: 'Dussehra',
+          start: '2025-10-10',
+          allDay: true,
+          color: '#DC143C'
+        },
+        {
+          title: 'Onam',
+          start: '2025-08-22',
+          allDay: true,
+          color: '#32CD32'
+        },
+        {
+          title: 'Eid al-Fitr',
+          start: '2025-05-01',
+          allDay: true,
+          color: '#8A2BE2'
+        },
+        {
+          title: 'Eid al-Adha',
+          start: '2025-07-21',
+          allDay: true,
+          color: '#20B2AA'
+        },
+        {
+          title: 'Guru Nanak Jayanti',
+          start: '2025-11-12',
+          allDay: true,
+          color: '#FFA07A'
+        },
+        {
+          title: 'Christmas',
+          start: '2025-12-25',
+          allDay: true,
+          color: '#008000'
+        },
+        // 2026 Events (next year)
+        {
+          title: 'Republic Day',
+          start: '2026-01-26',
+          allDay: true,
+          color: '#FFD700'
+        },
+        {
+          title: 'Makar Sankranti',
+          start: '2026-01-14',
+          allDay: true,
+          color: '#FFA500'
+        },
+        {
+          title: 'Holi',
+          start: '2026-03-18',
+          allDay: true,
+          color: '#FF69B4'
+        },
+        {
+          title: 'Raksha Bandhan',
+          start: '2026-08-19',
+          allDay: true,
+          color: '#FF1493'
+        },
+        {
+          title: 'Independence Day',
+          start: '2026-08-15',
+          allDay: true,
+          color: '#00BFFF'
+        },
+        {
+          title: 'Janmashtami',
+          start: '2026-08-31',
+          allDay: true,
+          color: '#FF6347'
+        },
+        {
+          title: 'Gandhi Jayanti',
+          start: '2026-10-02',
+          allDay: true,
+          color: '#32CD32'
+        },
+        {
+          title: 'Navratri',
+          start: '2026-10-07',
+          allDay: true,
+          color: '#FFD700'
+        },
+        {
+          title: 'Durga Puja',
+          start: '2026-10-08',
+          allDay: true,
+          color: '#FF69B4'
+        },
+        {
+          title: 'Dussehra',
+          start: '2026-10-10',
+          allDay: true,
+          color: '#DC143C'
+        },
+        {
+          title: 'Onam',
+          start: '2026-08-22',
+          allDay: true,
+          color: '#32CD32'
+        },
+        {
+          title: 'Eid al-Fitr',
+          start: '2026-05-01',
+          allDay: true,
+          color: '#8A2BE2'
+        },
+        {
+          title: 'Eid al-Adha',
+          start: '2026-07-21',
+          allDay: true,
+          color: '#20B2AA'
+        },
+        {
+          title: 'Guru Nanak Jayanti',
+          start: '2026-11-12',
+          allDay: true,
+          color: '#FFA07A'
+        },
+        {
+          title: 'Christmas',
+          start: '2026-12-25',
+          allDay: true,
+          color: '#008000'
+        }
+      ],
+      eventContent: function(arg) {
+        var icon = "";
+        if(arg.event.title.includes("Holi")){
+          icon = '<i class="fas fa-tint" style="color:#FF69B4; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Diwali")){
+          icon = '<i class="fas fa-fire" style="color:#FF4500; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Republic Day")){
+          icon = '<i class="fas fa-flag" style="color:#FFD700; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Independence Day")){
+          icon = '<i class="fas fa-flag" style="color:#00BFFF; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Gandhi Jayanti")){
+          icon = '<i class="fas fa-peace" style="color:#32CD32; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Eid")){
+          icon = '<i class="fas fa-mosque" style="color:#8A2BE2; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Christmas")){
+          icon = '<i class="fas fa-tree" style="color:#008000; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Makar Sankranti")){
+          icon = '<i class="fas fa-sun" style="color:#FFA500; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Raksha Bandhan")){
+          icon = '<i class="fas fa-hand-holding-heart" style="color:#FF1493; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Janmashtami")){
+          icon = '<i class="fas fa-child" style="color:#FF6347; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Navratri")){
+          icon = '<i class="fas fa-star" style="color:#FFD700; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Durga Puja")){
+          icon = '<i class="fas fa-hands-helping" style="color:#FF69B4; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Dussehra")){
+          icon = '<i class="fas fa-trophy" style="color:#DC143C; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Onam")){
+          icon = '<i class="fas fa-leaf" style="color:#32CD32; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Guru Nanak")){
+          icon = '<i class="fas fa-pray" style="color:#FFA07A; margin-right:4px;"></i>';
+        } else if(arg.event.title.includes("Tuesday Holiday")){
+          icon = '<i class="fas fa-calendar-day" style="color:#FFCCCC; margin-right:4px;"></i>';
+        }
+        // Wrap the event text in a div that allows wrapping
+        return { html: '<div style="white-space: normal; display: inline-block; max-width: 100%;">' + icon + '<span>' + arg.event.title + '</span></div>' };
+      }
+    });
+    miniCalendar.render();
+  });
 </script>
 {% endblock custom_js %}

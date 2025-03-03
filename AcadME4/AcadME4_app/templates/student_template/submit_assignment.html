@@ -8,13 +8,28 @@
             <h4>Submit Assignment: {{ assignment.title }}</h4>
         </div>
         <div class="card-body">
+             <!-- Success/Error Message Display -->
+            {% if messages %}
+                <div id="message-container">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <script>
+                    setTimeout(function() {
+                        document.getElementById("message-container").style.display = "none";
+                    }, 3000); // Hide after 3 seconds
+                </script>
+            {% endif %}
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label class="form-label"><strong>Upload File (PDF only)</strong></label>
                     <input type="file" name="submission_file" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-success w-100">Submit</button>
+                <button type="submit" class="btn btn-success w-100" onclick="this.disabled=true; this.form.submit();">Submit</button>
             </form>
 
         </div>

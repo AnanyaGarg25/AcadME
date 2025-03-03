@@ -449,6 +449,91 @@ Home
                 <!-- /.card -->
                   </div>
               </div>
+
+          <!-- Mini Calendar Row -->
+    <div class="row">
+      <!-- Make the calendar span half the row width -->
+      <div class="col-lg-6 col-12">
+        <div class="card card-primary card-mini-calendar">
+          <div class="card-header">
+            <h3 class="card-title" style="font-size:0.8em;">Mini Calendar</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+              <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:5px;">
+            <div id="miniCalendar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /.row -->
+
+
+ </div>
+<div style="background: linear-gradient(135deg, #FFDEE9, #B5FFFC); width: 100%; height: 50px; display: flex; align-items: center; justify-content: space-around;">
+  <div id="digitalClock" style="font-size: 1.2em; font-weight: bold; color: #333;">Loading time...</div>
+  <div id="inspirationalQuote" style="font-size: 1.2em; font-weight: bold; font-style: italic; color: #555;">Your inspirational quote goes here.</div>
+    <!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+<style>
+  /* Common Card Styles */
+  .card {
+    border-radius: 10px;
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease-in-out;
+    border: none;
+  }
+  .card:hover {
+    box-shadow: 6px 6px 18px rgba(0,0,0,0.2);
+    transform: scale(1.02);
+  }
+  .card-danger .card-header {
+    background: #04b099 !important;
+  }
+  .card-header {
+    color: #FFF;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 15px;
+  }
+  .card-tools button {
+    color: #FFF !important;
+    font-size: 14px;
+  }
+  .card-body {
+    padding: 15px;
+    border-radius: 0 0 10px 10px;
+  }
+  /* Mini Calendar Specific Styling */
+  .card-mini-calendar {
+    background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
+    color: #333;
+  }
+  #miniCalendar .fc {
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+  }
+  /* Wrap long event text */
+  #miniCalendar .fc-event-title {
+    white-space: normal;
+    word-break: break-word;
+  }
+  /* Ensure header and day numbers use a darker font for readability */
+  #miniCalendar .fc-col-header-cell-cushion,
+  #miniCalendar .fc-daygrid-day-number {
+    color: #333 !important;
+  }
+  /* Adjust mini calendar font size to keep it compact */
+  #miniCalendar {
+    font-size: 0.8em;
+  }
+</style>
       </div>
     </section>
 {% endblock main_content %}
@@ -532,5 +617,344 @@ Home
               options: barChartOptions
             })
     })
+</script>
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script>
+  $(document).ready(function(){
+
+    // Digital Clock: update every second
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const seconds = now.getSeconds().toString().padStart(2, '0');
+      document.getElementById('digitalClock').innerText = hours + ":" + minutes + ":" + seconds;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Inspirational Quote: display a random quote
+    const quotes = [
+      "Believe you can and you're halfway there. – Theodore Roosevelt",
+      "The only way to do great work is to love what you do. – Steve Jobs",
+      "The future belongs to those who believe in the beauty of their dreams. – Eleanor Roosevelt",
+      "You miss 100% of the shots you don't take. – Wayne Gretzky",
+      "Success is not final, failure is not fatal: It is the courage to continue that counts. – Winston Churchill"
+    ];
+    document.getElementById('inspirationalQuote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
+
+    // Pie Chart Data
+    var pieData = {
+      labels: ['ABSENT', 'PRESENT', 'TOTAL'],
+      datasets: [{
+        data: [{{ attendance_absent }}, {{ attendance_present }}, {{ total_attendance }}],
+        backgroundColor: ['#f56954', '#00a65a', '#ffc107']
+      }]
+    };
+    var pieChartCanvas = $('#pieChart').get(0).getContext('2d');
+    var pieOptions = {
+      maintainAspectRatio: false,
+      responsive: true
+    };
+    new Chart(pieChartCanvas, {
+      type: 'pie',
+      data: pieData,
+      options: pieOptions
+    });
+
+    // Bar Chart Data
+    var subjects = {{ data_name|safe }};
+    var data1 = {{ data1 }};
+    var data2 = {{ data2 }};
+    var areaChartData = {
+      labels: subjects,
+      datasets: [{
+        label: 'Present in Class',
+        backgroundColor: 'rgba(60,141,188,0.9)',
+        borderColor: 'rgba(60,141,188,0.8)',
+        pointRadius: false,
+        data: data1
+      },
+      {
+        label: 'Absent in Class',
+        backgroundColor: 'rgba(210,214,222,1)',
+        borderColor: 'rgba(210,214,222,1)',
+        pointRadius: false,
+        data: data2
+      }]
+    };
+    var barChartCanvas = $('#barChart').get(0).getContext('2d');
+    var barChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      datasetFill: false
+    };
+    new Chart(barChartCanvas, {
+      type: 'bar',
+      data: areaChartData,
+      options: barChartOptions
+    });
+
+    // Initialize Mini Calendar with Holiday Types (2025 & 2026)
+    var miniCalendarEl = document.getElementById('miniCalendar');
+    var miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
+      initialView: 'dayGridMonth',
+      height: 250,
+      fixedWeekCount: false,
+      events: [
+        // Recurring general holiday
+        {
+          title: 'Tuesday Holiday',
+          daysOfWeek: [2],
+          allDay: true,
+          color: '#FFCCCC',
+          type: 'general'
+        },
+        // 2025 Events
+        {
+          title: 'Republic Day',
+          start: '2025-01-26',
+          allDay: true,
+          color: '#FFD700',
+          type: 'national'
+        },
+        {
+          title: 'Makar Sankranti',
+          start: '2025-01-14',
+          allDay: true,
+          color: '#FFA500',
+          type: 'national'
+        },
+        {
+          title: 'Holi',
+          start: '2025-03-18',
+          allDay: true,
+          color: '#FF69B4',
+          type: 'religious'
+        },
+        {
+          title: 'Raksha Bandhan',
+          start: '2025-08-19',
+          allDay: true,
+          color: '#FF1493',
+          type: 'religious'
+        },
+        {
+          title: 'Independence Day',
+          start: '2025-08-15',
+          allDay: true,
+          color: '#00BFFF',
+          type: 'national'
+        },
+        {
+          title: 'Janmashtami',
+          start: '2025-08-31',
+          allDay: true,
+          color: '#FF6347',
+          type: 'religious'
+        },
+        {
+          title: 'Gandhi Jayanti',
+          start: '2025-10-02',
+          allDay: true,
+          color: '#32CD32',
+          type: 'national'
+        },
+        {
+          title: 'Navratri',
+          start: '2025-10-07',
+          allDay: true,
+          color: '#FFD700',
+          type: 'religious'
+        },
+        {
+          title: 'Durga Puja',
+          start: '2025-10-08',
+          allDay: true,
+          color: '#FF69B4',
+          type: 'religious'
+        },
+        {
+          title: 'Dussehra',
+          start: '2025-10-10',
+          allDay: true,
+          color: '#DC143C',
+          type: 'national'
+        },
+        {
+          title: 'Onam',
+          start: '2025-08-22',
+          allDay: true,
+          color: '#32CD32',
+          type: 'religious'
+        },
+        {
+          title: 'Eid al-Fitr',
+          start: '2025-05-01',
+          allDay: true,
+          color: '#8A2BE2',
+          type: 'religious'
+        },
+        {
+          title: 'Eid al-Adha',
+          start: '2025-07-21',
+          allDay: true,
+          color: '#20B2AA',
+          type: 'religious'
+        },
+        {
+          title: 'Guru Nanak Jayanti',
+          start: '2025-11-12',
+          allDay: true,
+          color: '#FFA07A',
+          type: 'national'
+        },
+        {
+          title: 'Christmas',
+          start: '2025-12-25',
+          allDay: true,
+          color: '#008000',
+          type: 'religious'
+        },
+        // 2026 Events
+        {
+          title: 'Republic Day',
+          start: '2026-01-26',
+          allDay: true,
+          color: '#FFD700',
+          type: 'national'
+        },
+        {
+          title: 'Makar Sankranti',
+          start: '2026-01-14',
+          allDay: true,
+          color: '#FFA500',
+          type: 'national'
+        },
+        {
+          title: 'Holi',
+          start: '2026-03-18',
+          allDay: true,
+          color: '#FF69B4',
+          type: 'religious'
+        },
+        {
+          title: 'Raksha Bandhan',
+          start: '2026-08-19',
+          allDay: true,
+          color: '#FF1493',
+          type: 'religious'
+        },
+        {
+          title: 'Independence Day',
+          start: '2026-08-15',
+          allDay: true,
+          color: '#00BFFF',
+          type: 'national'
+        },
+        {
+          title: 'Janmashtami',
+          start: '2026-08-31',
+          allDay: true,
+          color: '#FF6347',
+          type: 'religious'
+        },
+        {
+          title: 'Gandhi Jayanti',
+          start: '2026-10-02',
+          allDay: true,
+          color: '#32CD32',
+          type: 'national'
+        },
+        {
+          title: 'Navratri',
+          start: '2026-10-07',
+          allDay: true,
+          color: '#FFD700',
+          type: 'religious'
+        },
+        {
+          title: 'Durga Puja',
+          start: '2026-10-08',
+          allDay: true,
+          color: '#FF69B4',
+          type: 'religious'
+        },
+        {
+          title: 'Dussehra',
+          start: '2026-10-10',
+          allDay: true,
+          color: '#DC143C',
+          type: 'national'
+        },
+        {
+          title: 'Onam',
+          start: '2026-08-22',
+          allDay: true,
+          color: '#32CD32',
+          type: 'religious'
+        },
+        {
+          title: 'Eid al-Fitr',
+          start: '2026-05-01',
+          allDay: true,
+          color: '#8A2BE2',
+          type: 'religious'
+        },
+        {
+          title: 'Eid al-Adha',
+          start: '2026-07-21',
+          allDay: true,
+          color: '#20B2AA',
+          type: 'religious'
+        },
+        {
+          title: 'Guru Nanak Jayanti',
+          start: '2026-11-12',
+          allDay: true,
+          color: '#FFA07A',
+          type: 'national'
+        },
+        {
+          title: 'Christmas',
+          start: '2026-12-25',
+          allDay: true,
+          color: '#008000',
+          type: 'religious'
+        },
+        // Example Academic/Exam Events
+        {
+          title: 'Teaching Day',
+          start: '2025-04-15',
+          allDay: true,
+          color: '#C8E6C9',
+          type: 'academic'
+        },
+        {
+          title: 'Mid Term Exam',
+          start: '2025-06-01',
+          allDay: true,
+          color: '#BBDEFB',
+          type: 'examination'
+        }
+      ],
+      eventContent: function(arg) {
+        var type = arg.event.extendedProps.type || "";
+        var badgeHtml = "";
+        if (type === 'national') {
+          badgeHtml = '<span style="background:#FFD700; color:#000; padding:2px 4px; border-radius:4px; font-size:10px; margin-left:4px;">National</span>';
+        } else if (type === 'religious') {
+          badgeHtml = '<span style="background:#FF69B4; color:#FFF; padding:2px 4px; border-radius:4px; font-size:10px; margin-left:4px;">Religious</span>';
+        } else if (type === 'academic') {
+          badgeHtml = '<span style="background:#C8E6C9; color:#000; padding:2px 4px; border-radius:4px; font-size:10px; margin-left:4px;">Academic</span>';
+        } else if (type === 'examination') {
+          badgeHtml = '<span style="background:#BBDEFB; color:#000; padding:2px 4px; border-radius:4px; font-size:10px; margin-left:4px;">Exam</span>';
+        }
+        return { html: '<div style="white-space: normal; display: inline-block; max-width: 100%;">' + arg.event.title + badgeHtml + '</div>' };
+      }
+    });
+    miniCalendar.render();
+  });
 </script>
 {% endblock custom_js %}
