@@ -114,7 +114,8 @@ def get_students(request):
         data_small = {"id": student.admin.id, "name": student.admin.first_name + " " + student.admin.last_name,
                       "roll_no": student.roll_no, "btbt_id": student.btbt_id}
         list_data.append(data_small)
-    return JsonResponse(json.dumps(list_data), content_type="application/json", safe=False)
+    return JsonResponse(list_data, safe=False)  # ✅ Correct
+
 
 @csrf_exempt
 def save_attendance_data(request):
@@ -635,44 +636,42 @@ def get_teacher_courses(request):
     except Staffs.DoesNotExist:
         return JsonResponse({"error": "Staff record not found"}, status=400)
 
+
+from django.conf import settings
+from django.http import JsonResponse
+from .models import AssignmentSubmission, Staffs
+
 @login_required
-def staff_view_submissions(request, subject_id=None):
-    """View all submissions OR fetch submissions for a specific subject."""
+def get_filtered_submissions(request, subject_id):
+    """Fetch student submissions for a given subject taught by the logged-in teacher"""
     try:
         staff_obj = Staffs.objects.get(admin=request.user)
+        submissions = AssignmentSubmission.objects.filter(
+            assignment__subject_id=subject_id,
+            assignment__staff=staff_obj
+        ).values(
+            "id", "assignment__title", "student__admin__username",
+            "submitted_at", "status", "submission_file"
+        )
 
-        if subject_id:
-            # Fetch submissions only for the selected subject
-            submissions = AssignmentSubmission.objects.filter(
-                assignment__subject_id=subject_id,
-                assignment__staff=staff_obj
-            ).values(
-                "id", "assignment__title", "student__admin__username",
-                "submitted_at", "status", "submission_file"
-            )
+        submission_list = [
+            {
+                "id": sub["id"],
+                "assignment_title": sub["assignment__title"],
+                "student_username": sub["student__admin__username"],
+                "submitted_at": sub["submitted_at"].strftime('%Y-%m-%d %H:%M:%S'),  # Format datetime
+                "status": sub["status"],
+                "file_url": settings.MEDIA_URL + str(sub["submission_file"])  # ✅ Ensure correct path
+            }
+            for sub in submissions
+        ]
 
-            submission_list = [
-                {
-                    "id": sub["id"],
-                    "assignment_title": sub["assignment__title"],
-                    "student_username": sub["student__admin__username"],
-                    "submitted_at": sub["submitted_at"],
-                    "status": sub["status"],
-                    "file_url": sub["submission_file"]
-                }
-                for sub in submissions
-            ]
-
-            return JsonResponse(submission_list, safe=False)
-
-        else:
-            # Fetch all submissions assigned to this staff
-            submissions = AssignmentSubmission.objects.filter(assignment__staff=staff_obj)
-            return render(request, "staff_template/view_submissions.html", {"submissions": submissions})
+        return JsonResponse(submission_list, safe=False)
 
     except Staffs.DoesNotExist:
-        if subject_id:
-            return JsonResponse({"error": "Staff record not found"}, status=400)
-        else:
-            messages.error(request, "Staff information not found.")
-            return redirect("home")
+        return JsonResponse({"error": "Staff record not found"}, status=400)
+
+
+def get_session_years(request):
+    session_years = SessionYearModel.object.all().values("id", "session_start_year", "session_end_year")
+    return JsonResponse(list(session_years), safe=False)

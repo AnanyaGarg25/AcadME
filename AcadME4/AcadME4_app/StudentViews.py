@@ -326,7 +326,8 @@ def student_about(request):
     return render(request, "student_template/college_about.html")
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from .models import Syllabus, Students
+from .models import Syllabus, Students, Staffs
+
 
 @login_required
 def view_syllabus_books(request):

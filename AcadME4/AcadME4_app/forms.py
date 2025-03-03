@@ -14,41 +14,52 @@ class ChoiceNoValidation(ChoiceField):
 
 class DateInput(forms.DateInput):
     input_type = "date"
+from django import forms
+from AcadME4_app.models import Courses, Branch, SessionYearModel
+
 class AddStudentForm(forms.Form):
-    email=forms.EmailField(label="Email",max_length=50,widget=forms.EmailInput(attrs={"class":"form-control","autocomplete":"off"}))
-    password=forms.CharField(label="Password",max_length=50,widget=forms.PasswordInput(attrs={"class":"form-control"}))
-    btbt_id=forms.CharField(label="Banasthali ID",max_length=20,widget=forms.TextInput(attrs={"class": "form-control"}))
-    roll_no = forms.CharField(label="Roll No.",max_length=20,widget=forms.TextInput(attrs={"class": "form-control"}))
-    first_name=forms.CharField(label="First Name",max_length=50,widget=forms.TextInput(attrs={"class":"form-control"}))
-    last_name=forms.CharField(label="Last Name",max_length=50,widget=forms.TextInput(attrs={"class":"form-control"}))
-    username=forms.CharField(label="Username",max_length=50,widget=forms.TextInput(attrs={"class":"form-control","autocomplete":"off"}))
-    address=forms.CharField(label="Address",max_length=50,widget=forms.TextInput(attrs={"class":"form-control"}))
+    email = forms.EmailField(label="Email", max_length=50,
+                             widget=forms.EmailInput(attrs={"class": "form-control", "autocomplete": "off"}))
+    password = forms.CharField(label="Password", max_length=50,
+                               widget=forms.PasswordInput(attrs={"class": "form-control"}))
+    btbt_id = forms.CharField(label="Banasthali ID", max_length=20,
+                              widget=forms.TextInput(attrs={"class": "form-control"}))
+    roll_no = forms.CharField(label="Roll No.", max_length=20,
+                              widget=forms.TextInput(attrs={"class": "form-control"}))
+    first_name = forms.CharField(label="First Name", max_length=50,
+                                 widget=forms.TextInput(attrs={"class": "form-control"}))
+    last_name = forms.CharField(label="Last Name", max_length=50,
+                                widget=forms.TextInput(attrs={"class": "form-control"}))
+    username = forms.CharField(label="Username", max_length=50,
+                               widget=forms.TextInput(attrs={"class": "form-control", "autocomplete": "off"}))
+    address = forms.CharField(label="Address", max_length=50,
+                              widget=forms.TextInput(attrs={"class": "form-control"}))
 
-    course_list = []
+    # ✅ Initialize empty fields
+    course = forms.ChoiceField(label="Course", choices=[],
+                               widget=forms.Select(attrs={"class": "form-control", "id": "course"}))
+    branch = forms.ChoiceField(label="Branch", choices=[],
+                               widget=forms.Select(attrs={"class": "form-control", "id": "branch"}), required=False)
+    session_year_id = forms.ChoiceField(label="Session Year", choices=[],
+                                        widget=forms.Select(attrs={"class": "form-control"}))
 
-    courses = Courses.objects.all()
-    for course in courses:
-        small_course=(course.id,course.course_name)
-        course_list.append(small_course)
+    profile_pic = forms.FileField(label="Profile Pic", required=False,
+                                  widget=forms.FileInput(attrs={"class": "form-control"}))
 
-        #course_list = []
+    def __init__(self, *args, **kwargs):
+        super(AddStudentForm, self).__init__(*args, **kwargs)
 
+        # ✅ Populate course choices dynamically
+        self.fields['course'].choices = [(course.id, course.course_name) for course in Courses.objects.all()]
 
-    session_list = []
+        # ✅ Populate session year choices dynamically
+        self.fields['session_year_id'].choices = [
+            (ses.id, f"{ses.session_start_year} to {ses.session_end_year}")
+            for ses in SessionYearModel.object.all()
+        ]
 
-    sessions = SessionYearModel.object.all()
-    for ses in sessions:
-        small_ses = (ses.id, str(ses.session_start_year)+"  to  "+str(ses.session_end_year))
-        session_list.append(small_ses)
-
-        #session_list = []
-
-    course=forms.ChoiceField(label="Course",choices=course_list,widget=forms.Select(attrs={"class":"form-control","id":"course"}))
-    branch = forms.ChoiceField(label="Branch", choices=[], widget=forms.Select(attrs={"class": "form-control", "id": "branch"}), required=False)
-    session_year_id=forms.ChoiceField(label="Session Year",widget=forms.Select(attrs={"class":"form-control"}),choices=session_list)
-
-    profile_pic=forms.FileField(label="Profile Pic",max_length=50,widget=forms.FileInput(attrs={"class":"form-control"}))
-
+        # ✅ Populate branch choices dynamically
+        self.fields['branch'].choices = [(branch.id, branch.name) for branch in Branch.objects.all()]
 
 
 class EditStudentForm(forms.Form):

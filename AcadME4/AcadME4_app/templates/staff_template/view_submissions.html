@@ -4,36 +4,161 @@
 {% block main_content %}
 <div class="container mt-4">
     <h3 class="text-center">Student Submissions</h3>
-    <table class="table table-bordered">
+
+    <!-- Course Dropdown -->
+    <div class="mb-3">
+        <label for="id_course" class="form-label"><strong>Course</strong></label>
+        <select name="course" id="id_course" class="form-select" required>
+            <option value="">Select Course</option>
+        </select>
+    </div>
+
+    <!-- Branch Dropdown -->
+    <div class="mb-3">
+        <label for="id_branch" class="form-label"><strong>Branch</strong></label>
+        <select name="branch" id="id_branch" class="form-select" required>
+            <option value="">Select Branch</option>
+        </select>
+    </div>
+
+    <!-- Subject Dropdown -->
+    <div class="mb-3">
+        <label for="id_subject" class="form-label"><strong>Subject</strong></label>
+        <select name="subject" id="id_subject" class="form-select" required>
+            <option value="">Select Subject</option>
+        </select>
+    </div>
+
+    <table class="table table-bordered mt-4">
         <thead>
-            <tr>
+            <tr class="table-dark">
                 <th>Assignment</th>
                 <th>Student</th>
                 <th>Submitted At</th>
                 <th>Status</th>
                 <th>Download</th>
-                <!--<th>Grade</th>-->
             </tr>
         </thead>
-        <tbody>
-            {% for submission in submissions %}
+        <tbody id="submissions_table">
             <tr>
-                <td>{{ submission.assignment.title }}</td>
-                <td>{{ submission.student.admin.username }}</td>
-                <td>{{ submission.submitted_at }}</td>
-                <td>{{ submission.status }}</td>
-                <td>
-                    <a href="{{ submission.submission_file.url }}" class="btn btn-primary" target="_blank">Download</a>
-                </td>
-
+                <td colspan="5" class="text-center">Select a subject to view submissions</td>
             </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">No submissions yet</td>
-            </tr>
-            {% endfor %}
         </tbody>
     </table>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // ✅ Fetch Courses
+        $.ajax({
+            url: "/get-teacher-courses/",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                let courseDropdown = $("#id_course");
+                courseDropdown.html('<option value="">Select Course</option>');
+                $.each(data, function (key, value) {
+                    courseDropdown.append(`<option value="${value.id}">${value.course_name}</option>`);
+                });
+            },
+            error: function (xhr) {
+                console.error("❌ Error fetching courses:", xhr.responseText);
+            }
+        });
+
+        // ✅ Fetch Branches
+        $("#id_course").change(function () {
+            let courseId = $(this).val();
+            let branchDropdown = $("#id_branch");
+            let subjectDropdown = $("#id_subject");
+            branchDropdown.html('<option value="">Select Branch</option>');
+            subjectDropdown.html('<option value="">Select Subject</option>');
+
+            if (courseId) {
+                $.ajax({
+                    url: `/get-branches/${courseId}/`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $.each(data, function (key, value) {
+                            branchDropdown.append(`<option value="${value.id}">${value.name}</option>`);
+                        });
+                    },
+                    error: function (xhr) {
+                        console.error("❌ Error fetching branches:", xhr.responseText);
+                    }
+                });
+            }
+        });
+
+        // ✅ Fetch Subjects
+        $("#id_branch").change(function () {
+            let branchId = $(this).val();
+            let subjectDropdown = $("#id_subject");
+            subjectDropdown.html('<option value="">Select Subject</option>');
+
+            if (branchId) {
+                $.ajax({
+                    url: `/get-subjects/${branchId}/`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $.each(data, function (key, value) {
+                            subjectDropdown.append(`<option value="${value.id}">${value.subject_name}</option>`);
+                        });
+                    },
+                    error: function (xhr) {
+                        console.error("❌ Error fetching subjects:", xhr.responseText);
+                    }
+                });
+            }
+        });
+
+        // ✅ Fetch Submissions & Display in Table
+        $("#id_subject").change(function () {
+            let subjectId = $(this).val();
+            let submissionsTable = $("#submissions_table");
+            submissionsTable.html('<tr><td colspan="5" class="text-center">Loading...</td></tr>');
+
+            if (subjectId) {
+                let url = `/get-submissions/${subjectId}/`;
+                console.log("Fetching submissions from:", url);
+
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        console.log("✅ Submissions Data:", data);
+
+                        if (data.length === 0) {
+                            submissionsTable.html('<tr><td colspan="5" class="text-center">No submissions yet</td></tr>');
+                        } else {
+                            let tableContent = "";
+                            $.each(data, function (key, value) {
+                                tableContent += `<tr>
+                                    <td>${value.assignment_title}</td>
+                                    <td>${value.student_username}</td>
+                                    <td>${value.submitted_at}</td>
+                                    <td>${value.status}</td>
+                                    <td><a href="${value.file_url}" class="btn btn-primary" target="_blank">Download</a></td>
+                                </tr>`;
+                            });
+
+                            submissionsTable.html(tableContent);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("❌ Error fetching submissions:", xhr.responseText);
+                        alert("Error fetching submissions. Check console.");
+                    }
+                });
+
+            } else {
+                submissionsTable.html('<tr><td colspan="5" class="text-center">Select a subject to view submissions</td></tr>');
+            }
+        });
+    });
+</script>
 {% endblock %}
-<!--  <td><a href="{% url 'staff_grade_submission' submission.id %}" class="btn btn-warning">Grade</a></td> -->

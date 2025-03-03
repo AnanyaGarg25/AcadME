@@ -7,28 +7,37 @@ Take Attendance
       <div class="container-fluid">
           <div class="row">
               <div class="col-md-12">
-            <!-- general form elements -->
             <div class="card card-primary">
               <div class="card-header">
                 <h3 class="card-title">Take Attendance</h3>
               </div>
-              <!-- /.card-header -->
-              <!-- form start -->
-                <div class="card-body">
 
+                <div class="card-body">
+                  <!-- ✅ Course Dropdown -->
+                  <div class="form-group">
+                        <label>Course</label>
+                        <select class="form-control" name="course" id="course">
+                            <option value="">-- Select Course --</option>
+                        </select>
+                  </div>
+
+                  <!-- ✅ Branch Dropdown -->
+                  <div class="form-group">
+                        <label>Branch</label>
+                        <select class="form-control" name="branch" id="branch">
+                            <option value="">-- Select Branch --</option>
+                        </select>
+                  </div>
+
+                  <!-- ✅ Subject Dropdown -->
                   <div class="form-group">
                         <label>Subject</label>
                         <select class="form-control" name="subject" id="subject">
                             <option value="">-- Select Subject --</option>
-                            {% for subject in subjects %}
-                            <option value="{{subject.id}}" data-has-lab="{{ subject.has_lab|yesno:'true,false' }}">
-                                {{ subject.subject_name }}
-                            </option>
-                            {% endfor %}
                         </select>
                   </div>
 
-                    <!-- New Dropdown to Select Theory or Lab -->
+                  <!-- ✅ Class Type (Theory/Lab) -->
                   <div class="form-group" id="class_type_block" style="display: none;">
                         <label>Class Type</label>
                         <select class="form-control" name="class_type" id="class_type">
@@ -36,136 +45,177 @@ Take Attendance
                             <option value="lab">Lab</option>
                         </select>
                   </div>
+
+                  <!-- ✅ Session Year -->
                   <div class="form-group">
                     <label>Session Year</label>
                     <select class="form-control" name="session_year" id="session_year">
                         <option value="">-- Select Session Year --</option>
                        {% for session_year in session_years %}
-                         <option value="{{session_year.id}}">{{ session_year.session_start_year }}  to  {{ session_year.session_end_year }}</option>
+                         <option value="{{session_year.id}}">{{ session_year.session_start_year }} to {{ session_year.session_end_year }}</option>
                        {% endfor %}
                     </select>
                   </div>
-
-                      <div class="form-group">
-                      {% if messages %}
-                        {% for message in messages %}
-                        {% if message.tags == 'error' %}
-                        <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
-                        {% endif %}
-                        {% if message.tags == 'success' %}
-                        <div class="alert alert-success" style="margin-top:10px">{{ message }}</div>
-                        {% endif %}
-                        {% endfor %}
-                      {% endif %}
-                    </div>
-
                 </div>
-                <!-- /.card-body -->
 
                 <div class="card-footer">
-                  <button type="button" class="btn btn-primary btn-block" id="fetch_student">Fetch Student</button>
+                  <button type="button" class="btn btn-primary btn-block" id="fetch_student">Fetch Students</button>
                 </div>
-                <div id="student_data" class="card-footer">
 
-                </div>
+                <div id="student_data" class="card-footer"></div>
             </div>
-            <!-- /.card -->
-          </div>
           </div>
       </div>
-    </section>
+</section>
+
 {% endblock main_content %}
+
 {% block custom_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function(){
-        $("#fetch_student").click(function(){
-            var subject=$("#subject").val()
-            var session_year=$("#session_year").val()
+    $(document).ready(function () {
+        // ✅ Fetch teacher's courses when page loads
+        $.ajax({
+            url: "/get-teacher-courses/",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                let courseDropdown = $("#course");
+                courseDropdown.html('<option value="">-- Select Course --</option>');
+                $.each(data, function (key, value) {
+                    courseDropdown.append(`<option value="${value.id}">${value.course_name}</option>`);
+                });
+            },
+            error: function (xhr) {
+                console.error("Error fetching courses:", xhr.responseText);
+            }
+        });
 
-            $.ajax({
-                url:'{% url 'get_students' %}',
-                type:'POST',
-                data:{subject:subject,session_year:session_year},
-            })
-            .done(function(response){
-                var json_data=JSON.parse(response);
-                console.log(json_data)
-                var div_data = "<div class='form-group'><label>Attendance Date:</label><input type='date' name='attendance_date' id='attendance_date' class='form-control'></div>";
+        // ✅ Fetch branches when a course is selected
+        $("#course").change(function () {
+            let courseId = $(this).val();
+            let branchDropdown = $("#branch");
+            let subjectDropdown = $("#subject");
+            branchDropdown.html('<option value="">-- Select Branch --</option>');
+            subjectDropdown.html('<option value="">-- Select Subject --</option>');
 
-    div_data += "<div class='table-responsive'><table class='table table-bordered'>";
-    div_data += "<thead class='thead-dark'><tr><th>Roll No</th><th>Name</th><th>BTBT ID</th><th>Present</th></tr></thead><tbody>";
-
-    for (key in json_data) {
-        div_data += "<tr>";
-        div_data += "<td>" + json_data[key]['roll_no'] + "</td>";
-        div_data += "<td>" + json_data[key]['name'] + "</td>";
-        div_data += "<td>" + json_data[key]['btbt_id'] + "</td>";
-        div_data += "<td class='text-center'><input type='checkbox' checked='checked' name='student_data[]' value='" + json_data[key]['id'] + "'></td>";
-        div_data += "</tr>";
-    }
-
-    div_data += "</tbody></table></div>";  // Close table
-
-    // Add Save Attendance Button
-    div_data += "<div class='form-group text-center'>";
-    div_data += "<button id='save_attendance' class='btn btn-success' type='button'><i class='fas fa-save'></i> Save Attendance</button>";
-    div_data += "</div>";
-
-                $("#student_data").html(div_data);
-            })
-            .fail(function(){
-                alert("Error in Fetching Student")
-            })
-
-
-            $(document).on("click","#save_attendance",function(){
-                $(this).attr("disabled","disabled")
-                $(this).text("Saving Attendance Data...")
-                var student_data=$("input[name='student_data[]']").map(function(){
-                    if($(this).is(":checked"))
-                    {
-                      return {"id":$(this).val(),"status":1};
-                    }
-                    else{
-                             return {"id":$(this).val(),"status":0};
-                             }
-                }).get()
-                var attendance_date=$("#attendance_date").val();
-                var subject_id=$("#subject").val();
-                var session_year_id=$("#session_year").val();
-                var class_type = $("#class_type").val();  // ✅ Get Theory/Lab selection
-                console.log("Class Type Sent:", class_type);  // ✅ Debugging - Check if class_type is being sent
-                console.log(student_data)
-                student_data=JSON.stringify(student_data)
+            if (courseId) {
                 $.ajax({
-                        url:'{% url 'save_attendance_data' %}',
-                        type:'POST',
-                        data:{student_ids:student_data,attendance_date:attendance_date,subject_id:subject_id,session_year_id:session_year_id,class_type: class_type},
-                    })
-                    .done(function(response){
-                        if(response=="OKAY"){
-                             alert("Attendance Save")
-                        }
-                        else{
-                             alert("Error in Saving Data")
-                        }
-                        location.reload()
-                    })
-                   .fail(function(){
-                       alert("Error in Saving Students")
-                   })
+                    url: `/get-branches/${courseId}/`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $.each(data, function (key, value) {
+                            branchDropdown.append(`<option value="${value.id}">${value.name}</option>`);
+                        });
+                    },
+                    error: function (xhr) {
+                        console.error("Error fetching branches:", xhr.responseText);
+                    }
+                });
+            }
+        });
 
-            })
+        // ✅ Fetch subjects when a branch is selected
+        $("#branch").change(function () {
+            let branchId = $(this).val();
+            let subjectDropdown = $("#subject");
+            subjectDropdown.html('<option value="">-- Select Subject --</option>');
 
-        })
-        $("#subject").change(function(){
-            var hasLab = $("#subject option:selected").data("has-lab");
-            if (hasLab === true) {
+            if (branchId) {
+                $.ajax({
+                    url: `/get-subjects/${branchId}/`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $.each(data, function (key, value) {
+                            subjectDropdown.append(`<option value="${value.id}" data-has-lab="${value.has_lab}">${value.subject_name}</option>`);
+                        });
+                    },
+                    error: function (xhr) {
+                        console.error("Error fetching subjects:", xhr.responseText);
+                    }
+                });
+            }
+        });
+
+        // ✅ Show/Hide Theory or Lab Selection
+        $("#subject").change(function () {
+            let hasLab = $("#subject option:selected").data("has-lab");
+            if (hasLab) {
                 $("#class_type_block").show();
             } else {
                 $("#class_type_block").hide();
             }
         });
-    })
+
+        // ✅ Fetch Students
+        $("#fetch_student").click(function () {
+            let subject = $("#subject").val();
+            let session_year = $("#session_year").val();
+            let class_type = $("#class_type").val();
+
+            $.ajax({
+                url: '{% url "get_students" %}',
+                type: "POST",
+                data: {subject: subject, session_year: session_year, class_type: class_type},
+            })
+            .done(function (response) {
+                let json_data = JSON.parse(response);
+                let div_data = "<div class='form-group'><label>Attendance Date:</label><input type='date' name='attendance_date' id='attendance_date' class='form-control'></div>";
+
+                div_data += "<div class='table-responsive'><table class='table table-bordered'>";
+                div_data += "<thead class='thead-dark'><tr><th>Roll No</th><th>Name</th><th>BTBT ID</th><th>Present</th></tr></thead><tbody>";
+
+                $.each(json_data, function (key, student) {
+                    div_data += `<tr>
+                        <td>${student.roll_no}</td>
+                        <td>${student.name}</td>
+                        <td>${student.btbt_id}</td>
+                        <td class='text-center'><input type='checkbox' checked='checked' name='student_data[]' value='${student.id}'></td>
+                    </tr>`;
+                });
+
+                div_data += "</tbody></table></div>";
+
+                // Add Save Attendance Button
+                div_data += "<div class='form-group text-center'>";
+                div_data += "<button id='save_attendance' class='btn btn-success' type='button'><i class='fas fa-save'></i> Save Attendance</button>";
+                div_data += "</div>";
+
+                $("#student_data").html(div_data);
+            })
+            .fail(function () {
+                alert("Error in Fetching Students");
+            });
+        });
+
+        // ✅ Save Attendance
+        $(document).on("click", "#save_attendance", function () {
+            $(this).attr("disabled", "disabled").text("Saving Attendance...");
+
+            let student_data = $("input[name='student_data[]']").map(function () {
+                return {id: $(this).val(), status: $(this).is(":checked") ? 1 : 0};
+            }).get();
+
+            let attendance_date = $("#attendance_date").val();
+            let subject_id = $("#subject").val();
+            let session_year_id = $("#session_year").val();
+            let class_type = $("#class_type").val();
+
+            $.ajax({
+                url: '{% url "save_attendance_data" %}',
+                type: "POST",
+                data: {student_ids: JSON.stringify(student_data), attendance_date, subject_id, session_year_id, class_type},
+            })
+            .done(function (response) {
+                alert(response === "OKAY" ? "Attendance Saved" : "Error in Saving Data");
+                location.reload();
+            })
+            .fail(function () {
+                alert("Error in Saving Students");
+            });
+        });
+    });
 </script>
 {% endblock custom_js %}
