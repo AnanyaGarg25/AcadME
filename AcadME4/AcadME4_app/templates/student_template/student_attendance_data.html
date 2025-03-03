@@ -53,6 +53,10 @@ Attendance Data
                      {% if attendance_report.status == True %}
                    <div class="col-lg-3 attendance_div_green">
                      <b>Date: {{ attendance_report.attendance_id.attendance_date }}</b>
+                    <br>
+                    <b>Class Type: {{ attendance_report.class_type|title }}</b>  <!-- ✅ Show Theory/Lab -->
+                    <br>
+                    <b>[ Status : {{ "Present" if attendance_report.status else "Absent" }} ]</b>
 
                      <br>
 

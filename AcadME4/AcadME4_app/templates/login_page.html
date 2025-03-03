@@ -2,167 +2,137 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!--  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>AcadME</title> -->
-  <!-- Tell the browser to be responsive to screen width -->
-<!--  <meta name="viewport" content="width=device-width, initial-scale=1"> -->
-
-  <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-      <title>AcadME - Login</title>
-      <link rel="shortcut icon" href="{% static 'assests/img/BV_logo.png' %}">
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap">
-      <link rel="stylesheet" href="{% static 'assests/plugins/bootstrap/css/bootstrap.min.css' %}">
-      <link rel="stylesheet" href="{% static 'assests/plugins/fontawesome/css/fontawesome.min.css' %}">
-      <link rel="stylesheet" href="{% static 'assests/plugins/fontawesome/css/all.min.css' %}">
-      <link rel="stylesheet" href="{% static 'assests/css/style.css' %}">
-
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcadME - Login</title>
+    <link rel="shortcut icon" href="{% static 'assests/img/BV_logo.png' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'assests/plugins/bootstrap/css/bootstrap.min.css' %}">
     <style>
-   .login-body {
-       background: url("{% static 'dist/img/1.jpeg' %}") no-repeat center center fixed;
-       background-size: 100% 100%;  /* Stretch to fit the full screen */
-    height: 100vh; /* Full viewport height */
-    width: 100vw;  /* Full viewport width */
-    overflow: hidden; /* Prevent scrolling if necessary */
-   }
-   </style>
-
-  <!-- Font Awesome -->
-<!--  <link rel="stylesheet" href="{% static "plugins/fontawesome-free/css/all.min.css" %}" > -->
-  <!-- Ionicons -->
-<!--  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"> -->
-  <!-- icheck bootstrap -->
-<!--  <link rel="stylesheet" href="{% static "plugins/icheck-bootstrap/icheck-bootstrap.min.css" %}"> -->
-  <!-- Theme style -->
-<!--  <link rel="stylesheet" href="{% static "dist/css/adminlte.min.css" %}"> -->
-  <!-- Google Font: Source Sans Pro -->
-<!--  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet"> -->
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url("{% static 'dist/img/hd.avif' %}") no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            animation: fadeIn 1s ease-in-out; /* Smooth fade-in effect */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .login-container {
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.96), rgba(240, 248, 255, 0.9)); /* Lighter white gradient */
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 400px;
+            text-align: center;
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .login-container:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Slight shadow effect */
+        }
+        .logo {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+        .login-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .form-group i {
+            position: absolute;
+            color: #999;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .form-group .fa-envelope,
+        .form-group .fa-lock {
+            left: 15px;
+        }
+        .form-group .toggle-password {
+            right: 15px;
+            cursor: pointer;
+        }
+        .form-control {
+            padding: 15px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #f0f0f0;
+            transition: all 0.3s ease-in-out;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+        }
+        .forgot-password {
+            display: block;
+            text-align: right;
+            margin-top: 5px;
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s ease-in-out;
+        }
+        .forgot-password:hover {
+            color: #1d6fa5;
+        }
+        .login-btn {
+            background: #333;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+        }
+        .login-btn:hover {
+            background: #555;
+            transform: scale(1.05);
+        }
+    </style>
 </head>
-
- <body>
-      <div class="main-wrapper login-body">
-         <div class="login-wrapper">
-            <div class="container">
-               <div class="loginbox">
-                  <div class="login-left">
-                     <img class="img-fluid" src="{% static 'assests/img/BV_logo.png' %}" alt="Logo">
-                  </div>
-                  <div class="login-right">
-                     <div class="login-right-wrap">
-                        <h1>AcadME</h1>
-                        <p class="account-subtitle">Login</p>
-                        {% if messages %}
-                        {% for message in messages %}
-                        {% if message.tags == 'error' %}
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                       {{message}}
-                       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                       <span aria-hidden="true">&times;</span>
-                      </button>
-                        </div>
-                        {% endif %}
-                        {% endfor %}
-                        {% endif %}
-                        <form action="/doLogin" method="post">
-                        {% csrf_token %}
-                           <div class="form-group">
-                              <input class="form-control" type="text" placeholder="Email" name="email">
-                           </div>
-                           <div class="form-group">
-                              <input class="form-control" type="password" placeholder="Password" name="password">
-                           </div>
-                           <div class="form-group">
-                              <button class="btn btn-primary btn-block" type="submit">Login</button>
-                           </div>
-                        </form>
-
-                     </div>
-                  </div>
-               </div>
+<body>
+    <div class="login-container">
+        <img src="{% static 'assests/img/BV_logo.png' %}" class="logo" alt="Logo">
+        <h2 class="login-title">Sign in with email</h2>
+        <form action="/doLogin" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <i class="fas fa-envelope"></i>
+                <input class="form-control" type="text" placeholder="Email" name="email">
             </div>
-         </div>
-      </div>
-      <script src="{% static 'assests/js/jquery-3.6.0.min.js' %}"></script>
-      <script src="{% static 'assests/js/popper.min.js' %}"></script>
-      <script src="{% static 'assests/plugins/bootstrap/js/bootstrap1.min.js' %}"></script>
-      <script src="{% static 'assests/js/script.js' %}"></script>
-
-
-
-
-<!--
-<body class="hold-transition login-page">
-<div class="login-box">
-  <div class="login-logo">
-    <a href="../../index2.html"><b>AcadME:</b> e-portal</a>
-  </div>
--->
-  <!-- /.login-logo -->
-<!--
-  <div class="card">
-    <div class="card-body login-card-body">
-      <p class="login-box-msg">Sign in to AcadME</p>
-
-      <form action="/doLogin" method="post">
-        {% csrf_token %}
-        <div class="input-group mb-3">
-          <input type="email" class="form-control" placeholder="Email" name="email">
-          <div class="input-group-append">
-            <div class="input-group-text">
-              <span class="fas fa-envelope"></span>
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input class="form-control" type="password" id="password" placeholder="Password" name="password">
+                <i class="fas fa-eye-slash toggle-password" id="toggle-password"></i>
             </div>
-          </div>
-        </div>
-        <div class="input-group mb-3">
-          <input type="password" class="form-control" placeholder="Password" name="password">
-          <div class="input-group-append">
-            <div class="input-group-text">
-              <span class="fas fa-lock"></span>
-            </div>
-          </div>
-        </div>
-        <div class="row">
--->
-          <!-- /.col -->
-<!--
-          <div class="col-12">
-            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-          </div>
-          {% if messages %}
-          <div class="col-12">
-            {% for message in messages %}
-            {% if message.tags == 'error' %}
-            <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
-            {% endif %}
-            {% endfor %}
-          </div>
-          {% endif %}
--->
-          <!-- /.col -->
-<!--
-        </div>
-      </form>
--->
-
-      <!-- /.social-auth-links -->
-
-<!--
+            <a href="{#}" class="forgot-password">Forgot password?</a>
+            <button class="login-btn" type="submit">Login</button>
+        </form>
     </div>
--->
-    <!-- /.login-card-body -->
-<!--
-  </div>
-</div>
--->
-<!-- /.login-box -->
-
-<!-- jQuery -->
-<!-- <script src="{% static "plugins/jquery/jquery.min.js" %}"></script> -->
-<!-- Bootstrap 4 -->
-<!-- <script src="{% static "plugins/bootstrap/js/bootstrap.bundle.min.js" %}"></script> -->
-<!-- AdminLTE App -->
-<!-- <script src="{% static "dist/js/adminlte.min.js" %}"></script> -->
-
+    <script>
+        document.getElementById('toggle-password').addEventListener('click', function(event) {
+            event.stopPropagation();
+            let passwordField = document.getElementById('password');
+            let type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+            this.classList.toggle('fa-eye');
+        });
+    </script>
 </body>
 </html>

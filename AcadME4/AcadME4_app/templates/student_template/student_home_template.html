@@ -8,7 +8,7 @@ Home
           <div class="row">
           <div class="col-lg-3 col-6">
             <!-- small box -->
-            <div class="small-box bg-info">
+            <div class="small-box pastel-card">
               <div class="inner">
                 <h3>{{ total_attendance }}</h3>
 
@@ -20,10 +20,75 @@ Home
               <a href="{% url 'student_view_attendance' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
+ <style>
+    /* Light Pink Gradient for Pastel Card */
+    .pastel-card {
+        background: linear-gradient(135deg, #FF6B89, #FFA6C0); /* Light pink to soft pastel pink */
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
+        color: #FFFFFF; /* White text for better visibility */
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hover Effect */
+    .pastel-card:hover {
+        transform: scale(1.05);
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Icon Styling - Top Left Corner */
+    .pastel-card .icon {
+        font-size: 28px; /* Smaller icon */
+        color: rgba(255, 255, 255, 0.8); /* Light white */
+        position: absolute;
+        top: 10px;
+        left: 15px;
+    }
+
+    /* Move Text Up */
+    .pastel-card .inner {
+        margin-top: -10px; /* Move text upwards */
+    }
+
+    /* Text Styling */
+    .pastel-card h3 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #FFF; /* White for better contrast */
+    }
+
+    .pastel-card p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #F8F9FA; /* Slightly lighter white */
+    }
+
+    /* Footer Styling (More Info) */
+    .small-box-footer {
+        display: block;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        text-decoration: none;
+        color: #FFF !important; /* White text */
+        font-weight: bold;
+        border-radius: 0 0 12px 12px;
+        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    .small-box-footer:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: #FFF !important; /* Stays white on hover */
+    }
+</style>
           <!-- ./col -->
           <div class="col-lg-3 col-6">
             <!-- small box -->
-            <div class="small-box bg-success">
+            <div class="small-box icy-blue-card">
               <div class="inner">
                 <h3>{{ attendance_absent }}</h3>
 
@@ -35,21 +100,168 @@ Home
               <a href="{% url 'student_view_attendance' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-warning">
-              <div class="inner">
-                <h3>{{ attendance_present }}</h3>
+<style>
+    /* Icy Blue Gradient for Staff Count Box */
+    .icy-blue-card {
+        background: linear-gradient(135deg, #A0D9F6, #4DA8DA); /* Light icy blue to deep blue */
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
+        color: #FFFFFF; /* White text for better visibility */
+        position: relative;
+        overflow: hidden;
+    }
 
-                <p>Present</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-stats-bars"></i>
-              </div>
-              <a href="{% url 'student_view_attendance' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
+    /* Hover Effect */
+    .icy-blue-card:hover {
+        transform: scale(1.05);
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Icon Styling - Top Left Corner */
+    .icy-blue-card .icon {
+        font-size: 28px; /* Smaller icon */
+        color: rgba(255, 255, 255, 0.8); /* Light white */
+        position: absolute;
+        top: 10px;
+        left: 15px;
+    }
+
+    /* Move Text Up */
+    .icy-blue-card .inner {
+        margin-top: -10px; /* Move text upwards */
+    }
+
+    /* Text Styling */
+    .icy-blue-card h3 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #FFF; /* White for better contrast */
+    }
+
+    .icy-blue-card p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #F8F9FA; /* Slightly lighter white */
+    }
+
+    /* Footer Styling (More Info) */
+    .small-box-footer {
+        display: block;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        text-decoration: none;
+        color: #FFF !important; /* White text */
+        font-weight: bold;
+        border-radius: 0 0 12px 12px;
+        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    .small-box-footer:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: #FFF !important; /* Stays white on hover */
+    }
+</style>
+          <!-- ./col -->
+         <div class="col-lg-3 col-6">
+    <!-- small box -->
+    <div class="small-box bg-warning">
+        <div class="inner">
+            <h3>{{ student_notification_count }}</h3>
+            <p>Notifications</p>
+        </div>
+        <div class="icon">
+            <i class="ion ion-ios-notifications"></i>
+        </div>
+        <a href="{% url 'student_notifications' %}" class="small-box-footer">
+            More info <i class="fas fa-arrow-circle-right"></i>
+        </a>
+    </div>
+</div>
+<style>
+    /* Ensure all small boxes have the same size */
+    .small-box {
+        height: 160px; /* Uniform height */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hover Effect */
+    .small-box:hover {
+        transform: scale(1.05);
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Pastel Red Gradient */
+    .bg-warning {
+        background: linear-gradient(135deg, #FF9A9E, #F76C6C) !important; /* Soft pastel red */
+    }
+
+    /* Icon Styling - Top Left Corner */
+    .small-box .icon {
+        font-size: 28px;
+        color: rgba(255, 255, 255, 0.8);
+        position: absolute;
+        top: 10px;
+        left: 15px;
+    }
+
+    /* Move Text Up */
+    .small-box .inner {
+        margin-top: -10px;
+    }
+
+    /* Text Styling */
+    .small-box h3 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #FFF;
+    }
+
+    .small-box p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #F8F9FA;
+    }
+
+    /* Force "More info" to be White */
+    .small-box-footer {
+        display: block;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        text-decoration: none;
+        color: #FFF !important; /* Stronger override */
+        font-weight: bold;
+        border-radius: 0 0 12px 12px;
+        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    /* Ensure White on Hover */
+    .small-box-footer:hover,
+    .small-box-footer:focus,
+    .small-box-footer:visited {
+        background: rgba(255, 255, 255, 0.3) !important;
+        color: #FFF !important; /* Absolutely force white */
+    }
+
+    /* Force White on All Links Inside Footer */
+    .small-box-footer i,
+    .small-box-footer span {
+        color: #FFF !important;
+    }
+</style>
+
           <!-- ./col -->
           <div class="col-lg-3 col-6">
             <!-- small box -->
@@ -62,16 +274,89 @@ Home
               <div class="icon">
                 <i class="ion ion-pie-graph"></i>
               </div>
-              <a href="#" class="small-box-footer">&nbsp;</a>
+              <a href="{% url 'student_subjects' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+
             </div>
           </div>
           <!-- ./col -->
         </div>
+<style>
+    /* Ensure all small boxes have the same size */
+    .small-box {
+        height: 160px; /* Uniform height */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hover Effect */
+    .small-box:hover {
+        transform: scale(1.05);
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Pastel Teal Gradient */
+    .bg-danger {
+        background: linear-gradient(135deg, #A0E7E5, #5AC8C8) !important; /* Soft pastel teal */
+    }
+
+    /* Icon Styling - Top Left Corner */
+    .small-box .icon {
+        font-size: 28px;
+        color: rgba(255, 255, 255, 0.8);
+        position: absolute;
+        top: 10px;
+        left: 15px;
+    }
+
+    /* Move Text Up */
+    .small-box .inner {
+        margin-top: -10px;
+    }
+
+    /* Text Styling */
+    .small-box h3 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #FFF;
+    }
+
+    .small-box p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #F8F9FA;
+    }
+
+    /* Footer Styling ("More Info" Button) */
+    .small-box-footer {
+        display: block;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        text-decoration: none;
+        color: #FFF !important; /* Force White */
+        font-weight: bold;
+        border-radius: 0 0 12px 12px;
+        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    .small-box-footer:hover,
+    .small-box-footer:focus {
+        background: rgba(255, 255, 255, 0.3);
+        color: #FFF !important; /* Ensure White on Hover */
+    }
+</style>
           <div class="row">
               <div class="col-lg-6">
                       <div class="card card-danger">
                           <div class="card-header">
-                            <h3 class="card-title"> Attendance Start</h3>
+                            <h3 class="card-title"> Attendance Chart</h3>
 
                             <div class="card-tools">
                               <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
@@ -85,8 +370,64 @@ Home
                           <!-- /.card-body -->
                         </div>
                         <!-- /.card -->
-
                   </div>
+              {% block custom_css %}
+<style>
+    /* ✅ Apply soft pastel theme with modern UI */
+    .card {
+        border-radius: 10px; /* Smooth rounded corners */
+        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15); /* Soft shadow */
+        transition: all 0.3s ease-in-out;
+        border: none;
+    }
+
+    .card:hover {
+        box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.2);
+        transform: scale(1.02);
+    }
+
+    /* ✅ Pastel Red Header */
+    .card-danger {
+        background: linear-gradient(135deg, #FFB6C1, #FF6B6B) !important;
+        border: none;
+    }
+    .card-danger .card-header {
+    background: #6bbf98 !important;
+    }
+
+    /* ✅ Card Header Styling */
+    .card-header {
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+        padding: 15px;
+        /* text-transform: uppercase; */
+    }
+
+    /* ✅ Buttons inside the header */
+    .card-tools button {
+        color: white !important;
+        font-size: 14px;
+    }
+
+    /* ✅ Card Body Background */
+    .card-body {
+        background: #F9F9F9; /* Soft white-gray */
+        padding: 15px;
+        border-radius: 0 0 10px 10px;
+    }
+
+    /* ✅ Chart Styling */
+    #pieChart {
+        min-height: 250px !important;
+        max-height: 250px !important;
+    }
+    .card-success .card-header {
+    background: #5ea3f2 !important;
+    }
+
+</style>
+{% endblock custom_css %}
                   <div class="col-lg-6">
                       <div class="card card-success">
                   <div class="card-header">
@@ -128,7 +469,7 @@ Home
               datasets: [
                 {
                   data: [{{ attendance_absent }},{{ attendance_present }}, {{ total_attendance }}],
-                  backgroundColor : ['#f56954', '#00a65a', '#ffc107'],
+                  backgroundColor : ['#FFA8A0', '#8FD6A8', '#FFE599'],
                 }
               ]
             }

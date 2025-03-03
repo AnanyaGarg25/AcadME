@@ -28,7 +28,7 @@
              {% url 'student_home' as student_home %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ student_home }}" class="nav-link  {% if request.path == student_home %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="nav-icon fas fa-th"></i>
+              <i class="fas fa-home" style="margin-right: 8px;"></i>
               <p>
                 Home
               </p>
@@ -38,7 +38,7 @@
              {% url 'student_view_attendance' as student_view_attendance %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ student_view_attendance }}" class="nav-link  {% if request.path == student_view_attendance %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="nav-icon fas fa-th"></i>
+              <i class="fa fa-calendar" style="margin-right: 8px;"></i>
               <p>
                 View Attendance
               </p>
@@ -48,7 +48,7 @@
              {% url 'student_feedback' as student_feedback %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ student_feedback }}" class="nav-link  {% if request.path == student_feedback %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="nav-icon fas fa-th"></i>
+              <i class="fas fa-comment-dots" style="margin-right: 8px;"></i>
               <p>
                 FeedBack Message
               </p>
@@ -58,7 +58,7 @@
              {% url 'student_view_result' as student_view_result %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ student_view_result }}" class="nav-link  {% if request.path == student_view_result %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="nav-icon fas fa-th"></i>
+              <i class="fas fa-id-card" style="margin-right: 8px;"></i>
               <p>
                 Grade Card
               </p>
@@ -68,7 +68,7 @@
              {% url 'student_notifications' as student_notifications %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ student_notifications }}" class="nav-link  {% if request.path == student_notifications %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="nav-icon fas fa-th"></i>
+              <i class="fas fa-bell" style="margin-right: 8px;"></i>
               <p>
                 Notifications
               </p>
@@ -78,7 +78,7 @@
    {% url 'student_view_assignments' as student_view_assignments %}
  <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
   <a href="{{ student_view_assignments }}" class="nav-link  {% if request.path == student_view_assignments %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-    <i class="nav-icon fas fa-th"></i>
+    <i class="fas fa-eye" style="margin-right: 8px;"></i>
     <p>
       View Assignments
     </p>
@@ -88,8 +88,8 @@
             <li class="nav-item">
   {% url 'student_timetable_view' as student_timetable_view %}
   <a href="{% url 'student_timetable_view' %}" class="nav-link {% if request.path == student_timetable_view %} active {% endif %}">
-    <i class="fa fa-calendar" style="margin-right: 8px;"></i>
-    <p>📅 View Timetable</p>
+    <i class="fas fa-table" style="margin-right: 8px;"></i>
+    <p>View Timetable</p>
   </a>
 </li>
             <li class="nav-item">
@@ -101,13 +101,15 @@
 </li>
               <li class="nav-item">
           <a class="nav-link" href="{% url 'college_gallery' %}">
-            <i class="fas fa-award"></i> Achievements & Gallery
+            <i class="fas fa-award" style="margin-right: 8px;"></i>
+              <p>Achievements & Gallery</p>
           </a>
         </li>
 
    <li class="nav-item">
   <a class="nav-link" href="{% url 'student_about' %}">
-    <i class="fas fa-info-circle"></i> About Us
+    <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+      <p>About Us</p>
   </a>
 </li>
 

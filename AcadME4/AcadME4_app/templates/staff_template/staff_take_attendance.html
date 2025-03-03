@@ -17,13 +17,24 @@ Take Attendance
                 <div class="card-body">
 
                   <div class="form-group">
-                    <label>Subject</label>
-                    <select class="form-control" name="subject" id="subject">
-                        <option value="">-- Select Subject --</option>
-                       {% for subject in subjects %}
-                         <option value="{{subject.id}}">{{ subject.subject_name }}</option>
-                       {% endfor %}
-                    </select>
+                        <label>Subject</label>
+                        <select class="form-control" name="subject" id="subject">
+                            <option value="">-- Select Subject --</option>
+                            {% for subject in subjects %}
+                            <option value="{{subject.id}}" data-has-lab="{{ subject.has_lab|yesno:'true,false' }}">
+                                {{ subject.subject_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                  </div>
+
+                    <!-- New Dropdown to Select Theory or Lab -->
+                  <div class="form-group" id="class_type_block" style="display: none;">
+                        <label>Class Type</label>
+                        <select class="form-control" name="class_type" id="class_type">
+                            <option value="theory">Theory</option>
+                            <option value="lab">Lab</option>
+                        </select>
                   </div>
                   <div class="form-group">
                     <label>Session Year</label>
@@ -122,12 +133,14 @@ Take Attendance
                 var attendance_date=$("#attendance_date").val();
                 var subject_id=$("#subject").val();
                 var session_year_id=$("#session_year").val();
+                var class_type = $("#class_type").val();  // ✅ Get Theory/Lab selection
+                console.log("Class Type Sent:", class_type);  // ✅ Debugging - Check if class_type is being sent
                 console.log(student_data)
                 student_data=JSON.stringify(student_data)
                 $.ajax({
                         url:'{% url 'save_attendance_data' %}',
                         type:'POST',
-                        data:{student_ids:student_data,attendance_date:attendance_date,subject_id:subject_id,session_year_id:session_year_id},
+                        data:{student_ids:student_data,attendance_date:attendance_date,subject_id:subject_id,session_year_id:session_year_id,class_type: class_type},
                     })
                     .done(function(response){
                         if(response=="OKAY"){
@@ -145,6 +158,14 @@ Take Attendance
             })
 
         })
+        $("#subject").change(function(){
+            var hasLab = $("#subject option:selected").data("has-lab");
+            if (hasLab === true) {
+                $("#class_type_block").show();
+            } else {
+                $("#class_type_block").hide();
+            }
+        });
     })
 </script>
 {% endblock custom_js %}

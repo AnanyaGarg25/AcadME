@@ -33,40 +33,73 @@ import calendar
 import datetime
 
 
-
 def student_home(request):
-    student_obj=Students.objects.get(admin=request.user.id)
-    attendance_total=AttendanceReport.objects.filter(student_id=student_obj).count()
-    attendance_present = AttendanceReport.objects.filter(student_id=student_obj,status=True).count()
-    attendance_absent = AttendanceReport.objects.filter(student_id=student_obj,status=False).count()
-    course=Courses.objects.get(id=student_obj.course_id.id)
+    student_obj = Students.objects.get(admin=request.user.id)
+
+    # Attendance Data
+    attendance_total = AttendanceReport.objects.filter(student_id=student_obj).count()
+    attendance_present = AttendanceReport.objects.filter(student_id=student_obj, status=True).count()
+    attendance_absent = AttendanceReport.objects.filter(student_id=student_obj, status=False).count()
+
+    # Subjects Data
+    course = Courses.objects.get(id=student_obj.course_id.id)
     subjects = Subjects.objects.filter(course_id=course).count()
+
     subject_name = []
     data_present = []
     data_absent = []
-    subject_data=Subjects.objects.filter(course_id=student_obj.course_id)
+
+    subject_data = Subjects.objects.filter(course_id=student_obj.course_id)
     for subject in subject_data:
-        attendance=Attendance.objects.filter(subject_id=subject.id)
-        attendance_present_count=AttendanceReport.objects.filter(attendance_id__in=attendance,status=True,student_id=student_obj.id).count()
-        attendance_absent_count = AttendanceReport.objects.filter(attendance_id__in=attendance, status=False,student_id=student_obj.id).count()
+        attendance = Attendance.objects.filter(subject_id=subject.id)
+        attendance_present_count = AttendanceReport.objects.filter(attendance_id__in=attendance, status=True,
+                                                                   student_id=student_obj.id).count()
+        attendance_absent_count = AttendanceReport.objects.filter(attendance_id__in=attendance, status=False,
+                                                                  student_id=student_obj.id).count()
+
         subject_name.append(subject.subject_name)
         data_present.append(attendance_present_count)
         data_absent.append(attendance_absent_count)
 
-    return render(request,"student_template/student_home_template.html",{"total_attendance":attendance_total,"attendance_absent":attendance_absent,"attendance_present":attendance_present,"subjects":subjects,"data_name":subject_name,"data1":data_present,"data2":data_absent})
+    # ✅ Student Notifications Count
+    student_notification_count = NotificationStudent.objects.filter(student_id=student_obj.id).count()
+
+    return render(request, "student_template/student_home_template.html", {
+        "total_attendance": attendance_total,
+        "attendance_absent": attendance_absent,
+        "attendance_present": attendance_present,
+        "subjects": subjects,
+        "data_name": subject_name,
+        "data1": data_present,
+        "data2": data_absent,
+        "student_notification_count": student_notification_count,  # ✅ Add this to the template
+    })
+
 def student_view_attendance(request):
     student=Students.objects.get(admin=request.user.id)
     course=student.course_id
+    # ✅ Fetch all subjects for the student
     subjects=Subjects.objects.filter(course_id=course)
-    return render(request,"student_template/student_view_attendance.html",{"subjects":subjects})
+
+    # ✅ Prepare subject list with lab info
+    subject_list = []
+    for subject in subjects:
+        subject_list.append({
+            "id": subject.id,
+            "subject_name": subject.subject_name,
+            "has_lab": subject.has_lab  # ✅ Include lab info
+        })
+
+    return render(request,"student_template/student_view_attendance.html",{"subjects":subject_list})
 
 
 def get_attendance_data(request):
     student = Students.objects.get(admin=request.user.id)  # Get the logged-in student
     subject_id = request.GET.get('subject')
     month_year = request.GET.get('month')
+    class_type = request.GET.get('class_type')  # ✅ Get class type from frontend
 
-    if not subject_id or not month_year:
+    if not subject_id or not month_year or not class_type:
         return JsonResponse({'error': 'Invalid request parameters'}, status=400)
 
     year, month = map(int, month_year.split('-'))
@@ -75,9 +108,9 @@ def get_attendance_data(request):
     start_date = datetime.date(year, month, 1)
     end_date = datetime.date(year, month, last_day)
 
-    # Fetch all attendance records for the given subject & date range
+    # ✅ Fetch attendance records for the given subject, date range, and class type
     attendance_records = Attendance.objects.filter(
-        subject_id=subject_id, attendance_date__range=[start_date, end_date]
+        subject_id=subject_id,class_type=class_type, attendance_date__range=[start_date, end_date]
     ).order_by("attendance_date")  # ✅ Sort by date
 
     data = []
@@ -307,3 +340,13 @@ def view_syllabus_books(request):
 
         return render(request, "student_template/view_syllabus_books.html",
                       {"subjects": student_subjects, "syllabus": syllabus})
+
+def student_subjects(request):
+    student = Students.objects.get(admin=request.user)  # Get logged-in student
+    subjects = Subjects.objects.filter(course_id=student.course_id)  # Get subjects of the student's course
+    subject_count = subjects.count()  # Count total subjects
+
+    return render(request, "student_template/student_subjects.html", {
+        "subjects": subjects,
+        "subject_count": subject_count
+    })

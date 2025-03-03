@@ -28,7 +28,8 @@ from AcadME4_app.models import StudentResult
 from AcadME4_app.models import Assignment
 
 from AcadME4_app.models import NotificationStaffs
-
+from django.http import JsonResponse
+from AcadME4_app.models import Branch, Subjects, Courses, Staffs
 from AcadME4_app.models import AssignmentSubmission
 from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
@@ -60,7 +61,7 @@ def staff_home(request):
 
     # Fetch students for attendance analysis
     students_attendance = Students.objects.filter(course_id__in=course_ids)
-
+    notification_count = NotificationStaffs.objects.filter(staff_id=request.user.id).count()
     student_list = []
     student_list_attendance_present = []
     student_list_attendance_absent = []
@@ -75,6 +76,7 @@ def staff_home(request):
 
     # Render the template with the fetched data
     context = {
+        "notification_count": notification_count,
         "students_count": students_count,
         "attendance_count": attendance_count,
         "subject_count": subject_count,
@@ -88,7 +90,7 @@ def staff_home(request):
     return render(request, "staff_template/staff_home_template.html", context)
 
 def staff_take_attendance(request):
-    subjects=Subjects.objects.filter(staff_id=request.user.id)
+    subjects = Subjects.objects.filter(staff_id=request.user.id).values("id", "subject_name", "has_lab")
     session_years=SessionYearModel.object.all()
     return render(request,"staff_template/staff_take_attendance.html",{"subjects":subjects,"session_years":session_years})
 
@@ -120,24 +122,34 @@ def save_attendance_data(request):
     subject_id=request.POST.get("subject_id")
     attendance_date= request.POST.get("attendance_date")
     session_year_id= request.POST.get("session_year_id")
+    class_type = request.POST.get("class_type")  # Get theory/lab selection
 
-
-    subject_model=Subjects.objects.get(id=subject_id)
-    session_model = SessionYearModel.object.get(id=session_year_id)
-    json_sstudent=json.loads(student_ids)
    # print(data[0]['id'])
     try:
-        attendance=Attendance(subject_id=subject_model,attendance_date=attendance_date,session_year_id=session_model)
+        subject_model = Subjects.objects.get(id=subject_id)
+        session_model = SessionYearModel.object.get(id=session_year_id)
+        json_sstudent = json.loads(student_ids)
+        # Ensure class_type is valid
+        if class_type not in ["theory", "lab"]:
+            return HttpResponse("ERROR: Invalid class_type")
+
+        print(
+            f"Received Data - Subject: {subject_id}, Date: {attendance_date}, Session Year: {session_year_id}, Class Type: {class_type}")
+        attendance=Attendance(subject_id=subject_model,attendance_date=attendance_date,session_year_id=session_model, class_type=class_type)
+
         attendance.save()
 
 
         for stud in json_sstudent:
             student=Students.objects.get(admin=stud['id'])
-            attendance_report=AttendanceReport(student_id=student,attendance_id=attendance,status=stud['status'])
+            attendance_report=AttendanceReport(student_id=student,attendance_id=attendance,status=stud['status'],class_type=class_type)
             attendance_report.save()
+            print(f"Attendance Report Saved for Student: {student.admin.username}")
+
         return HttpResponse("OKAY")
-    except:
-        return HttpResponse("ERROR")
+    except Exception as e:
+        print(f"Error while saving attendance: {str(e)}")
+        return HttpResponse(f"ERROR: {str(e)}")
 
 def staff_subjects(request):
     subjects = Subjects.objects.filter(staff_id=request.user.id)
@@ -152,9 +164,11 @@ def staff_update_attendance(request):
 def get_attendance_dates(request):
     subject=request.POST.get("subject")
     session_year_id = request.POST.get("session_year_id")
+    class_type = request.POST.get("class_type")  # Get theory/lab selection
+
     subject_obj=Subjects.objects.get(id=subject)
     session_year_obj = SessionYearModel.object.get(id=session_year_id)
-    attendance=Attendance.objects.filter(subject_id=subject_obj,session_year_id=session_year_obj)
+    attendance=Attendance.objects.filter(subject_id=subject_obj,session_year_id=session_year_obj, class_type=class_type)
     attendance_obj=[]
     for attendance_single in attendance:
         data={"id":attendance_single.id,"attendance_date":str(attendance_single.attendance_date),"session_year_id":attendance_single.session_year_id.id}
@@ -165,27 +179,34 @@ def get_attendance_dates(request):
 @csrf_exempt
 def get_attendance_student(request):
     attendance_date = request.POST.get("attendance_date")
-    attendance=Attendance.objects.get(id=attendance_date)
+    class_type = request.POST.get("class_type")  # ✅ Get Theory/Lab selection
+    try:
+        attendance=Attendance.objects.get(id=attendance_date, class_type=class_type)
 
-    attendance_data=AttendanceReport.objects.filter(attendance_id=attendance)
-    list_data=[]
-    for student in attendance_data:
-        data_small = {"id": student.student_id.admin.id, "name": student.student_id.admin.first_name + " " + student.student_id.admin.last_name,"status":student.status,
-                      "roll_no": student.student_id.roll_no, "btbt_id": student.student_id.btbt_id}
-        list_data.append(data_small)
-    return JsonResponse(json.dumps(list_data), content_type="application/json", safe=False)
+        attendance_data=AttendanceReport.objects.filter(attendance_id=attendance)
+        list_data=[]
+        for student in attendance_data:
+            data_small = {"id": student.student_id.admin.id, "name": student.student_id.admin.first_name + " " + student.student_id.admin.last_name,"status":student.status,
+                          "roll_no": student.student_id.roll_no, "btbt_id": student.student_id.btbt_id}
+            list_data.append(data_small)
+        return JsonResponse(json.dumps(list_data), content_type="application/json", safe=False)
+    except Attendance.DoesNotExist:
+            return HttpResponse("ERROR: No attendance record found for this date and class type")
+    except Exception as e:
+            return HttpResponse(f"ERROR: {str(e)}")
 
 @csrf_exempt
 def save_updateattendance_data(request):
     student_ids=request.POST.get("student_ids")
     attendance_date= request.POST.get("attendance_date")
-    attendance=Attendance.objects.get(id=attendance_date)
-    json_sstudent=json.loads(student_ids)
-    try:
+    class_type = request.POST.get("class_type")  # ✅ Get Theory/Lab selection
 
+    try:
+        attendance = Attendance.objects.get(id=attendance_date, class_type=class_type)
+        json_sstudent = json.loads(student_ids)
         for stud in json_sstudent:
             student=Students.objects.get(admin=stud['id'])
-            attendance_report=AttendanceReport.objects.get(student_id=student,attendance_id=attendance)
+            attendance_report=AttendanceReport.objects.get(student_id=student,attendance_id=attendance,class_type=class_type)
             attendance_report.status=stud['status']
             attendance_report.save()
         return HttpResponse("OKAY")
@@ -569,3 +590,89 @@ def upload_syllabus_books(request):
 
 def staff_about(request):
     return render(request, "staff_template/staff_about.html")
+
+def get_branches(request, course_id):
+    """ Fetch only branches where the logged-in teacher teaches subjects """
+    try:
+        teacher = Staffs.objects.get(admin=request.user)  # ✅ Ensure Staffs object
+
+        # Get branches where the teacher has subjects under the selected course
+        branches = Branch.objects.filter(
+            subjects__staff_id=teacher.admin, subjects__course_id=course_id
+        ).distinct().values("id", "name")
+
+        return JsonResponse(list(branches), safe=False)
+
+    except Staffs.DoesNotExist:
+        return JsonResponse({"error": "Staff record not found"}, status=400)
+
+def get_subjects(request, branch_id):
+    """ Fetch subjects of the selected branch that are taught by the logged-in teacher. """
+    try:
+        teacher = Staffs.objects.get(admin=request.user)  # ✅ Ensure Staffs object
+
+        subjects = Subjects.objects.filter(
+            staff_id=teacher.admin,  # Only subjects assigned to this teacher
+            branch_id=branch_id      # Only subjects in the selected branch
+        ).values("id", "subject_name")
+
+        return JsonResponse(list(subjects), safe=False)
+
+    except Staffs.DoesNotExist:
+        return JsonResponse({"error": "Staff record not found"}, status=400)
+
+def get_teacher_courses(request):
+    """ Fetch courses assigned to the logged-in teacher """
+    try:
+        teacher = Staffs.objects.get(admin=request.user)  # ✅ Ensure Staffs object
+
+        courses = Courses.objects.filter(
+            subjects__staff_id=teacher.admin  # Only courses where this teacher teaches
+        ).distinct().values("id", "course_name")
+
+        return JsonResponse(list(courses), safe=False)
+
+    except Staffs.DoesNotExist:
+        return JsonResponse({"error": "Staff record not found"}, status=400)
+
+@login_required
+def staff_view_submissions(request, subject_id=None):
+    """View all submissions OR fetch submissions for a specific subject."""
+    try:
+        staff_obj = Staffs.objects.get(admin=request.user)
+
+        if subject_id:
+            # Fetch submissions only for the selected subject
+            submissions = AssignmentSubmission.objects.filter(
+                assignment__subject_id=subject_id,
+                assignment__staff=staff_obj
+            ).values(
+                "id", "assignment__title", "student__admin__username",
+                "submitted_at", "status", "submission_file"
+            )
+
+            submission_list = [
+                {
+                    "id": sub["id"],
+                    "assignment_title": sub["assignment__title"],
+                    "student_username": sub["student__admin__username"],
+                    "submitted_at": sub["submitted_at"],
+                    "status": sub["status"],
+                    "file_url": sub["submission_file"]
+                }
+                for sub in submissions
+            ]
+
+            return JsonResponse(submission_list, safe=False)
+
+        else:
+            # Fetch all submissions assigned to this staff
+            submissions = AssignmentSubmission.objects.filter(assignment__staff=staff_obj)
+            return render(request, "staff_template/view_submissions.html", {"submissions": submissions})
+
+    except Staffs.DoesNotExist:
+        if subject_id:
+            return JsonResponse({"error": "Staff record not found"}, status=400)
+        else:
+            messages.error(request, "Staff information not found.")
+            return redirect("home")

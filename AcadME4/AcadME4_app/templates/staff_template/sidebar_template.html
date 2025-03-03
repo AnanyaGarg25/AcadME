@@ -28,10 +28,9 @@
              {% url 'staff_home' as staff_home %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ staff_home }}" class="nav-link  {% if request.path == staff_home %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="nav-icon fas fa-th"></i>
+              <i class="fas fa-home" style="margin-right: 8px;"></i>
               <p>
                 Home
-
               </p>
             </a>
           </li>
@@ -59,7 +58,7 @@
               {% url 'staff_add_result' as staff_add_result %}
             <!--{% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ staff_add_result }}" class="nav-link  {% if request.path == staff_add_result %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="nav-icon fas fa-th"></i>
+              <i class="fas fa-plus" style="margin-right: 8px;"></i>
               <p>
                 Add Result
               </p>
@@ -69,7 +68,7 @@
               {% url 'edit_student_result' as edit_student_result %}
             <!--{% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ edit_student_result }}" class="nav-link  {% if request.path == edit_student_result %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="nav-icon fas fa-th"></i>
+              <i class="fas fa-pencil-alt" style="margin-right: 8px;"></i>
               <p>
                  Edit Result
               </p>
@@ -89,7 +88,7 @@
              {% url 'staff_upload_assignment' as staff_upload_assignment  %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ staff_upload_assignment }}" class="nav-link  {% if request.path == staff_upload_assignment %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="fas fa-comment-dots" style="margin-right: 8px;"></i>
+              <i class="fas fa-upload" style="margin-right: 8px;"></i>
               <p>
                   Upload Assignment
               </p>
@@ -99,7 +98,7 @@
              {% url 'staff_notifications' as staff_notifications  %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ staff_notifications }}" class="nav-link  {% if request.path == staff_notifications %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="fas fa-comment-dots" style="margin-right: 8px;"></i>
+              <i class="fas fa-bell" style="margin-right: 8px;"></i>
               <p>
                   Notifications
               </p>
@@ -109,16 +108,14 @@
    {% url 'staff_view_submissions' as staff_view_submissions  %}
  <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
   <a href="{{ staff_view_submissions }}" class="nav-link  {% if request.path == staff_view_submissions %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-    <i class="fas fa-comment-dots" style="margin-right: 8px;"></i>
-    <p>
-        View Submitted  Assignments
-    </p>
+    <i class="fas fa-eye" style="margin-right: 8px;"></i>
+    <p>View Submitted Assignments</p>
   </a>
 </li>
                     <li class="nav-item">
           {% url 'staff_view_timetable' as staff_view_timetable %}
           <a href="{% url 'staff_view_timetable' %}" class="nav-link {% if request.path == staff_view_timetable %} active {% endif %}">
-            <i class="fa fa-calendar" style="margin-right: 8px;"></i>
+            <i class="fas fa-table" style="margin-right: 8px;"></i>
             <p> View Timetable</p>
           </a>
         </li>
@@ -126,19 +123,21 @@
             <li class="nav-item">
   {% url 'upload_syllabus_books' as upload_syllabus_books %}
   <a href="{% url 'upload_syllabus_books' %}" class="nav-link {% if request.path == upload_syllabus_books %} active {% endif %}">
-    <i class="fa fa-calendar" style="margin-right: 8px;"></i>
+    <i class="fas fa-upload" style="margin-right: 8px;"></i>
     <p>Upload Materials</p>
   </a>
 </li>
 
          <li class="nav-item">
   <a class="nav-link" href="{% url 'staff_gallery' %}">
-    <i class="fas fa-award"></i>  Achievements & Gallery
+    <i class="fas fa-award" style="margin-right: 8px;"></i>
+      <p>Achievements & Gallery</p>
   </a>
 </li>
             <li class="nav-item">
   <a class="nav-link" href="{% url 'staff_about' %}">
-    <i class="fas fa-info-circle"></i> About Us
+    <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+      <p>About Us</p>
   </a>
 </li>
 

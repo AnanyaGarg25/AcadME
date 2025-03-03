@@ -16,15 +16,24 @@
                     <input type="text" name="title" class="form-control" required id="id_title">
                 </div>
 
-               <div class="mb-3">
-    <label for="id_subject" class="form-label"><strong>Subject</strong></label>
-    <select name="subject" class="form-select" required id="id_subject">
-        {% for subject in subjects %}
-            <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
-        {% endfor %}
-    </select>
-</div>
+                <!-- Course Dropdown -->
+                <div class="mb-3">
+                    <label for="id_course" class="form-label"><strong>Course</strong></label>
+                   <select name="course" id="id_course" class="form-select" required>
+    <option value="">Select Course</option>
+</select>
 
+<select name="branch" id="id_branch" class="form-select" required>
+    <option value="">Select Branch</option>
+</select>
+
+<select name="subject" id="id_subject" class="form-select" required>
+    <option value="">Select Subject</option>
+</select>
+
+                </div>
+
+                <!-- File Upload -->
                 <div class="mb-3">
                     <label for="id_syllabus_file" class="form-label"><strong>Syllabus File</strong></label>
                     <input type="file" name="syllabus_file" class="form-control" required id="id_syllabus_file">
@@ -33,15 +42,97 @@
                 <button type="submit" class="btn btn-primary w-100">Upload</button>
 
                 {% if messages %}
-                {% for message in messages %}
-                    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %} mt-3">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 {% endif %}
             </form>
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+   $(document).ready(function () {
+    // ✅ Fetch teacher's courses when the page loads
+    $.ajax({
+        url: "/get-teacher-courses/",
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+            let courseDropdown = $("#id_course");
+            courseDropdown.html('<option value="">Select Course</option>');
+
+            $.each(data, function (key, value) {
+                courseDropdown.append(`<option value="${value.id}">${value.course_name}</option>`);
+            });
+        },
+        error: function (xhr) {
+            console.error("Error fetching courses:", xhr.responseText);
+        }
+    });
+
+    // ✅ Fetch branches when a course is selected
+    $("#id_course").change(function () {
+        let courseId = $(this).val();
+        let branchDropdown = $("#id_branch");
+        let subjectDropdown = $("#id_subject");
+
+        branchDropdown.html('<option value="">Select Branch</option>');
+        subjectDropdown.html('<option value="">Select Subject</option>');
+
+        if (courseId) {
+            $.ajax({
+                url: `/get-branches/${courseId}/`,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    $.each(data, function (key, value) {
+                        branchDropdown.append(`<option value="${value.id}">${value.name}</option>`);
+                    });
+                },
+                error: function (xhr) {
+                    console.error("Error fetching branches:", xhr.responseText);
+                }
+            });
+        }
+    });
+
+    // ✅ Fetch subjects when a branch is selected
+    $("#id_branch").change(function () {
+        let branchId = $(this).val();
+        let subjectDropdown = $("#id_subject");
+
+        subjectDropdown.html('<option value="">Select Subject</option>');
+
+        if (branchId) {
+            $.ajax({
+                url: `/get-subjects/${branchId}/`,  // ✅ Fetch only subjects taught by the logged-in teacher
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    if (data.length === 0) {
+                        console.log("No subjects found for this teacher in this branch.");
+                    }
+                    $.each(data, function (key, value) {
+                        subjectDropdown.append(`<option value="${value.id}">${value.subject_name}</option>`);
+                    });
+                },
+                error: function (xhr) {
+                    console.error("Error fetching subjects:", xhr.responseText);
+                }
+            });
+        }
+    });
+});
+
+
+
+</script>
+
+
 
 {% endblock %}

@@ -1,4 +1,5 @@
 {% extends 'admin_template/base_template.html' %}
+{% load custom_filters %}
 {% block page_title %}
 Manage Subject
 {% endblock page_title %}
@@ -34,9 +35,9 @@ Manage Subject
                       <th>Subject Code</th>
                       <th>Subject Name</th>
                       <th>Course Name</th>
-
                       <th>Branch</th>
                       <th>Staff Name</th>
+                      <th>Labs</th>  <!-- New column for Labs -->
                       <th>Action</th>
                     </tr>
                   </thead>
@@ -49,7 +50,16 @@ Manage Subject
                       <td>{{subject.course_id.course_name}}</td>
                       <td>{{subject.branch_id.name}}</td>
                       <td>{{subject.staff_id.first_name}} {{subject.staff_id.last_name}}</td>
-
+                      <!-- Show Labs if Available -->
+                      <td>
+                          {% if subject_lab_mapping|get_item:subject.id %}
+                              {% for lab in subject_lab_mapping|get_item:subject.id %}
+                                  <p>ID: {{ lab.lab_id }} - {{ lab.lab_name }}</p>
+                              {% endfor %}
+                          {% else %}
+                              <p>No Labs</p>
+                          {% endif %}
+                      </td>
                       <td><a href="/edit_subject/{{subject.id}}" class="btn btn-success">Edit</a></td>
                     </tr>
                   {% endfor %}
@@ -62,5 +72,6 @@ Manage Subject
           </div>
         </div>
       </div>
-    </section>
+      </div>
+</section>
 {% endblock main_content %}

@@ -2,6 +2,7 @@
 {% block page_title %}
 Upload Assignment
 {% endblock page_title %}
+
 {% block main_content %}
 
 <style>
@@ -43,30 +44,49 @@ Upload Assignment
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
+                <!-- Course Dropdown -->
+                <div class="mb-3">
+                    <label for="id_course" class="form-label"><strong>Course</strong></label>
+                    <select name="course" class="form-select" required id="id_course">
+                        <option value="">-- Select Course --</option>
+                    </select>
+                </div>
+
+                <!-- Branch Dropdown -->
+                <div class="mb-3">
+                    <label for="id_branch" class="form-label"><strong>Branch</strong></label>
+                    <select name="branch" class="form-select" required id="id_branch">
+                        <option value="">-- Select Branch --</option>
+                    </select>
+                </div>
+
+                <!-- Subject Dropdown -->
+                <div class="mb-3">
+                    <label for="id_subject" class="form-label"><strong>Subject</strong></label>
+                    <select name="subject" class="form-select" required id="id_subject">
+                        <option value="">-- Select Subject --</option>
+                    </select>
+                </div>
+
+                <!-- Assignment Title -->
                 <div class="mb-3">
                     <label for="id_title" class="form-label"><strong>Title</strong></label>
                     <input type="text" name="title" class="form-control" required id="id_title">
                 </div>
 
+                <!-- Assignment Description -->
                 <div class="mb-3">
                     <label for="id_description" class="form-label"><strong>Description</strong></label>
                     <textarea name="description" class="form-control" rows="4" required id="id_description"></textarea>
                 </div>
 
-                <div class="mb-3">
-                    <label for="id_subject" class="form-label"><strong>Subject</strong></label>
-                    <select name="subject" class="form-select" required id="id_subject">
-                        {% for subject in subjects %}
-                            <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
+                <!-- Assignment File Upload -->
                 <div class="mb-3">
                     <label for="id_assignment_file" class="form-label"><strong>Assignment File</strong></label>
                     <input type="file" name="assignment_file" class="form-control" id="id_assignment_file">
                 </div>
 
+                <!-- Due Date -->
                 <div class="mb-3">
                     <label for="id_due_date" class="form-label"><strong>Due Date</strong></label>
                     <input type="date" name="due_date" class="form-control" required id="id_due_date">
@@ -86,5 +106,79 @@ Upload Assignment
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // ✅ Fetch teacher's courses on page load
+        $.ajax({
+            url: "/get-teacher-courses/",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                let courseDropdown = $("#id_course");
+                courseDropdown.html('<option value="">-- Select Course --</option>');
+
+                $.each(data, function (key, value) {
+                    courseDropdown.append(`<option value="${value.id}">${value.course_name}</option>`);
+                });
+            },
+            error: function () {
+                alert("Error fetching courses.");
+            }
+        });
+
+        // ✅ Fetch branches when a course is selected
+        $("#id_course").change(function () {
+            let courseId = $(this).val();
+            let branchDropdown = $("#id_branch");
+            let subjectDropdown = $("#id_subject");
+
+            branchDropdown.html('<option value="">-- Select Branch --</option>');
+            subjectDropdown.html('<option value="">-- Select Subject --</option>');
+
+            if (courseId) {
+                $.ajax({
+                    url: `/get-branches/${courseId}/`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $.each(data, function (key, value) {
+                            branchDropdown.append(`<option value="${value.id}">${value.name}</option>`);
+                        });
+                    },
+                    error: function () {
+                        alert("Error loading branches.");
+                    }
+                });
+            }
+        });
+
+        // ✅ Fetch subjects when a branch is selected
+        $("#id_branch").change(function () {
+            let branchId = $(this).val();
+            let subjectDropdown = $("#id_subject");
+
+            subjectDropdown.html('<option value="">-- Select Subject --</option>');
+
+            if (branchId) {
+                $.ajax({
+                    url: `/get-subjects/${branchId}/`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $.each(data, function (key, value) {
+                            subjectDropdown.append(`<option value="${value.id}">${value.subject_name}</option>`);
+                        });
+                    },
+                    error: function () {
+                        alert("Error loading subjects.");
+                    }
+                });
+            }
+        });
+
+    });
+</script>
 
 {% endblock %}

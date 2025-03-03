@@ -13,7 +13,7 @@ from datetime import datetime
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from AcadME4_app.models import CustomUser, Subjects, Courses, Timetable, Staffs
+from AcadME4_app.models import CustomUser, Subjects, Courses, Timetable, Staffs, Labs
 
 from AcadME4_app.models import SessionYearModel,Branch
 from django.views.decorators.csrf import csrf_exempt
@@ -194,7 +194,8 @@ def add_student_save(request):
 def add_subject(request):
     courses=Courses.objects.all()
     staffs=CustomUser.objects.filter(user_type=2)
-    return render(request,"admin_template/add_subject_template.html",{"staffs":staffs,"courses":courses})
+    labs = Labs.objects.all()  # Fetch all labs
+    return render(request,"admin_template/add_subject_template.html",{"staffs":staffs,"courses":courses, "labs": labs})
 
 
 def add_subject_save(request):
@@ -206,22 +207,36 @@ def add_subject_save(request):
         course_id = request.POST.get("course")
         branch_id = request.POST.get("branch")
         staff_id = request.POST.get("staff")
+        has_lab = request.POST.get("has_lab")  # ✅ Get lab selection
+        lab_id = request.POST.get("lab_id")
+        lab_name = request.POST.get("lab_name")
 
         try:
             course = Courses.objects.get(id=course_id)
             branch = Branch.objects.get(id=branch_id) if branch_id else None  # ✅ Fetch branch only if selected
             staff = CustomUser.objects.get(id=staff_id)
 
-            # ✅ Ensure the subject is created with the selected branch
+            # ✅ Convert 'yes'/'no' selection to boolean True/False
+            has_lab = True if has_lab == "yes" else False
+
             subject = Subjects(
                 subject_name=subject_name,
                 subject_code=subject_code,
                 course_id=course,
-                branch_id=branch,  # ✅ Store branch
-                staff_id=staff
+                branch_id=branch,
+                staff_id=staff,
+                has_lab=has_lab  # ✅ Save True/False
             )
             subject.save()
 
+            # ✅ If a lab exists, save it
+            if has_lab and lab_id and lab_name:
+                lab = Labs(
+                    lab_id=lab_id,
+                    lab_name=lab_name,
+                    subject=subject
+                )
+                lab.save()
             messages.success(request, "Successfully Added Subject")
             return HttpResponseRedirect(reverse("add_subject"))
 
@@ -256,8 +271,17 @@ def manage_course(request):
 
 
 def manage_subject(request):
-    subjects=Subjects.objects.all()
-    return render(request,"admin_template/manage_subject_template.html",{"subjects":subjects})
+    subjects = Subjects.objects.all()
+    subject_lab_mapping = {}
+
+    for subject in subjects:
+        labs = Labs.objects.filter(subject=subject)  # Fetch labs for each subject
+        subject_lab_mapping[subject.id] = labs
+
+    return render(request, "admin_template/manage_subject_template.html", {
+        "subjects": subjects,
+        "subject_lab_mapping": subject_lab_mapping  # Pass lab data to template
+    })
 
 def edit_staff(request,staff_id):
     staff=Staffs.objects.get(admin=staff_id)
@@ -377,7 +401,10 @@ def edit_subject(request,subject_id):
     courses=Courses.objects.all()
     branches = Branch.objects.filter(course_id=subject.course_id.id)
     staffs=CustomUser.objects.filter(user_type=2)
-    return render(request,"admin_template/edit_subject_template.html",{"subject":subject,"staffs":staffs,"courses":courses, "branches": branches,"id": subject_id,"selected_course": subject.course_id.id,
+    all_labs = Labs.objects.all()  # ✅ Show all labs
+    subject_labs = Labs.objects.filter(subject=subject)  # ✅ Only selected subject labs
+
+    return render(request,"admin_template/edit_subject_template.html",{"subject":subject,"staffs":staffs,"courses":courses, "branches": branches,"all_labs": all_labs,"subject_labs": subject_labs,"id": subject_id,"selected_course": subject.course_id.id,
         "selected_branch": subject.branch_id.id if subject.branch_id else None, })
 
 def edit_subject_save(request):
@@ -390,6 +417,9 @@ def edit_subject_save(request):
         staff_id=request.POST.get("staff")
         course_id=request.POST.get("course")
         branch_id = request.POST.get("branch")
+        lab_id = request.POST.get("lab")
+        new_lab_id = request.POST.get("new_lab_id")
+        new_lab_name = request.POST.get("new_lab_name")
         try:
             subject=Subjects.objects.get(id=subject_id)
             subject.subject_name=subject_name
@@ -399,6 +429,30 @@ def edit_subject_save(request):
             course=Courses.objects.get(id=course_id)
             subject.branch_id = Branch.objects.get(id=branch_id) if branch_id else None
             subject.course_id=course
+
+            has_lab = False  # ✅ Default: No lab assigned
+
+            # ✅ If a new lab is added, create it
+            if lab_id == "new" and new_lab_id and new_lab_name:
+                lab = Labs.objects.create(
+                    lab_id=new_lab_id,
+                    lab_name=new_lab_name,
+                    subject=subject
+                )
+                has_lab = True  # ✅ Subject now has a lab
+
+            # ✅ If an existing lab is selected, update it
+            elif lab_id and lab_id != "new":
+                try:
+                    lab = Labs.objects.get(id=lab_id)
+                    lab.subject = subject
+                    lab.save()
+                    has_lab = True  # ✅ Subject now has a lab
+                except Labs.DoesNotExist:
+                    pass  # No lab was selected or added
+
+            # ✅ Update `has_lab` in the Subjects table
+            subject.has_lab = has_lab
             subject.save()
 
             messages.success(request,"Successfully Edited Subject")
@@ -491,15 +545,24 @@ def admin_profile_save(request):
 def admin_view_attendance(request):
     subjects = Subjects.objects.all()
     session_year_id = SessionYearModel.object.all()
+    # ✅ Prepare subject list with lab info
+    subject_list = []
+    for subject in subjects:
+        subject_list.append({
+            "id": subject.id,
+            "subject_name": subject.subject_name,
+            "has_lab": subject.has_lab  # ✅ Include lab info
+        })
     return render(request, "admin_template/admin_view_attendance.html",{"subjects": subjects, "session_year_id": session_year_id})
 
 @csrf_exempt
 def admin_get_attendance_dates(request):
     subject = request.POST.get("subject")
     session_year_id = request.POST.get("session_year_id")
+    class_type = request.POST.get("class_type")  # ✅ Get class type
     subject_obj = Subjects.objects.get(id=subject)
     session_year_obj = SessionYearModel.object.get(id=session_year_id)
-    attendance = Attendance.objects.filter(subject_id=subject_obj, session_year_id=session_year_obj)
+    attendance = Attendance.objects.filter(subject_id=subject_obj, session_year_id=session_year_obj, class_type=class_type)
     attendance_obj = []
     for attendance_single in attendance:
         data = {"id": attendance_single.id, "attendance_date": str(attendance_single.attendance_date),
@@ -511,17 +574,22 @@ def admin_get_attendance_dates(request):
 @csrf_exempt
 def admin_get_attendance_student(request):
     attendance_date = request.POST.get("attendance_date")
-    attendance = Attendance.objects.get(id=attendance_date)
+    class_type = request.POST.get("class_type")  # ✅ Get class type
+    try:
+        # ✅ Fetch attendance record for the selected Class Type
+        attendance = Attendance.objects.get(id=attendance_date, class_type=class_type)
 
-    attendance_data = AttendanceReport.objects.filter(attendance_id=attendance)
-    list_data = []
+        attendance_data = AttendanceReport.objects.filter(attendance_id=attendance)
+        list_data = []
 
-    for student in attendance_data:
-        data_small = {"id": student.student_id.admin.id,
-                      "name": student.student_id.admin.first_name + " " + student.student_id.admin.last_name,
-                      "status": student.status}
-        list_data.append(data_small)
-    return JsonResponse(json.dumps(list_data), content_type="application/json", safe=False)
+        for student in attendance_data:
+            data_small = {"id": student.student_id.admin.id,
+                          "name": student.student_id.admin.first_name + " " + student.student_id.admin.last_name,
+                          "status": student.status}
+            list_data.append(data_small)
+        return JsonResponse(json.dumps(list_data), content_type="application/json", safe=False)
+    except Attendance.DoesNotExist:
+        return JsonResponse({"error": "No attendance record found for the selected class type."}, status=404)
 
 def staff_feedback_message(request):
     feedbacks = FeedBackStaffs.objects.all()
@@ -599,8 +667,9 @@ def admin_get_monthly_attendance(request):
         subject_id = request.POST.get("subject")
         session_year_id = request.POST.get("session_year_id")
         selected_month = request.POST.get("month")  # Expected format: YYYY-MM
+        class_type = request.POST.get("class_type")  # ✅ Get class type (theory/lab)
 
-        if not subject_id or not session_year_id or not selected_month:
+        if not subject_id or not session_year_id or not selected_month or not class_type:
             return JsonResponse({"error": "Missing data. Please select all fields."}, status=400)
 
         try:
@@ -612,7 +681,8 @@ def admin_get_monthly_attendance(request):
             subject_id=subject_id,
             session_year_id=session_year_id,
             attendance_date__year=year,
-            attendance_date__month=month
+            attendance_date__month=month,
+            class_type = class_type  # ✅ Filter by class type
         )
 
         if not attendance_records.exists():

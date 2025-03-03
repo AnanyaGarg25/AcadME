@@ -42,11 +42,24 @@ Monthly Attendance Report
                                     <label>Subject</label>
                                     <select class="form-control" name="subject" id="subject">
                                         {% for subject in subjects %}
-                                        <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
+                                        <option value="{{ subject.id }}" data-has-lab="{{ subject.has_lab|yesno:'true,false' }}">
+                                            {{ subject.subject_name }}
+                                        </option>
                                         {% endfor %}
+                                    </select>
+
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group" id="class_type_block" style="display: none;">
+                                    <label>Class Type</label>
+                                    <select class="form-control" name="class_type" id="class_type">
+                                        <option value="theory">Theory</option>
+                                        <option value="lab">Lab</option>
                                     </select>
                                 </div>
                             </div>
+
 
                             <div class="col-lg-4">
                                 <div class="form-group">
@@ -72,7 +85,7 @@ Monthly Attendance Report
                         </div>
 
                         <div class="form-group">
-                            <div class="alert alert-danger" id="error_attendance" style="display:none"></div>
+                            <div class="alert alert-danger" id="error_attendance" style="display: none; color: red;"></div>
                         </div>
                     </div>
 
@@ -83,6 +96,7 @@ Monthly Attendance Report
                                 <thead>
                                     <tr>
                                         <th>Student Name</th>
+                                        <th>Class Type</th>  <!-- ✅ New column for Theory/Lab -->
                                         <th>Attended Classes</th>
                                         <th>Total Classes</th>
                                         <th>Attendance Percentage</th>
@@ -105,75 +119,102 @@ Monthly Attendance Report
 {% block custom_js %}
 <script>
     $(document).ready(function () {
-        console.log("jQuery Loaded!");
+    console.log("jQuery Loaded!");
 
-        $("#fetch_attendance").click(function () {
-            console.log("Fetch Attendance Button Clicked!");
+    // Show/Hide Lab Dropdown Based on Selected Subject
+    $("#subject").change(function () {
+        var hasLab = $("#subject option:selected").data("has-lab") === true;
+        console.log("Selected Subject Has Lab:", hasLab);
 
-            var subject = $("#subject").val();
-            var session_year = $("#session_year_id").val();
-            var selected_month = $("#attendance_month").val();
-
-            if (!selected_month) {
-                console.log("⚠ Please select a month!");
-                return;
-            }
-
-            var csrftoken = getCookie('csrftoken'); // CSRF token function
-
-            $.ajax({
-                url: '{% url "admin_get_monthly_attendance" %}',
-                type: 'POST',
-                data: {
-                    subject: subject,
-                    session_year_id: session_year,
-                    month: selected_month
-                },
-                headers: {
-                    "X-CSRFToken": csrftoken
-                },
-                success: function (response) {
-                    console.log("Response Data:", response);
-                    if (response.error) {
-                        $("#error_attendance").html(response.error).show();
-                        return;
-                    }
-
-                    var table_data = "";
-                    response.forEach(function (student) {
-                        let percentage = ((student.attended_classes / student.total_classes) * 100).toFixed(2);
-                        table_data += `<tr>
-                            <td>${student.name}</td>
-                            <td>${student.attended_classes}</td>
-                            <td>${student.total_classes}</td>
-                            <td>${percentage}%</td>
-                        </tr>`;
-                    });
-
-                    $("#attendanceTableBody").html(table_data);
-                    $("#attendanceTable").show();
-                },
-                error: function (xhr, status, error) {
-                    console.error("AJAX Error:", xhr.responseText);
-                }
-            });
-        });
-
-        // Function to get CSRF token
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                let cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    let cookie = cookies[i].trim();
-                    if (cookie.startsWith(name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
+        if (hasLab) {
+            $("#class_type_block").show();  // ✅ Correctly show class type selection
+        } else {
+            $("#class_type_block").hide();  // ❌ Hide when no lab
         }
     });
+
+    // Initially hide class type dropdown
+    $("#class_type_block").hide();
+
+    $("#fetch_attendance").click(function () {
+        console.log("Fetch Attendance Button Clicked!");
+
+        var subject = $("#subject").val();
+        var session_year = $("#session_year_id").val();
+        var selected_month = $("#attendance_month").val();
+        var class_type = $("#class_type").val();  // ✅ Get class type selection
+
+        if (!selected_month) {
+            $("#error_attendance").html("⚠ Please select a month!").show();
+            return;
+        }
+
+        $.ajax({
+            url: '{% url "admin_get_monthly_attendance" %}',
+            type: 'POST',
+            data: {
+                subject: subject,
+                session_year_id: session_year,
+                month: selected_month,
+                class_type: class_type  // ✅ Ensure correct data is passed
+            },
+            headers: {
+                "X-CSRFToken": getCookie('csrftoken')
+            },
+            success: function (response) {
+    console.log("Response Data:", response); // Debugging step
+
+    // 1️⃣ Hide table & clear previous data
+    $("#attendanceTableBody").empty(); // Remove old rows
+    $("#attendanceTable").hide(); // Hide table
+    $("#error_attendance").hide(); // Hide previous error messages
+
+    // 2️⃣ Check if response is empty or null
+    if (!response || response.length === 0 || response === null) {
+        console.log("No attendance data found."); // Debugging step
+        $("#error_attendance").html("No attendance data found.").show(); // Show error message
+        return; // Stop execution here
+    }
+
+    // 3️⃣ If data exists, populate the table
+    var table_data = "";
+    response.forEach(function (student) {
+        let percentage = ((student.attended_classes / student.total_classes) * 100).toFixed(2);
+        table_data += `<tr>
+            <td>${student.name}</td>
+            <td>${$("#class_type").val() ? $("#class_type").val().toUpperCase() : "N/A"}</td>
+            <td>${student.attended_classes}</td>
+            <td>${student.total_classes}</td>
+            <td>${percentage}%</td>
+        </tr>`;
+    });
+
+    // 4️⃣ Append new data and show the table
+    $("#attendanceTableBody").html(table_data);
+    $("#attendanceTable").show();
+},
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", xhr.responseText);
+            }
+        });
+    });
+
+    // Function to get CSRF token (optional if using `{% csrf_token %}`)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            let cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+
 </script>
 {% endblock custom_js %}

@@ -1,4 +1,3 @@
-
 {% load static %}
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
@@ -47,7 +46,7 @@
              {% url 'add_staff' as add_staff %}
            <!-- {% url 'edit_staff' staff_id=id as edit_staff %}-->
             <a href="{{ add_staff }}" class="nav-link  {% if request.path == add_staff %} active {% endif %}"><!--{% if request.path == manage_staff %} active {% endif %} {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="fas fa-chalkboard-teacher" style="margin-right: 8px;"></i>
+              <i class="fas fa-user-plus" style="margin-right: 8px;"></i>
               <p>
                 Add Staff
 
@@ -105,17 +104,6 @@
               <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i>
               <p>
                 Manage Course
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-              {% url 'add_branch' as add_branch %}
-          <!--  {% url 'edit_staff' staff_id=id as edit_staff %}-->
-            <a href="{% url 'add_branch' %}" class="nav-link {% if request.path == add_branch %} active {% endif %}"><!-- {% if request.path == edit_staff %} active {% endif %}-->
-              <i class="fa fa-graduation-cap" style="margin-right: 8px;"></i>
-              <p>
-                Add Branch
-
               </p>
             </a>
           </li>
@@ -213,7 +201,8 @@
 
             <li class="nav-item">
   <a class="nav-link" href="{% url 'admin_about' %}">
-    <i class="fas fa-info-circle"></i> About Us
+    <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+      <p>About Us</p>
   </a>
 </li>
 
@@ -223,8 +212,3 @@
     </div>
     <!-- /.sidebar -->
   </aside>
-
-
-
-
-

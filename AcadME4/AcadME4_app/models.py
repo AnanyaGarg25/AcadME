@@ -80,9 +80,21 @@ class Subjects(models.Model):
     course_id = models.ForeignKey(Courses,on_delete=models.CASCADE,default=1)
     branch_id = models.ForeignKey(Branch, on_delete=models.DO_NOTHING,default=1)
     staff_id=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    has_lab = models.BooleanField(default=False, null=False)  # ✅ Ensure default value
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     objects = models.Manager()
+
+class Labs(models.Model):
+    id = models.AutoField(primary_key=True)
+    lab_id = models.CharField(max_length=50, unique=True)  # Unique Lab ID
+    lab_name = models.CharField(max_length=255)
+    subject = models.ForeignKey(Subjects, on_delete=models.CASCADE)  # Links to Subject
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.lab_name} (ID: {self.lab_id})"
+
 
 class Students(models.Model):
     id = models.AutoField(primary_key=True)
@@ -100,11 +112,17 @@ class Students(models.Model):
     objects = models.Manager()
 
 class Attendance(models.Model):
+    CLASS_TYPE_CHOICES = [
+        ("theory", "Theory"),
+        ("lab", "Lab"),
+    ]
+
     id = models.AutoField(primary_key=True)
     subject_id = models.ForeignKey(Subjects, on_delete=models.DO_NOTHING)
     attendance_date=models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     session_year_id = models.ForeignKey(SessionYearModel, on_delete=models.CASCADE)
+    class_type = models.CharField(max_length=10, choices=CLASS_TYPE_CHOICES, default="theory")  # New Field
     updated_at = models.DateTimeField(auto_now_add=True)
     objects = models.Manager()
 
@@ -113,6 +131,11 @@ class AttendanceReport(models.Model):
     student_id=models.ForeignKey(Students,on_delete=models.DO_NOTHING)
     attendance_id=models.ForeignKey(Attendance,on_delete=models.CASCADE)
     status=models.BooleanField(default=False)
+    class_type = models.CharField(
+        max_length=10,
+        choices=[("theory", "Theory"), ("lab", "Lab")],
+        default="theory"  # ✅ New field to store Theory/Lab selection
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     objects=models.Manager()
@@ -244,10 +267,11 @@ class Timetable(models.Model):
     ]
 
     id = models.AutoField(primary_key=True)
-    subject = models.ForeignKey(Subjects, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subjects, on_delete=models.CASCADE, null=True, blank=True)  # ✅ Allow null for labs
     course = models.ForeignKey(Courses, on_delete=models.CASCADE)
     teacher = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     day_of_week = models.CharField(max_length=10, choices=DAYS_OF_WEEK)
+    lab = models.ForeignKey(Labs, on_delete=models.CASCADE, null=True, blank=True)  # ✅ New field for lab timetable
     start_time = models.TimeField()
     end_time = models.TimeField()
 

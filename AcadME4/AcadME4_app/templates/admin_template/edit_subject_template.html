@@ -54,6 +54,25 @@ Edit Subject
                        {% endfor %}
                     </select>
                   </div>
+                    <div class="form-group">
+                        <label>Labs</label>
+                        <select class="form-control" id="lab_select" name="lab">
+                            <option value="">Select Lab</option>
+                            {% for lab in all_labs %}
+                                <option value="{{ lab.id }}" {% if lab in subject_labs %}selected{% endif %}>
+                                    {{ lab.lab_name }} (ID: {{ lab.lab_id }})
+                                </option>
+                            {% endfor %}
+                            <option value="new">Add New Lab</option>
+                        </select>
+                    </div>
+                    <div id="new_lab_fields" style="display: none;">
+                        <label>New Lab ID</label>
+                        <input type="text" class="form-control" name="new_lab_id" placeholder="Enter New Lab ID">
+
+                        <label>New Lab Name</label>
+                        <input type="text" class="form-control" name="new_lab_name" placeholder="Enter New Lab Name">
+                    </div>
                       <div class="form-group">
                       {% if messages %}
                         {% for message in messages %}
@@ -123,6 +142,14 @@ Edit Subject
         if (selectedCourseId) {
             loadBranches(selectedCourseId, selectedBranchId);
         }
+        // ✅ Add script for Lab Selection
+        $("#lab_select").change(function () {
+            if ($(this).val() === "new") {
+                $("#new_lab_fields").show();
+            } else {
+                $("#new_lab_fields").hide();
+            }
+        });
     });
 </script>
 {% endblock custom_js %}

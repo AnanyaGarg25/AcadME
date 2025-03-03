@@ -29,6 +29,7 @@ from AcadME4_app import StaffViews
 
 from AcadME4_app.EditResultViewClass import EditResultViewClass
 
+
 urlpatterns = [
     path('demo', views.showDemoPage),
     path('admin/', admin.site.urls),
@@ -79,7 +80,7 @@ path('staff/subjects/', StaffViews.staff_subjects, name='staff_subjects'),
     # Staff URl Path
     path('staff_home', StaffViews.staff_home, name='staff_home'),
     path('student_home', StudentViews.student_home, name='student_home'),
-    path('student_view_attendance', StudentViews.student_view_attendance, name='student_view_attendance'),
+    path('student_view_attendance/', StudentViews.student_view_attendance, name='student_view_attendance'),
 
     path('staff_take_attendance', StaffViews.staff_take_attendance, name='staff_take_attendance'),
     path('staff_update_attendance', StaffViews.staff_update_attendance, name='staff_update_attendance'),
@@ -134,7 +135,11 @@ path('view_syllabus_books', StudentViews.view_syllabus_books, name="view_syllabu
 
 path('college/about/', StudentViews.student_about, name='student_about'),
 path('staff/about/', StaffViews.staff_about, name='staff_about'),
-     path('custom_admin/about/', AdminViews.admin_about, name='admin_about'),
+path('custom_admin/about/', AdminViews.admin_about, name='admin_about'),
 
-              ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
+path("get-branches/<int:course_id>/", StaffViews.get_branches, name="get_branches"),
+path("get-subjects/<int:branch_id>/", StaffViews.get_subjects, name="get_subjects"),
+path("get-teacher-courses/", StaffViews.get_teacher_courses, name="get_teacher_courses"),
+path("student_subjects", StudentViews.student_subjects, name="student_subjects"),
+]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 
