@@ -119,8 +119,12 @@ def add_branch(request):
 @csrf_exempt
 def get_branches_by_course(request):
     course_id = request.POST.get("course_id")
-    print(course_id)
+    print("Received Course ID:", course_id)  # ✅ Debugging line
+    #print(course_id)
+    if not course_id:
+        return JsonResponse({"error": "Invalid course ID"}, status=400)
     branches = Branch.objects.filter(course_id=course_id).values("id", "name")
+    print("Fetched Branches:", list(branches))  # ✅ Debugging line
     # Get branches for selected course
     return JsonResponse(list(branches), safe=False)
 
@@ -543,8 +547,11 @@ def admin_profile_save(request):
             return HttpResponseRedirect(reverse("admin_profile"))
 
 def admin_view_attendance(request):
+    courses = Courses.objects.all()  # ✅ Fetch all courses
+    branches = Branch.objects.all()  # ✅ Fetch all branches
     subjects = Subjects.objects.all()
-    session_year_id = SessionYearModel.object.all()
+    #session_year_id = SessionYearModel.object.all()
+    session_years = SessionYearModel.object.all()  # ✅ Fix typo
     # ✅ Prepare subject list with lab info
     subject_list = []
     for subject in subjects:
@@ -553,7 +560,7 @@ def admin_view_attendance(request):
             "subject_name": subject.subject_name,
             "has_lab": subject.has_lab  # ✅ Include lab info
         })
-    return render(request, "admin_template/admin_view_attendance.html",{"subjects": subjects, "session_year_id": session_year_id})
+    return render(request, "admin_template/admin_view_attendance.html",{ "courses": courses,"branches": branches,"subjects": subjects, "session_year_id": session_years})
 
 @csrf_exempt
 def admin_get_attendance_dates(request):
@@ -666,15 +673,22 @@ def admin_get_monthly_attendance(request):
     if request.method == "POST":
         subject_id = request.POST.get("subject")
         session_year_id = request.POST.get("session_year_id")
-        selected_month = request.POST.get("month")  # Expected format: YYYY-MM
+        selected_month = request.POST.get("month")
         class_type = request.POST.get("class_type")  # ✅ Get class type (theory/lab)
 
+        print("🔹 Received Subject ID:", subject_id)
+        print("🔹 Received Session Year ID:", session_year_id)
+        print("🔹 Received Month:", selected_month)
+        print("🔹 Received Class Type:", class_type)
+
         if not subject_id or not session_year_id or not selected_month or not class_type:
+            print("⚠ Missing Required Fields")
             return JsonResponse({"error": "Missing data. Please select all fields."}, status=400)
 
         try:
             year, month = map(int, selected_month.split("-"))
         except ValueError:
+            print("❌ Invalid Month Format")
             return JsonResponse({"error": "Invalid month format. Use YYYY-MM."}, status=400)
 
         attendance_records = Attendance.objects.filter(
@@ -682,17 +696,22 @@ def admin_get_monthly_attendance(request):
             session_year_id=session_year_id,
             attendance_date__year=year,
             attendance_date__month=month,
-            class_type = class_type  # ✅ Filter by class type
+            class_type=class_type  # ✅ Ensure this matches DB values
         )
 
+        print("🔹 Attendance Records Found:", attendance_records.count())
+
         if not attendance_records.exists():
-            return JsonResponse({"error": "No attendance data found for this month."}, status=404)
+            print("⚠ No attendance data found for this month.")
+            return JsonResponse({"error": "No attendance data found."}, status=404)
 
         total_classes = attendance_records.count()
         student_attendance = {}
 
         for record in attendance_records:
             reports = AttendanceReport.objects.filter(attendance_id=record)
+            print(f"🔹 Processing Record {record.id}, Reports Found:", reports.count())
+
             for report in reports:
                 student_name = f"{report.student_id.admin.first_name} {report.student_id.admin.last_name}"
                 if student_name not in student_attendance:
@@ -706,10 +725,12 @@ def admin_get_monthly_attendance(request):
                 "name": student,
                 "attended_classes": data["attended"],
                 "total_classes": data["total"],
-                "status": data["attended"] > (data["total"] / 2)  # Green if attended more than 50%
+                "status": data["attended"] > (data["total"] / 2)  # ✅ Green if attended more than 50%
             })
 
+        print("✅ Returning Attendance Data:", student_data)
         return JsonResponse(student_data, safe=False)
+
 
 import json
 from datetime import datetime
@@ -847,14 +868,26 @@ def get_subjects_by_course_and_branch(request):
     Returns the subjects for a given course and branch.
     Expects POST parameters: 'course_id' and 'branch_id'.
     """
-    if request.method == "POST":
-        course_id = request.POST.get("course_id")
-        branch_id = request.POST.get("branch_id")
-        if not (course_id and branch_id):
+    if request.method == "POST" or request.method == "GET":
+        course_id = request.GET.get("course_id") or request.POST.get("course_id")
+        branch_id = request.GET.get("branch_id") or request.POST.get("branch_id")
+
+        print(f"🔹 Received Course ID: {course_id}, Branch ID: {branch_id}")  # ✅ Debugging
+
+        # ✅ If no course or branch is selected, return an empty list
+        if not course_id or not branch_id:
+            print("⚠ Course or Branch missing. Returning empty list.")  # ✅ Debugging
             return JsonResponse([], safe=False)
-        subjects = Subjects.objects.filter(course_id=course_id, branch_id=branch_id).values("id", "subject_name", "staff_id")
+
+        subjects = Subjects.objects.filter(course_id=course_id, branch_id=branch_id).values(
+            "id", "subject_name", "staff_id", "has_lab"
+        )
+
+        print("✅ Subjects Fetched:", list(subjects))  # ✅ Debugging Step
         return JsonResponse(list(subjects), safe=False)
+
     return JsonResponse({"error": "Invalid method"}, status=405)
+
 
 @csrf_exempt
 def get_teachers_by_subject(request):

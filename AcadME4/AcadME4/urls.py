@@ -28,14 +28,16 @@ from AcadME4_app import StudentViews
 from AcadME4_app import StaffViews
 
 from AcadME4_app.EditResultViewClass import EditResultViewClass
+from AcadME4_app.AdminViews import get_branches_by_course
+
 
 
 urlpatterns = [
     path('demo', views.showDemoPage),
     path('admin/', admin.site.urls),
     path('',views.ShowLoginPage,name="show_login"),
-path('get_user_details',views.GetUserDetails),
-path('logout_user',views.logout_user,name="logout"),
+    path('get_user_details',views.GetUserDetails),
+    path('logout_user',views.logout_user,name="logout"),
     path('doLogin',views.doLogin,name="do_login"),
     path('admin_home',AdminViews.admin_home,name="admin_home"),
     path('add_staff',AdminViews.add_staff,name='add_staff'),
@@ -46,13 +48,15 @@ path('logout_user',views.logout_user,name="logout"),
     path('add_student_save',AdminViews.add_student_save,name='add_student_save'),
     path('add_branch',AdminViews.add_branch,name='add_branch'),
     path('add_branch_save',AdminViews.add_branch_save,name='add_branch_save'),
-path("get_branches_by_course", AdminViews.get_branches_by_course, name="get_branches_by_course"),
-path('get_attendance_data/',StudentViews.get_attendance_data, name="get_attendance_data"),
+    path("get-branches-by-course/", AdminViews.get_branches_by_course, name="get_branches_by_course"),
+    path("get_branches_by_course/", AdminViews.get_branches_by_course, name="get_branches_by_course"),
+    path("get-subjects-by-course-and-branch/", AdminViews.get_subjects_by_course_and_branch, name="get_subjects_by_course_and_branch"),
+    path('get_attendance_data/',StudentViews.get_attendance_data, name="get_attendance_data"),
     path('add_subject',AdminViews.add_subject,name='add_subject'),
     path('add_subject_save',AdminViews.add_subject_save,name='add_subject_save'),
     path('manage_staff',AdminViews.manage_staff,name='manage_staff'),
     path('manage_student',AdminViews.manage_student,name='manage_student'),
-path('staff/subjects/', StaffViews.staff_subjects, name='staff_subjects'),
+    path('staff/subjects/', StaffViews.staff_subjects, name='staff_subjects'),
     path('manage_course',AdminViews.manage_course,name='manage_course'),
     path('manage_subject',AdminViews.manage_subject,name='manage_subject'),
     path('edit_staff/<str:staff_id>',AdminViews.edit_staff,name='edit_staff'),

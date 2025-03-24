@@ -632,7 +632,7 @@ def get_subjects(request, branch_id):
         subjects = Subjects.objects.filter(
             staff_id=teacher.admin,  # Only subjects assigned to this teacher
             branch_id=branch_id      # Only subjects in the selected branch
-        ).values("id", "subject_name")
+        ).values("id", "subject_name","has_lab")
 
         return JsonResponse(list(subjects), safe=False)
 

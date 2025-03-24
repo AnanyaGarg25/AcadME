@@ -489,19 +489,10 @@ Home
 
   </div>
   <!-- /.container-fluid -->
-   </div>
-            <div id="digitalClock" style="font-size: 1.2em; font-weight: bold; color: #333;">Loading time...</div>
-
-<div style="background: linear-gradient(135deg, #FFDEE9, #B5FFFC); width: 100%; height: 50px; display: flex; align-items: center; justify-content: space-around;">
-
+  <div style="background: linear-gradient(135deg, #FFDEE9, #B5FFFC); width: 100%; height: 50px; display: flex; align-items: center; justify-content: space-around;">
+  <div id="digitalClock" style="font-size: 1.2em; font-weight: bold; color: #333;">Loading time...</div>
   <div id="inspirationalQuote" style="font-size: 1.2em; font-weight: bold; font-style: italic; color: #555;">Your inspirational quote goes here.</div>
-</div>
 
-
-</section>
-{% endblock main_content %}
-
-{% block custom_css %}
 <!-- FullCalendar CSS -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
 <style>
@@ -553,8 +544,9 @@ Home
     color: #333 !important;
   }
 </style>
-{% endblock custom_css %}
-
+</div>
+</section>
+{% endblock main_content %}
 {% block custom_js %}
 <!-- FullCalendar JS -->
 

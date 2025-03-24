@@ -18,6 +18,15 @@
         background-color: #007bff;
         color: white;
     }
+    /* ✅ Change Error Message Font to White */
+    #error_attendance {
+        background-color: red; /* Keeps the background red */
+        color: white !important; /* ✅ Makes text white */
+        font-weight: bold;
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+    }
 </style>
 {% endblock custom_css %}
 
@@ -34,10 +43,35 @@ Monthly Attendance Report
                     <div class="card-header">
                         <h3 class="card-title">View Monthly Attendance</h3>
                     </div>
-
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-4">
+                            <!-- ✅ Course Dropdown -->
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label>Course</label>
+                                    <select class="form-control" name="course" id="course">
+                                        <option value="">-- Select Course --</option>
+                                        {% for course in courses %}
+                                        <option value="{{ course.id }}">{{ course.course_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- ✅ Branch Dropdown -->
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label>Branch</label>
+                                    <select class="form-control" name="branch" id="branch">
+                                        <option value="">-- Select Branch --</option>
+                                        {% for branch in branches %}
+                                        <option value="{{ branch.id }}">{{ branch.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12">
                                 <div class="form-group">
                                     <label>Subject</label>
                                     <select class="form-control" name="subject" id="subject">
@@ -47,10 +81,10 @@ Monthly Attendance Report
                                         </option>
                                         {% endfor %}
                                     </select>
-
                                 </div>
                             </div>
-                            <div class="col-lg-4">
+
+                            <div class="col-lg-12">
                                 <div class="form-group" id="class_type_block" style="display: none;">
                                     <label>Class Type</label>
                                     <select class="form-control" name="class_type" id="class_type">
@@ -61,7 +95,7 @@ Monthly Attendance Report
                             </div>
 
 
-                            <div class="col-lg-4">
+                            <div class="col-lg-12">
                                 <div class="form-group">
                                     <label>Session Year</label>
                                     <select class="form-control" name="session_year_id" id="session_year_id">
@@ -72,20 +106,19 @@ Monthly Attendance Report
                                 </div>
                             </div>
 
-                            <div class="col-lg-4">
+                            <div class="col-lg-12">
                                 <div class="form-group">
                                     <label>Select Month</label>
                                     <input type="month" class="form-control" id="attendance_month">
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="form-group">
+                            <div class="col-lg-12 text-center">
                             <button type="button" class="btn btn-primary btn-block" id="fetch_attendance">Fetch Attendance</button>
-                        </div>
+                            </div>
 
-                        <div class="form-group">
-                            <div class="alert alert-danger" id="error_attendance" style="display: none; color: red;"></div>
+                            <div class="col-lg-12">
+                                <div class="alert alert-danger" id="error_attendance" style="display: none; color: red;"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -121,6 +154,84 @@ Monthly Attendance Report
     $(document).ready(function () {
     console.log("jQuery Loaded!");
 
+
+    // ✅ Clear Subject dropdown on page load to prevent pre-filling
+    $("#subject").html('<option value="">-- Select Subject --</option>');
+
+    // ✅ Fetch branches when a course is selected
+    $("#course").change(function () {
+        let courseId = $(this).val();
+        let branchDropdown = $("#branch");
+        let subjectDropdown = $("#subject");
+
+        branchDropdown.html('<option value="">-- Select Branch --</option>');
+        subjectDropdown.html('<option value="">-- Select Subject --</option>');
+
+        if (courseId) {
+            $.ajax({
+                url: "/get-branches-by-course/",
+                type: "POST",
+                data: { course_id: courseId },
+                headers: { "X-CSRFToken": getCookie("csrftoken") },
+                dataType: "json",
+                success: function (data) {
+                console.log("AJAX Success: Branches Received:", data);  // ✅ Debugging step
+                if (data.error) {
+                    console.error("Error:", data.error);
+                    return;
+                }
+                $.each(data, function (key, value) {
+                    branchDropdown.append(`<option value="${value.id}">${value.name}</option>`);
+                });
+                },
+                error: function (xhr) {
+                    console.error("Error fetching branches:", xhr.responseText);
+                }
+            });
+        }
+    });
+     // ✅ Fetch subjects when a branch is selected
+    $("#branch").change(function () {
+        let courseId = $("#course").val();
+        let branchId = $(this).val();
+        let subjectDropdown = $("#subject");
+        subjectDropdown.html('<option value="">-- Select Subject --</option>');
+
+        // ✅ Prevent fetching if either course or branch is not selected
+        if (!courseId || !branchId) {
+            console.warn("⚠ Select both Course and Branch before fetching subjects.");
+            return;
+        }
+
+        if (courseId && branchId) {
+            $.ajax({
+            url: "/get-subjects-by-course-and-branch/",
+            type: "POST",  // ✅ Use POST instead of GET
+            data: { course_id: courseId, branch_id: branchId },
+            headers: { "X-CSRFToken": getCookie("csrftoken") },  // ✅ Include CSRF token
+            dataType: "json",
+            success: function (data) {
+                console.log("Subjects received:", data);  // ✅ Debugging Step
+
+               // ✅ Show message if no subjects are found
+                if (data.length === 0) {
+                    console.warn("⚠ No subjects found for selected course and branch.");
+                    return;
+                }
+
+                $.each(data, function (key, value) {
+                    subjectDropdown.append(
+                        `<option value="${value.id}" data-has-lab="${value.has_lab}">${value.subject_name}</option>`
+                    );
+                });
+            },
+                error: function (xhr) {
+                    console.error("Error fetching subjects:", xhr.responseText);
+                }
+            });
+        }
+    });
+
     // Show/Hide Lab Dropdown Based on Selected Subject
     $("#subject").change(function () {
         var hasLab = $("#subject option:selected").data("has-lab") === true;
@@ -144,6 +255,12 @@ Monthly Attendance Report
         var selected_month = $("#attendance_month").val();
         var class_type = $("#class_type").val();  // ✅ Get class type selection
 
+         // ✅ Hide previous data before fetching new data
+        $("#attendanceTableBody").empty();
+        $("#attendanceTable").hide();
+        $("#error_attendance").hide();
+
+
         if (!selected_month) {
             $("#error_attendance").html("⚠ Please select a month!").show();
             return;
@@ -162,12 +279,14 @@ Monthly Attendance Report
                 "X-CSRFToken": getCookie('csrftoken')
             },
             success: function (response) {
-    console.log("Response Data:", response); // Debugging step
+                console.log("Response Data:", response); // Debugging step
 
-    // 1️⃣ Hide table & clear previous data
-    $("#attendanceTableBody").empty(); // Remove old rows
-    $("#attendanceTable").hide(); // Hide table
-    $("#error_attendance").hide(); // Hide previous error messages
+    // 1️⃣ If response contains an error message, show it and stop execution
+            if (response.error) {
+                console.warn("⚠ Error:", response.error);
+                $("#error_attendance").html(response.error).show();
+                return;
+            }
 
     // 2️⃣ Check if response is empty or null
     if (!response || response.length === 0 || response === null) {
@@ -194,7 +313,12 @@ Monthly Attendance Report
     $("#attendanceTable").show();
 },
             error: function (xhr, status, error) {
-                console.error("AJAX Error:", xhr.responseText);
+                console.error("❌ AJAX Error:", xhr.responseText);
+                let errorMsg = "Error fetching attendance. Please try again.";
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMsg = xhr.responseJSON.error;
+                }
+                $("#error_attendance").html(errorMsg).show();;
             }
         });
     });
