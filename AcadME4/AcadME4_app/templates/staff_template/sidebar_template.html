@@ -11,8 +11,12 @@
     <div class="sidebar">
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-        <div class="image">
-                <img src="{% static "dist/img/Tlogo4.jpeg" %}" class="img-circle elevation-2" alt="User Image">
+          <div class="image">
+                {% if staff.profile_pic %}
+            <img src="{{ staff.profile_pic }}" class="img-circle elevation-2" alt="User Image">
+            {% else %}
+                <img src="{% static 'dist/img/Tfemale_logo.png' %}" class="img-circle elevation-2" alt="User Image">
+            {% endif %}
         </div>
         <div class="info">
           <a href="{% url 'staff_profile' %}" class="d-block">{{ user.first_name }} {{ user.last_name }}</a>

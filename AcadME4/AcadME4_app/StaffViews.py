@@ -1,5 +1,6 @@
 import json
-
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.serializers import serialize
@@ -250,30 +251,50 @@ def staff_profile(request):
     staff = Staffs.objects.get(admin=user)
     return render(request,"staff_template/staff_profile.html",{"user":user,"staff":staff})
 
+
 def staff_profile_save(request):
-    if request.method!="POST":
+    if request.method != "POST":
         return HttpResponseRedirect(reverse("staff_profile"))
     else:
-        first_name=request.POST.get("first_name")
+        first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         address = request.POST.get("address")
-        password=request.POST.get("password")
+        password = request.POST.get("password")
+
         try:
-            customuser=CustomUser.objects.get(id=request.user.id)
-            customuser.first_name=first_name
+            customuser = CustomUser.objects.get(id=request.user.id)
+            customuser.first_name = first_name
             customuser.last_name = last_name
-            if password!=None and password!="":
+            if password is not None and password != "":
                 customuser.set_password(password)
             customuser.save()
 
-            staff=Staffs.objects.get(admin=customuser.id)
-            staff.address=address
+            staff = Staffs.objects.get(admin=customuser)
+            staff.address = address
+
+            # ✅ Handle Profile Picture Upload
+            if "profile_pic" in request.FILES:
+                profile_pic = request.FILES["profile_pic"]
+                print("✅ Profile Pic Received:", profile_pic.name)
+
+                # ✅ Save in `media/` instead of `media/profile_pics/`
+                fs = FileSystemStorage(location=settings.MEDIA_ROOT)
+                filename = fs.save(profile_pic.name, profile_pic)
+                profile_pic_url = fs.url(filename)
+                staff.profile_pic = profile_pic_url  # Save correct path (without `profile_pics/`)
+
+                # ✅ Debugging: Print the saved path
+                print("Saved Profile Picture Path:", staff.profile_pic)
+
             staff.save()
-            messages.success(request, "Successfully Updated Profile")
+            messages.success(request, "✅ Successfully Updated Profile")
             return HttpResponseRedirect(reverse("staff_profile"))
-        except:
-            messages.error(request, "Failed to Update Profile")
+
+        except Exception as e:
+            messages.error(request, f"❌ Failed to Update Profile: {str(e)}")
             return HttpResponseRedirect(reverse("staff_profile"))
+
+
 @csrf_exempt
 def staff_add_result(request):
     subjects=Subjects.objects.filter(staff_id=request.user.id)
@@ -692,3 +713,11 @@ def get_filtered_submissions(request, subject_id):
 def get_session_years(request):
     session_years = SessionYearModel.object.all().values("id", "session_start_year", "session_end_year")
     return JsonResponse(list(session_years), safe=False)
+# StaffViews.py
+from django.shortcuts import render
+from AcadME4_app.models import FAQ  # Adjust the import according to your project structure
+def staff_chatbot(request):
+    faqs = FAQ.objects.filter(user_type="staff")
+    return render(request, 'chatbot/staff_chatbot.html', {'faqs': faqs})
+
+

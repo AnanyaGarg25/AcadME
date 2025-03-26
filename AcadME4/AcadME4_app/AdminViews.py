@@ -1,5 +1,6 @@
 import json
-
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render, redirect
@@ -83,11 +84,20 @@ def add_staff_save(request):
         password=request.POST.get("password")
         address=request.POST.get("address")
         gender = request.POST.get("gender")
+        profile_pic = request.FILES.get('profile_pic', None)
+        if profile_pic:
+            fs = FileSystemStorage(location=settings.MEDIA_ROOT)  # ✅ Save directly in 'media/'
+            filename = fs.save(profile_pic.name, profile_pic)
+            profile_pic_url = fs.url(filename)  # ✅ Generates correct URL
+        else:
+            profile_pic_url = None
+
         try:
             user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=2)
             user.staffs.address=address
             user.staffs.teacher_id=teacher_id
             user.staffs.gender = gender
+            user.staffs.profile_pic = profile_pic_url
             user.save()
             messages.success(request,"Successfully Added Staff")
             return HttpResponseRedirect(reverse("add_staff"))
@@ -169,10 +179,18 @@ def add_student_save(request):
                  session_year_id=form.cleaned_data["session_year_id"]
                  course_id=form.cleaned_data["course"]
                  branch_id=form.cleaned_data["branch"]
-                 profile_pic=request.FILES['profile_pic']
+                 profile_pic = request.FILES.get('profile_pic', None)
+
+                 if profile_pic:  # ✅ Save the uploaded file
+                     fs = FileSystemStorage()
+                     filename = fs.save(profile_pic.name, profile_pic)
+                     profile_pic_url = fs.url(filename)
+                 else:
+                     profile_pic_url = None
+                 '''profile_pic=request.FILES['profile_pic']
                  fs=FileSystemStorage()
                  filename=fs.save(profile_pic.name,profile_pic)
-                 profile_pic_url=fs.url(filename)
+                 profile_pic_url=fs.url(filename)'''
 
                  try:
                      user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=3)
@@ -291,6 +309,28 @@ def edit_staff(request,staff_id):
     staff=Staffs.objects.get(admin=staff_id)
     return render(request,"admin_template/edit_staff_template.html",{"staff":staff,"id":staff_id})
 
+@csrf_exempt
+def delete_staff(request, staff_id):
+    """ Delete a staff member and their associated CustomUser account """
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+    try:
+        # Get the staff entry linked to the CustomUser
+        staff = Staffs.objects.get(admin__id=staff_id)
+        user = CustomUser.objects.get(id=staff.admin.id)  # Get the CustomUser account
+
+        staff.delete()  # Delete the staff entry
+        user.delete()  # Delete the linked CustomUser account
+
+        return JsonResponse({"status": "success", "message": "Staff deleted successfully!"})
+    except Staffs.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Staff not found."}, status=404)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "User account not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
 def edit_staff_save(request):
     if request.method!="POST":
         return HttpResponse("<h2>Method Not Allowed</h2>")
@@ -317,6 +357,14 @@ def edit_staff_save(request):
             staff_model.address=address
             staff_model.teacher_id =teacher_id
             staff_model.gender = gender
+            if 'profile_pic' in request.FILES:
+                profile_pic = request.FILES['profile_pic']
+                fs = FileSystemStorage(location=settings.MEDIA_ROOT)  # ✅ Save directly inside 'media/'
+
+                # ✅ Save File with Same Name if Exists
+                filename = fs.save(profile_pic.name, profile_pic)
+                profile_pic_url=fs.url(filename)
+                staff_model.profile_pic = profile_pic_url  # ✅ Store only the filename in DB
             staff_model.save()
             messages.success(request,"Successfully Edited Staff")
             return HttpResponseRedirect(reverse("edit_staff",kwargs={"staff_id":staff_id}))
@@ -340,6 +388,27 @@ def edit_student(request,student_id):
     form.fields['branch'].initial=student.branch_id.id if student.branch_id else ""
     form.fields['session_year_id'].initial=student.session_year_id.id
     return render(request,"admin_template/edit_student_template.html",{"form":form,"id":student_id,"username":student.admin.username, "student_course_id": student.course_id.id,"student_branch_id": student.branch_id.id if student.branch_id else None })#{"username":student.admin.username})
+
+@csrf_exempt
+def delete_student(request, student_id):
+    """ Delete a student and their associated CustomUser account """
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+    try:
+        student = Students.objects.get(admin=student_id)
+        user = student.admin  # Get the linked user account
+
+        student.delete()  # Delete student entry
+        user.delete()  # Delete the CustomUser account
+
+        return JsonResponse({"status": "success", "message": "Student deleted successfully!"})
+    except Students.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Student not found."}, status=404)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "User account not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 def edit_student_save(request):
      if request.method!="POST":
@@ -398,6 +467,26 @@ def edit_student_save(request):
             form=EditStudentForm(request.POST)
             student=Students.objects.get(admin=student_id)
             return render(request,"admin_template/edit_student_template.html",{"form":form,"id":student_id,"username":student.admin.username })
+
+@csrf_exempt
+def delete_subject(request, subject_id):
+    """ Delete a subject and its associated labs """
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+    try:
+        subject = Subjects.objects.get(id=subject_id)
+
+        # ✅ Delete associated labs first
+        Labs.objects.filter(subject=subject).delete()
+
+        subject.delete()  # ✅ Delete subject
+
+        return JsonResponse({"status": "success", "message": "Subject deleted successfully!"})
+    except Subjects.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Subject not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 def edit_subject(request,subject_id):
     subject=Subjects.objects.get(id=subject_id)
@@ -952,3 +1041,9 @@ def admin_about(request):
     # return HttpResponse("Admin About view is working!")
 
     return render(request, "admin_template/admin_about.html")
+from django.shortcuts import render
+from AcadME4_app.models import FAQ
+
+def admin_chatbot(request):
+    faqs = FAQ.objects.filter(user_type="admin")
+    return render(request, 'chatbot/admin_chatbot.html', {'faqs': faqs})

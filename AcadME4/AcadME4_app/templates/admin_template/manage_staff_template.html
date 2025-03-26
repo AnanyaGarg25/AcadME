@@ -37,7 +37,9 @@ Manage Staff
                       <th>Gender</th>
                       <th>User Name</th>
                       <th>Email</th>
+
                        <th>Address</th>
+                        <th>Profile Picture</th>
                        <th>Last Login</th>
                        <th>Date Joined</th>
                       <th>Action</th>
@@ -54,9 +56,16 @@ Manage Staff
                       <td>{{staff.admin.username}}</td>
                       <td>{{staff.admin.email}}</td>
                       <td>{{staff.address}}</td>
+                        <td>
+                            {% if staff.profile_pic %}
+                               <img src="{{ staff.profile_pic }}" alt="Profile Pic" width="50" height="50" style="border-radius: 50%;">
+
+                            {% endif %}
+                        </td>
                       <td>{{staff.admin.last_login}}</td>
                       <td>{{staff.admin.date_joined}}</td>
                       <td><a href="/edit_staff/{{staff.admin.id}}" class="btn btn-success">Edit</a></td>
+                      <td><button class="btn btn-danger delete-staff" data-staff-id="{{ staff.admin.id }}">Delete</button></td>
                     </tr>
                   {% endfor %}
                   </tbody>
@@ -71,3 +80,32 @@ Manage Staff
         </div>
     </section>
 {% endblock main_content %}
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+        $(".delete-staff").click(function () {
+            let staffId = $(this).data("staff-id");
+
+            if (confirm("Are you sure you want to delete this staff member?")) {
+                $.ajax({
+                    url: "/delete-staff/" + staffId + "/",
+                    type: "POST",
+                    headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.status === "success") {
+                            alert("✅ Staff deleted successfully!");
+                            location.reload();  // ✅ Refresh page after deletion
+                        } else {
+                            alert("❌ Error: " + response.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        alert("❌ Error in request: " + xhr.responseText);
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock custom_js %}

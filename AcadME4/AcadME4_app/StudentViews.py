@@ -1,5 +1,6 @@
 from time import localtime
-
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect,HttpResponse
@@ -31,7 +32,7 @@ from django.http import JsonResponse
 from AcadME4_app.models import Attendance, AttendanceReport
 import calendar
 import datetime
-
+from django.core.files.storage import FileSystemStorage
 
 def student_home(request):
     student_obj = Students.objects.get(admin=request.user.id)
@@ -175,31 +176,49 @@ def student_notifications(request):
         'notifications': notifications,
         'unread_notifications_count': unread_notifications_count
     })
-
 def student_profile_save(request):
-    if request.method!="POST":
+    if request.method != "POST":
         return HttpResponseRedirect(reverse("student_profile"))
     else:
-        first_name=request.POST.get("first_name")
+        first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         address = request.POST.get("address")
-        password=request.POST.get("password")
+        password = request.POST.get("password")
+
         try:
-            customuser=CustomUser.objects.get(id=request.user.id)
-            customuser.first_name=first_name
+            customuser = CustomUser.objects.get(id=request.user.id)
+            customuser.first_name = first_name
             customuser.last_name = last_name
-            if password!=None and password!="":
+            if password is not None and password != "":
                 customuser.set_password(password)
             customuser.save()
 
-            student=Students.objects.get(admin=customuser)
-            student.address=address
+            student = Students.objects.get(admin=customuser)
+            student.address = address
+
+            # ✅ Handle Profile Picture Upload
+            if "profile_pic" in request.FILES:
+                profile_pic = request.FILES["profile_pic"]
+                print("✅ Profile Pic Received:", profile_pic.name)
+
+                # ✅ Save in `media/` instead of `media/profile_pics/`
+                fs = FileSystemStorage(location=settings.MEDIA_ROOT)
+                filename = fs.save(profile_pic.name, profile_pic)
+                profile_pic_url = fs.url(filename)
+                student.profile_pic = profile_pic_url  # Save correct path (without `profile_pics/`)
+
+                # ✅ Debugging: Print the saved path
+                print("Saved Profile Picture Path:", student.profile_pic)
+
             student.save()
-            messages.success(request, "Successfully Updated Profile")
+            messages.success(request, "✅ Successfully Updated Profile")
             return HttpResponseRedirect(reverse("student_profile"))
-        except:
-            messages.error(request, "Failed to Update Profile")
+
+        except Exception as e:
+            messages.error(request, f"❌ Failed to Update Profile: {str(e)}")
             return HttpResponseRedirect(reverse("student_profile"))
+
+
 
 def student_view_result(request):
     student=Students.objects.get(admin=request.user.id)
@@ -355,3 +374,10 @@ def student_subjects(request):
         "subjects": subjects,
         "subject_count": subject_count
     })
+# StudentViews.py
+from django.shortcuts import render
+from AcadME4_app.models import FAQ  # Adjust the import according to your project structure
+
+def student_chatbot(request):
+    faqs = FAQ.objects.filter(user_type="student")
+    return render(request, 'chatbot/student_chatbot.html', {'faqs': faqs})

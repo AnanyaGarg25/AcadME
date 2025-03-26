@@ -1,136 +1,184 @@
 {% load static %}
-<! DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>AcadME</title>
-  <!-- Tell the browser to be responsive to screen width -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="shortcut icon" href="{% static 'dist/img/BV_logo.png' %}">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="{% static "plugins/fontawesome-free/css/all.min.css" %}">
-  <!-- Ionicons -->
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-  <!-- Tempusdominus Bbootstrap 4 -->
-  <link rel="stylesheet" href="{% static "plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css" %}">
-  <!-- iCheck -->
-  <link rel="stylesheet" href="{% static "plugins/icheck-bootstrap/icheck-bootstrap.min.css" %}">
-  <!-- JQVMap -->
-  <link rel="stylesheet" href="{% static "plugins/jqvmap/jqvmap.min.css" %}">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="{% static "dist/css/adminlte.min.css"%}">
-  <!-- overlayScrollbars -->
-  <link rel="stylesheet" href="{% static "plugins/overlayScrollbars/css/OverlayScrollbars.min.css" %}">
-  <!-- Daterange picker -->
-  <link rel="stylesheet" href="{% static "plugins/daterangepicker/daterangepicker.css" %}">
-  <!-- summernote -->
-  <link rel="stylesheet" href="{% static "plugins/summernote/summernote-bs4.css" %}">
-  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/jqvmap/jqvmap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.css' %}">
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-    {% block custom_css %}{%  endblock custom_css %}
+
+  {% block custom_css %}{% endblock %}
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
   <!-- Navbar -->
   <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-    <!-- Left navbar links -->
     <ul class="navbar-nav">
       <li class="nav-item">
         <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
       </li>
-
     </ul>
-<h4 style="margin-left:10px;margin-top:5px;">Admin Login</h4>
-    <!-- Right navbar links -->
+    <h4 style="margin-left:10px;margin-top:5px;">Admin Login</h4>
     <ul class="navbar-nav ml-auto">
-      <!-- Messages Dropdown Menu -->
-
       <li class="nav-item">
-        <a class="nav-link"  href="{% url 'logout' %}">
-         Logout
-        </a>
+        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
       </li>
     </ul>
-
-
-    <!-- Right navbar links -->
   </nav>
   <!-- /.navbar -->
 
-  <!-- Main Sidebar Container -->
   {% include 'admin_template/sidebar_template.html' with user=user id=id %}
 
-
-  <!-- Content Wrapper. Contains page content -->
-     <div class="content-wrapper">
-       <!-- Content Header (Page header) -->
+  <div class="content-wrapper">
     <div class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
             <h1 class="m-0 text-dark">
-                {% block page_title %}
-                {% endblock page_title %}
+                {% block page_title %}{% endblock %}
             </h1>
-          </div><!-- /.col -->
+          </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="{% url 'admin_home' %}">Home</a></li>
             </ol>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
-      </div><!-- /.container-fluid -->
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- /.content-header -->
-     {% block main_content %}{% endblock main_content %}
 
+    {% block main_content %}{% endblock %}
   </div>
   <!-- /.content-wrapper -->
-    {% include 'admin_template/footer.html' %}
 
+  {% include 'admin_template/footer.html' %}
 </div>
-<!-- ./wrapper -->
+<!-- Floating Chatbot Icon with Animation -->
+<style>
+    /* Chatbot Icon Styling */
+    #chatbot-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        text-align: center;
+    }
 
-<!-- jQuery -->
-<script src="{% static "plugins/jquery/jquery.min.js" %}"></script>
-<!-- jQuery UI 1.11.4 -->
-<script src="{% static "plugins/jquery-ui/jquery-ui.min.js" %}"></script>
-<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+    #chatbot-icon img {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        border: 3px solid #ff9800;
+        box-shadow: 0px 0px 15px rgba(255, 152, 0, 0.7);
+        animation: bounce 1.5s infinite;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    #chatbot-icon img:hover {
+        transform: scale(1.1);
+        box-shadow: 0px 0px 20px rgba(255, 152, 0, 1);
+    }
+
+    /* Bounce Animation */
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* Speech Bubble */
+    .chatbot-text {
+        position: absolute;
+        bottom: 80px;
+        right: 10px;
+        background: #ff9800;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        animation: fadeInOut 3s infinite;
+    }
+
+    /* Speech Bubble Animation */
+    @keyframes fadeInOut {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    /* Speech Bubble Arrow */
+    .chatbot-text::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 20%;
+        border-width: 8px;
+        border-style: solid;
+        border-color: #ff9800 transparent transparent transparent;
+    }
+</style>
+
+<div id="chatbot-container">
+    <div class="chatbot-text">Hi! I am here to help.</div>
+    <div id="chatbot-icon">
+        {% if user.user_type == "1" or user.is_superuser %}
+            <a href="{% url 'admin_chatbot' %}" target="_blank">
+                <img src="{% static 'dist/img/chatbot_icon.jpg' %}" alt="Chatbot">
+            </a>
+        {% elif user.user_type == "2" %}
+            <a href="{% url 'staff_chatbot' %}">
+                <img src="{% static 'dist/img/chatbot_icon.jpg' %}" alt="Chatbot">
+            </a>
+        {% elif user.user_type == "3" %}
+            <a href="{% url 'student_chatbot' %}">
+                <img src="{% static 'dist/img/chatbot_icon.jpg' %}" alt="Chatbot">
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+
+<!-- JS Files -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
 <script>
   $.widget.bridge('uibutton', $.ui.button)
 </script>
-<!-- Bootstrap 4 -->
-<script src="{% static "plugins/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-<!-- ChartJS -->
-<script src="{% static "plugins/chart.js/Chart.min.js" %}"></script>
-<!-- Sparkline -->
-<script src="{% static "plugins/sparklines/sparkline.js" %}"></script>
-<!-- JQVMap -->
-<script src="{% static "plugins/jqvmap/jquery.vmap.min.js" %}"></script>
-<script src="{% static "plugins/jqvmap/maps/jquery.vmap.usa.js" %}"></script>
-<!-- jQuery Knob Chart -->
-<script src="{% static "plugins/jquery-knob/jquery.knob.min.js" %}"></script>
-<!-- daterangepicker -->
-<script src="{% static "plugins/moment/moment.min.js" %}"></script>
-<script src="{% static "plugins/daterangepicker/daterangepicker.js" %}"></script>
-<!-- Tempusdominus Bootstrap 4 -->
-<script src="{% static "plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js" %}"></script>
-<!-- Summernote -->
-<script src="{% static "plugins/summernote/summernote-bs4.min.js" %}"></script>
-<!-- overlayScrollbars -->
-<script src="{% static "plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js" %}"></script>
-<!-- AdminLTE App -->
-<script src="{% static "dist/js/adminlte.js" %}"></script>
-<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-<script src="{% static "dist/js/pages/dashboard.js" %}"></script>
-<!-- AdminLTE for demo purposes -->
-<script src="{% static "dist/js/demo.js" %}"></script>
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
+<script src="{% static 'plugins/sparklines/sparkline.js' %}"></script>
+<script src="{% static 'plugins/jqvmap/jquery.vmap.min.js' %}"></script>
+<script src="{% static 'plugins/jqvmap/maps/jquery.vmap.usa.js' %}"></script>
+<script src="{% static 'plugins/jquery-knob/jquery.knob.min.js' %}"></script>
+<script src="{% static 'plugins/moment/moment.min.js' %}"></script>
+<script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
+<script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+<script src="{% static 'plugins/summernote/summernote-bs4.min.js' %}"></script>
+<script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+<script src="{% static 'dist/js/adminlte.js' %}"></script>
+<script src="{% static 'dist/js/pages/dashboard.js' %}"></script>
+<script src="{% static 'dist/js/demo.js' %}"></script>
 
-{% block custom_js %}
-{% endblock custom_js %}
-
-
+{% block custom_js %}{% endblock %}
 </body>
 </html>

@@ -43,3 +43,9 @@ def GetUserDetails(request):
 def logout_user(request):
     logout(request)
     return HttpResponseRedirect("/")
+
+def student_home(request):
+    return render(request, "student_home_template.html", {"user_id": request.user.id})
+
+def staff_home(request):
+    return render(request, "staff_home_template.html", {"user_id": request.user.id})

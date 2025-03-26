@@ -149,5 +149,16 @@ path("student_subjects", StudentViews.student_subjects, name="student_subjects")
 path('get_subjects_by_course_and_branch/',  AdminViews.get_subjects_by_course_and_branch,name='get_subjects_by_course_and_branch'),
 path('get_teachers_by_subject/',  AdminViews.get_teachers_by_subject, name='get_teachers_by_subject'),
                   path('get-session-years/', StaffViews.get_session_years, name='get_session_years'),
+path('delete-student/<int:student_id>/', AdminViews.delete_student, name='delete_student'),
+path('delete-staff/<int:staff_id>/', AdminViews.delete_staff, name='delete_staff'),
+path('delete-subject/<int:subject_id>/', AdminViews.delete_subject, name='delete_subject'),
+path('staff/chatbot/', StaffViews.staff_chatbot, name='staff_chatbot'),
+path('student/chatbot/', StudentViews.student_chatbot, name='student_chatbot'),
+path('admin-chatbot/', AdminViews.admin_chatbot, name='admin_chatbot'),
+
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

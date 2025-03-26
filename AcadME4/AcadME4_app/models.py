@@ -52,6 +52,7 @@ class Staffs(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     teacher_id = models.CharField(max_length=20, default="Not Assigned")
     address = models.TextField()
+    profile_pic = models.FileField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     objects=models.Manager()
@@ -75,7 +76,7 @@ class Branch(models.Model):
 class Subjects(models.Model):
     id = models.AutoField(primary_key=True)
     subject_name = models.CharField(max_length=255)
-    subject_code=models.CharField(max_length=50,default="")
+    subject_code=models.CharField(max_length=50,unique=True,default="")
     course_id = models.ForeignKey(Courses,on_delete=models.CASCADE,default=1)
     branch_id = models.ForeignKey(Branch, on_delete=models.DO_NOTHING,default=1)
     staff_id=models.ForeignKey(CustomUser,on_delete=models.CASCADE)
@@ -99,8 +100,8 @@ class Students(models.Model):
     id = models.AutoField(primary_key=True)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     roll_no = models.CharField(max_length=20,unique=True,default="Not Assigned")
-    btbt_id= models.CharField(max_length=30,default="Not Assigned")
-    profile_pic=models.FileField()
+    btbt_id= models.CharField(max_length=30,unique=True,default="Not Assigned")
+    profile_pic=models.FileField(upload_to="", null=True, blank=True)
     address = models.TextField()
     course_id=models.ForeignKey(Courses,on_delete=models.DO_NOTHING)
     #branch_id=models.ForeignKey(Branch,on_delete=models.DO_NOTHING)
@@ -290,3 +291,15 @@ class Syllabus(models.Model):
 
     def __str__(self):
         return f"{self.title} (Syllabus)"
+class FAQ(models.Model):
+    USER_TYPE_CHOICES = (
+        ("admin", "Admin"),
+        ("staff", "Staff"),
+        ("student", "Student"),
+    )
+    question = models.CharField(max_length=255, unique=True)
+    answer = models.TextField()
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default="admin")
+
+    def __str__(self):
+        return self.question
