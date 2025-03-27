@@ -18,7 +18,7 @@ Student Feedback
                <table class="table table-bordered">
                    <thead class="thead-light">
                        <tr>
-                           <th>ID</th>
+
                            <th>BTBT ID</th>
                            <th>Course</th>
                            <th>Student ID</th>
@@ -32,7 +32,7 @@ Student Feedback
                    <tbody>
                    {% for feedback in feedbacks %}
                    <tr>
-                       <td>{{ feedback.id }}</td>
+
                        <td>{{ feedback.student_id.btbt_id }}</td> <!-- BTBT ID -->
                        <td>{{ feedback.student_id.course_id.course_name }}</td> <!-- Course -->
                        <td>{{ feedback.student_id.admin.id }}</td>

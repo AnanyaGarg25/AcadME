@@ -3,7 +3,7 @@
 
 {% block main_content %}
 <div class="container mt-4">
-    <h3 class="text-center">Student Submissions</h3>
+    <h3 class="text-center text-primary">Student Submissions</h3>
 
     <!-- Course Dropdown -->
     <div class="mb-3">
@@ -29,9 +29,9 @@
         </select>
     </div>
 
-    <table class="table table-bordered mt-4">
-        <thead>
-            <tr class="table-dark">
+    <table class="table table-bordered mt-4 table-striped">
+        <thead class="table-dark">
+            <tr>
                 <th>Assignment</th>
                 <th>Student</th>
                 <th>Submitted At</th>
@@ -46,6 +46,92 @@
         </tbody>
     </table>
 </div>
+
+<!-- Custom CSS -->
+<style>
+    body {
+        background-color: #f7f8fa;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .container {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h3 {
+        color: #007bff;
+        font-size: 2em;
+        margin-bottom: 30px;
+    }
+
+    .form-label {
+        font-size: 1.1em;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-select {
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 1em;
+        background-color: #f0f8ff;
+        border: 1px solid #ccc;
+    }
+
+    .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+    }
+
+    .table {
+        border-radius: 8px;
+        margin-top: 30px;
+        background-color: #fafafa;
+        border: 1px solid #e0e0e0;
+    }
+
+    .table th, .table td {
+        padding: 15px;
+        text-align: center;
+        font-size: 1em;
+    }
+
+    .table-striped tbody tr:nth-child(odd) {
+        background-color: #f9f9f9;
+    }
+
+    .table-dark {
+        background-color: #343a40;
+        color: white;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+
+    .alert {
+        font-size: 1.1em;
+    }
+</style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -161,4 +247,5 @@
         });
     });
 </script>
+
 {% endblock %}

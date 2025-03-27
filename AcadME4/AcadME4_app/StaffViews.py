@@ -226,7 +226,8 @@ def get_attendance_dates(request):
     session_year_obj = SessionYearModel.object.get(id=session_year_id)
     today = timezone.now().date()
     three_days_ago = today - timedelta(days=3)
-    attendance=Attendance.objects.filter(subject_id=subject_obj,session_year_id=session_year_obj, class_type=class_type,attendance_date__range=[three_days_ago, today])
+    attendance=Attendance.objects.filter(subject_id=subject_obj,session_year_id=session_year_obj, class_type=class_type, attendance_date__gte=three_days_ago,  # Greater than or equal to
+    attendance_date__lte=timezone.now() )
     attendance_obj=[]
     for attendance_single in attendance:
         data={"id":attendance_single.id,"attendance_date":str(attendance_single.attendance_date),"session_year_id":attendance_single.session_year_id.id}

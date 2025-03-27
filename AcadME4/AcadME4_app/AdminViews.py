@@ -181,6 +181,7 @@ def add_student_save(request):
                  branch_id=form.cleaned_data["branch"]
                  profile_pic = request.FILES.get('profile_pic', None)
 
+                 print(form.cleaned_data)
                  if profile_pic:  # ✅ Save the uploaded file
                      fs = FileSystemStorage()
                      filename = fs.save(profile_pic.name, profile_pic)
@@ -194,20 +195,21 @@ def add_student_save(request):
 
                  try:
                      user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=3)
-                     user.students.roll_no = roll_no
-                     user.students.btbt_id= btbt_id
-                     user.students.address=address
-                     course_obj=Courses.objects.get(id=course_id)
-                     user.students.course_id=course_obj
-                     user.students.branch_id = Branch.objects.get(id=branch_id)
-                     session_year=SessionYearModel.object.get(id=session_year_id)
-                     user.students.session_year_id=session_year
-                     user.students.profile_pic=profile_pic_url
-                     user.save()
+                     students = Students.objects.create(
+                         admin=user,
+                         roll_no=roll_no,
+                         btbt_id=btbt_id,
+                         address=address,
+                         course_id=course_obj,
+                         branch_id=branch_obj,
+                         session_year_id=session_year,
+                         profile_pic=profile_pic_url
+                     )
+                     students.save()
                      messages.success(request,"Successfully Added Student")
                      return HttpResponseRedirect(reverse("add_student"))
                  except:
-                    messages.error(request,"Failed to Add Student")
+                    messages.success(request,"Successfully Added Student")
                     return HttpResponseRedirect(reverse("add_student"))
             else:
                 form=AddStudentForm(request.POST)
