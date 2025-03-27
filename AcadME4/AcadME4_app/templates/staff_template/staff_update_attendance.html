@@ -178,7 +178,7 @@ View Update Attendance
                     $("#fetch_student_block").show();
                     $("#attendance_date").html(html_data);
                 } else {
-                    $("#error_attendance").html("No attendance data found").show();
+                    $("#error_attendance").html("You can only update attendance for the past 3 days. No records available.").show();
                     $("#attendance_block").hide();
                     $("#fetch_student_block").hide();
                     $("#attendance_date").html("");

@@ -21,6 +21,7 @@ Home
             </div>
           </div>
 
+
 <style>
     /* Light Pink Gradient for Pastel Card */
     .pastel-card {
@@ -265,6 +266,12 @@ Home
     .small-box-footer span {
         color: #FFF !important;
     }
+       .card-success:not(.card-outline)>.card-header {
+    background-color: #339DFF;
+}
+       .card-info:not(.card-outline)>.card-header {
+    background-color: #339DFF;
+}
 </style>
           <!-- ./col -->
           <div class="col-lg-3 col-6">
@@ -359,6 +366,41 @@ Home
         color: #FFF !important; /* Ensure White on Hover */
     }
 </style>
+           <!-- 📊 New Charts Row -->
+        <div class="row">
+            <!-- Bar Chart: Total Assignments Submitted -->
+            <div class="col-lg-6">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">Total Assignments Submitted</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="assignmentsChart" style="min-height: 250px; height: 250px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie Chart: Subjects Taught -->
+            <div class="col-lg-6">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">Subjects Taught by Me</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- The canvas size is controlled via HTML attributes -->
+                        <canvas id="subjectsChart" style="min-height: 250px; height: 250px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
       </div>
 <!-- Mini Calendar Row -->
@@ -515,10 +557,70 @@ Home
 
 {% block custom_js %}
 <!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 <script>
+    // 📊 Bar Graph: Total Assignments Submitted
+    var assignmentsCtx = document.getElementById('assignmentsChart').getContext('2d');
+    var assignmentsChart = new Chart(assignmentsCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ assignment_titles|safe }},
+            datasets: [{
+                label: 'Total Submissions',
+                data: {{ assignment_counts|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // Function to generate an array of unique colors using HSL
+    function generateColors(count) {
+      let colors = [];
+      for (let i = 0; i < count; i++) {
+        let hue = Math.floor(360 * i / count);
+        colors.push(`hsl(${hue}, 70%, 50%)`);
+      }
+      return colors;
+    }
+
+    // Data for Subjects Taught pie chart
+    var subjectNames = {{ subject_names|safe }};
+    var studentCounts = {{ student_counts|safe }};
+    // Generate unique colors based on the number of subjects
+    var uniqueColors = generateColors(subjectNames.length);
+
+    // Create the pie chart with unique colors and controlled (small) size via canvas attributes
+    var subjectsCtx = document.getElementById('subjectsChart').getContext('2d');
+    var subjectsChart = new Chart(subjectsCtx, {
+        type: 'pie',
+        data: {
+            labels: subjectNames,
+            datasets: [{
+                data: studentCounts,
+                backgroundColor: uniqueColors
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Size controlled via the canvas attributes in HTML
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
   $(document).ready(function(){
-  // Digital Clock: update every second
+    // Digital Clock: update every second
     function updateClock() {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, '0');
@@ -558,25 +660,23 @@ Home
     };
 
     function saveTasks() {
-    var tasks = [];
-    $("#todoList li").each(function () {
-        tasks.push($(this).text().replace("×", "").trim());
-    });
-
-    // Use a unique key for each user
-    var userId = "{{ request.user.id }}";  // Get the logged-in user's ID from Django
-    localStorage.setItem("tasks_" + userId, JSON.stringify(tasks));
-}
+      var tasks = [];
+      $("#todoList li").each(function () {
+          tasks.push($(this).text().replace("×", "").trim());
+      });
+      // Use a unique key for each user
+      var userId = "{{ request.user.id }}";  // Get the logged-in user's ID from Django
+      localStorage.setItem("tasks_" + userId, JSON.stringify(tasks));
+    }
 
     function loadTasks() {
-    var userId = "{{ request.user.id }}";  // Get the logged-in user's ID
-    var tasks = JSON.parse(localStorage.getItem("tasks_" + userId)) || [];
-
-    tasks.forEach(function (task) {
-        var listItem = `<li class="list-group-item">${task} <button class="btn-remove" onclick="removeTask(this)">×</button></li>`;
-        $("#todoList").append(listItem);
-    });
-}
+      var userId = "{{ request.user.id }}";  // Get the logged-in user's ID
+      var tasks = JSON.parse(localStorage.getItem("tasks_" + userId)) || [];
+      tasks.forEach(function (task) {
+          var listItem = `<li class="list-group-item">${task} <button class="btn-remove" onclick="removeTask(this)">×</button></li>`;
+          $("#todoList").append(listItem);
+      });
+    }
   });
 </script>
 {% endblock custom_js %}

@@ -66,7 +66,7 @@ class Courses(models.Model):
 
 class Branch(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     course_id = models.ForeignKey(Courses, on_delete=models.CASCADE, default=1)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -128,7 +128,7 @@ class Attendance(models.Model):
 
 class AttendanceReport(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id=models.ForeignKey(Students,on_delete=models.DO_NOTHING)
+    student_id=models.ForeignKey(Students,on_delete=models.CASCADE)
     attendance_id=models.ForeignKey(Attendance,on_delete=models.CASCADE)
     status=models.BooleanField(default=False)
     class_type = models.CharField(

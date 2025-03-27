@@ -209,12 +209,16 @@ Take Attendance
                 headers: { "X-CSRFToken": "{{ csrf_token }}" }
             })
             .done(function (response) {
-                alert(response === "OKAY" ? "Attendance Saved" : "Error in Saving Data");
-                location.reload();
-            })
-            .fail(function () {
-                alert("Error in Saving Attendance");
-            });
+                if (response.includes("ERROR")) {
+            alert("❌ " + response);  // ✅ Display the actual error message
+        } else {
+            alert("✅ Attendance Saved Successfully!");
+            location.reload();
+        }
+    })
+    .fail(function (xhr) {
+        alert("❌ " + xhr.responseText);  // ✅ Show actual error from Django
+    });
         });
     });
 </script>

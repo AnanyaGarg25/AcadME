@@ -161,4 +161,3 @@ path('admin-chatbot/', AdminViews.admin_chatbot, name='admin_chatbot'),
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

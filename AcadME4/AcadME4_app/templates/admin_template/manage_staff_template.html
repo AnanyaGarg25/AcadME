@@ -30,7 +30,6 @@ Manage Staff
                 <table class="table table-hover text-nowrap">
                   <thead>
                     <tr>
-                      <th>ID</th>
                       <th>First Name</th>
                       <th>Last Name</th>
                       <th>Teacher Id</th>
@@ -48,7 +47,6 @@ Manage Staff
                   <tbody>
                   {% for staff in staffs %}
                     <tr>
-                      <td>{{staff.admin.id}}</td>
                       <td>{{staff.admin.first_name}}</td>
                       <td>{{staff.admin.last_name}}</td>
                       <td>{% if staff.teacher_id %}{{ staff.teacher_id }}{% else %}Not Assigned{% endif %}</td>

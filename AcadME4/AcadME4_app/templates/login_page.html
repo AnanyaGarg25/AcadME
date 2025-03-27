@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,130 +9,333 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="{% static 'assests/plugins/bootstrap/css/bootstrap.min.css' %}">
+
+    <div id="particles-js"></div>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: url("{% static 'dist/img/hd.avif' %}") no-repeat center center fixed;
+            background: url("{% static 'dist/img/back1.jpg' %}") no-repeat center center fixed;
             background-size: cover;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            animation: fadeIn 1s ease-in-out; /* Smooth fade-in effect */
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+
+        /* Left Side Animated Tagline */
+        .tagline {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            text-transform: none;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: absolute;
+            left: 5%;
+            top: 20%;
         }
+
+        .tagline span {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-in-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0px); }
+        }
+
+        /* Centered Sign-in Box */
         .login-container {
-            background: linear-gradient(to top, rgba(255, 255, 255, 0.96), rgba(240, 248, 255, 0.9)); /* Lighter white gradient */
+            background: linear-gradient(135deg, rgba(255, 0, 150, 0.2), rgba(0, 255, 255, 0.2), rgba(0, 128, 255, 0.2), rgba(0, 255, 0, 0.2));
             border-radius: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             padding: 40px;
             width: 400px;
             text-align: center;
-            transition: box-shadow 0.3s ease-in-out;
-        }
-        .login-container:hover {
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Slight shadow effect */
-        }
-        .logo {
-            width: 80px;
-            margin-bottom: 20px;
-        }
-        .login-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        .form-group {
+            backdrop-filter: blur(12px);
             position: relative;
-            margin-bottom: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+            border: 2px solid transparent;
+            transition: all 0.4s ease-in-out;
         }
-        .form-group i {
-            position: absolute;
-            color: #999;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        .form-group .fa-envelope,
-        .form-group .fa-lock {
-            left: 15px;
-        }
-        .form-group .toggle-password {
-            right: 15px;
-            cursor: pointer;
-        }
-        .form-control {
-            padding: 15px 40px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            width: 100%;
-            box-sizing: border-box;
-            background-color: #f0f0f0;
-            transition: all 0.3s ease-in-out;
-        }
-        .form-control:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
-        }
-        .forgot-password {
-            display: block;
-            text-align: right;
-            margin-top: 5px;
-            color: #3498db;
-            text-decoration: none;
-            transition: color 0.3s ease-in-out;
-        }
-        /*.forgot-password:hover {
-            color: #1d6fa5;
-        }*/
+
         .login-btn {
-            background: #333;
+            background: linear-gradient(90deg, #ff6b6b, #6b6bff);
             color: white;
-            padding: 15px 20px;
+            padding: 15px;
             border: none;
             border-radius: 8px;
-            cursor: pointer;
             width: 100%;
-            margin-top: 20px;
-            transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+            transition: 0.3s;
+            animation: floatButton 3s ease-in-out infinite;
         }
+
+        @keyframes floatButton {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Floating Transparent Bubbles */
+        .floating-bubble {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            animation: floatAnim 10s infinite ease-in-out alternate, glowEffect 6s infinite ease-in-out;
+        }
+
+        @keyframes floatAnim {
+            0% { transform: translateY(0px) translateX(0px) scale(1); }
+            50% { transform: translateY(-40px) translateX(40px) scale(1.2); }
+            100% { transform: translateY(0px) translateX(0px) scale(1); }
+        }
+
+        @keyframes glowEffect {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .bubble1 { top: 5%; left: 10%; }
+        .bubble2 { top: 20%; left: 70%; }
+        .bubble3 { top: 60%; left: 20%; }
+        .bubble4 { top: 80%; left: 80%; }
+        .bubble5 { top: 30%; left: 50%; }
+
+        /* Spinning Atom Animation (Left Side) */
+        .atom {
+            position: absolute;
+            left: 10%;
+            top: 50%;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: transparent;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            animation: spinAtom 6s linear infinite;
+        }
+
+        .electron {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: white;
+            border-radius: 50%;
+            animation: orbit 3s linear infinite;
+        }
+
+        .electron:nth-child(1) { top: -10px; left: 50%; animation-delay: 0s; }
+        .electron:nth-child(2) { top: 50%; left: -10px; animation-delay: 1s; }
+        .electron:nth-child(3) { top: 50%; right: -10px; animation-delay: 2s; }
+
+        @keyframes spinAtom {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes orbit {
+            from { transform: rotate(0deg) translateX(40px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(40px) rotate(-360deg); }
+        }
+       #darkModeToggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, #ff6b6b, #6b6bff);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+}
+
+#darkModeToggle:hover {
+    background: linear-gradient(135deg, #ff8585, #8585ff);
+    transform: translateY(-2px);
+    box-shadow: 4px 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+#darkModeToggle:active {
+    transform: scale(0.95);
+    box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark Mode Effect */
+.dark-mode {
+    background: linear-gradient(135deg, #000428, #004e92);
+    color: white;
+    transition: background 0.5s ease-in-out;
+}
+        #particles-js {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+.logo {
+    width: 105px;  /* Adjust the width */
+    height: 105px;  /* Adjust the height */
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 0px 0px 8px rgba(255, 255, 255, 0.4);
+    margin-bottom: 10px;
+}
+
+.form-group .fa-envelope,
+.form-group .fa-lock {
+    left: 15px;
+}
+.login-container:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Slight shadow effect */
+}
+        .form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+.form-group i {
+    position: absolute;
+    color: #999;
+    top: 50%;
+    transform: translateY(-50%);
+}
+    .form-group .toggle-password {
+    right: 15px;
+    cursor: pointer;
+}
+.form-control {
+    padding: 15px 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #f0f0f0;
+    transition: all 0.3s ease-in-out;
+}
+.form-control:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+}
         .login-btn:hover {
-            background: #555;
-            transform: scale(1.05);
-        }
+    background: #555;
+    transform: scale(1.05);
+}
     </style>
 </head>
 <body>
+<!-- Incorrect Credentials Message -->
+    {% if messages %}
+        <div class="alert alert-danger" id="error-message">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="tagline">
+        <span id="word1">Welcome</span>
+        <span id="word2">to the</span>
+        <span id="word3">AcadME Portal</span>
+    </div>
+
     <div class="login-container">
         <img src="{% static 'assests/img/BV_logo.png' %}" class="logo" alt="Logo">
-        <h2 class="login-title">Sign in with email</h2>
+        <h3 class="login-title">Sign in with email</h3>
         <form action="/doLogin" method="post">
             {% csrf_token %}
             <div class="form-group">
                 <i class="fas fa-envelope"></i>
                 <input class="form-control" type="text" placeholder="Email" name="email">
+
             </div>
             <div class="form-group">
                 <i class="fas fa-lock"></i>
+
                 <input class="form-control" type="password" id="password" placeholder="Password" name="password">
                 <i class="fas fa-eye-slash toggle-password" id="toggle-password"></i>
             </div>
-            <!--<a href="{#}" class="forgot-password">Forgot password?</a>-->
             <button class="login-btn" type="submit">Login</button>
         </form>
     </div>
+
+    <!-- Floating Gradient Bubbles -->
+    <div class="floating-bubble bubble1"></div>
+    <div class="floating-bubble bubble2"></div>
+    <div class="floating-bubble bubble3"></div>
+    <div class="floating-bubble bubble4"></div>
+    <div class="floating-bubble bubble5"></div>
+
+    <!-- Spinning Atom on Left Side -->
+    <div class="atom">
+        <div class="electron"></div>
+        <div class="electron"></div>
+        <div class="electron"></div>
+    </div>
+<div class="waves"></div>
+
     <script>
-        document.getElementById('toggle-password').addEventListener('click', function(event) {
-            event.stopPropagation();
-            let passwordField = document.getElementById('password');
-            let type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordField.setAttribute('type', type);
-            this.classList.toggle('fa-eye-slash');
-            this.classList.toggle('fa-eye');
-        });
+        function animateTagline() {
+            document.getElementById("word1").style.animationDelay = "0s";
+            document.getElementById("word2").style.animationDelay = "1s";
+            document.getElementById("word3").style.animationDelay = "2s";
+        }
+        setTimeout(animateTagline, 500);
     </script>
+ <!-- Auto-hide Error Message After 3 Seconds -->
+    <script>
+        setTimeout(function() {
+            var errorMsg = document.getElementById("error-message");
+            if (errorMsg) {
+                errorMsg.style.display = "none";
+            }
+        }, 3000);
+    </script>
+
+
+
+<button id="darkModeToggle">Dark Mode</button>
+
+<script>
+document.getElementById("darkModeToggle").addEventListener("click", function () {
+    document.body.classList.toggle("dark-mode");
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+<script>
+particlesJS("particles-js", {
+    particles: {
+        number: { value: 50 },
+        shape: { type: "circle" },
+        opacity: { value: 0.3 },
+        size: { value: 3 },
+        move: { enable: true, speed: 2 }
+    }
+});
+
+    document.getElementById('toggle-password').addEventListener('click', function(event) {
+        event.stopPropagation();
+        let passwordField = document.getElementById('password');
+        let type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        this.classList.toggle('fa-eye-slash');
+        this.classList.toggle('fa-eye');
+});
+</script>
+
 </body>
 </html>

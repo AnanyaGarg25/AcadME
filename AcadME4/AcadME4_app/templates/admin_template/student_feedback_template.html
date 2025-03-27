@@ -14,108 +14,119 @@ Student Feedback
               </div>
               <!-- /.card-header -->
               <!-- form start -->
-           <div class="table">
-               <table class="table">
-                   <tr>
-                       <th>ID</th>
-                       <th>Student ID</th>
-                       <th>Student Name</th>
-                       <th>Student Session</th>
-                       <th>Message</th>
-                       <th>Sended On</th>
-                       <th>Reply</th>
-
-
-                   </tr>
+           <div class="table-responsive">
+               <table class="table table-bordered">
+                   <thead class="thead-light">
+                       <tr>
+                           <th>ID</th>
+                           <th>BTBT ID</th>
+                           <th>Course</th>
+                           <th>Student ID</th>
+                           <th>Student Name</th>
+                           <th>Student Session</th>
+                           <th>Message</th>
+                           <th>Sent On</th>
+                           <th>Reply</th>
+                       </tr>
+                   </thead>
+                   <tbody>
                    {% for feedback in feedbacks %}
                    <tr>
                        <td>{{ feedback.id }}</td>
-                       <td>{{ feedback.student_id.admin.id }} </td>
+                       <td>{{ feedback.student_id.btbt_id }}</td> <!-- BTBT ID -->
+                       <td>{{ feedback.student_id.course_id.course_name }}</td> <!-- Course -->
+                       <td>{{ feedback.student_id.admin.id }}</td>
                        <td>{{ feedback.student_id.admin.first_name }} {{ feedback.student_id.admin.last_name }}</td>
                        <td>{{ feedback.student_id.session_year_id.session_start_year }} - {{ feedback.student_id.session_year_id.session_end_year }}</td>
                        <td>{{ feedback.feedback }}</td>
-                       <td>{{ feedback.created_at }}</td>
+                       <td>{{ feedback.created_at|date:"F j, Y, g:i a" }}</td> <!-- Formatted date -->
                        <td>
                            {% if feedback.feedback_reply == "" %}
-                           <button class="btn btn-success reply_open_modal"  data-toggle="modal" data-target="#reply_modal">Reply</button>
+                           <button class="btn btn-success reply_open_modal"
+                                   data-toggle="modal"
+                                   data-target="#reply_modal"
+                                   data-id="{{ feedback.id }}"
+                                   data-name="{{ feedback.student_id.admin.first_name }} {{ feedback.student_id.admin.last_name }}"
+                                   data-btbt="{{ feedback.student_id.btbt_id }}"
+                                   data-course="{{ feedback.student_id.course_id.course_name }}">
+                               Reply
+                           </button>
                            {% else %}
                            {{ feedback.feedback_reply }}
                            {% endif %}
-
                        </td>
                    </tr>
                    {% endfor %}
+                   </tbody>
                </table>
-
            </div>
             </div>
             <!-- /.card -->
-
-
-
           </div>
           </div>
       </div>
-    </section>
- <!-- Modal -->
-  <div class="modal fade" id="reply_modal" role="dialog">
-    <div class="modal-dialog">
+</section>
 
+<!-- Modal -->
+<div class="modal fade" id="reply_modal" role="dialog">
+    <div class="modal-dialog">
       <!-- Modal content-->
       <div class="modal-content">
         <div class="modal-header">
-
           <h4 class="modal-title">Reply</h4>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
         <div class="modal-body">
-          <p>Reply <span id="reply_name"></span></p>
-            <input type="hidden" id="reply_id" name="reply_id">
-            <textarea class="form-control" rows="5" id="reply_message"></textarea>
-            <button id="reply_btn" class="btn btn-info btn-block">Reply</button>
+          <p>Reply to <span id="reply_name"></span></p>
+          <p><strong>BTBT ID:</strong> <span id="reply_btbt"></span></p>
+          <p><strong>Course:</strong> <span id="reply_course"></span></p>
+          <input type="hidden" id="reply_id" name="reply_id">
+          <textarea class="form-control" rows="5" id="reply_message"></textarea>
+          <button id="reply_btn" class="btn btn-info btn-block">Reply</button>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         </div>
       </div>
-
     </div>
-  </div>
+</div>
+
 {% endblock main_content %}
+
 {% block custom_js %}
 <script>
     $(document).ready(function(){
         $(".reply_open_modal").click(function(){
-            var id=$(this).parents("tr").children("td:eq(0)").text();
-            var name=$(this).parents("tr").children("td:eq(2)").text();
+            var id=$(this).data("id");
+            var name=$(this).data("name");
+            var btbt=$(this).data("btbt");
+            var course=$(this).data("course");
+
             $("#reply_id").val(id);
             $("#reply_name").text(name);
-
+            $("#reply_btbt").text(btbt);
+            $("#reply_course").text(course);
         });
-        $(document).on("click","#reply_btn",function(){
-                $(this).attr("disabled","disabled")
-                $(this).text("Sending Reply...")
 
-                var id=$("#reply_id").val();
-                var message=$("#reply_message").val()
-                $.ajax({
-                        url:'{% url 'student_feedback_message_replied' %}',
-                        type:'POST',
-                        data:{id:id,message:message},
-                    })
-                    .done(function(response){
-                        if(response=="True"){
-                             alert("Reply Sent")
-                        }
-                        else{
-                             alert("Error in Sending Reply")
-                        }
-                        location.reload()
-                    })
-                   .fail(function(){
-                       alert("Error in Sending Reply")
-                   })
+        $(document).on("click", "#reply_btn", function(){
+            $(this).attr("disabled", "disabled").text("Sending Reply...");
+
+            var id = $("#reply_id").val();
+            var message = $("#reply_message").val();
+
+            $.ajax({
+                url: '{% url 'student_feedback_message_replied' %}',
+                type: 'POST',
+                data: {id: id, message: message},
+            })
+            .done(function(response){
+                alert(response === "True" ? "Reply Sent" : "Error in Sending Reply");
+                location.reload();
+            })
+            .fail(function(){
+                alert("Error in Sending Reply");
             });
+        });
     });
 </script>
 {% endblock custom_js %}

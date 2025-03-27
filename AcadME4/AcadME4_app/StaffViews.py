@@ -38,20 +38,20 @@ from AcadME4_app.models import Staffs, Timetable
 
 @csrf_exempt
 def staff_home(request):
-    # Fetch all subjects assigned to the staff
+    # ✅ Fetch all subjects assigned to the staff
     subjects = Subjects.objects.filter(staff_id=request.user.id)
     subject_count = subjects.count()
 
-    # Get unique course IDs for the subjects taught by the staff
+    # ✅ Get unique course IDs for the subjects taught by the staff
     course_ids = subjects.values_list('course_id', flat=True).distinct()
 
-    # Count students enrolled in those courses
+    # ✅ Count students enrolled in those courses
     students_count = Students.objects.filter(course_id__in=course_ids).count()
 
-    # Count total attendance records for the subjects
+    # ✅ Count total attendance records for the subjects
     attendance_count = Attendance.objects.filter(subject_id__in=subjects).count()
 
-    # Fetch attendance data by subject
+    # ✅ Fetch attendance data by subject
     subject_list = []
     attendance_list = []
 
@@ -60,7 +60,7 @@ def staff_home(request):
         subject_list.append(subject.subject_name)
         attendance_list.append(attendance_count_per_subject)
 
-    # Fetch students for attendance analysis
+    # ✅ Fetch students for attendance analysis
     students_attendance = Students.objects.filter(course_id__in=course_ids)
     notification_count = NotificationStaffs.objects.filter(staff_id=request.user.id).count()
     student_list = []
@@ -75,7 +75,17 @@ def staff_home(request):
         student_list_attendance_present.append(attendance_present_count)
         student_list_attendance_absent.append(attendance_absent_count)
 
-    # Render the template with the fetched data
+    # ✅ Fetch Assignments Submitted Data (Fixed the Error)
+    assignments = Assignment.objects.filter(subject_id__in=subjects)
+    assignment_titles = [assignment.title for assignment in assignments]
+    assignment_counts = [AssignmentSubmission.objects.filter(assignment=assignment).count() for assignment in
+                         assignments]
+
+    # ✅ Fetch Subjects Taught Data (for Pie Chart)
+    subject_names = [subject.subject_name for subject in subjects]
+    student_counts = [Students.objects.filter(course_id=subject.course_id).count() for subject in subjects]
+
+    # ✅ Convert Data to JSON for Chart.js
     context = {
         "notification_count": notification_count,
         "students_count": students_count,
@@ -85,10 +95,17 @@ def staff_home(request):
         "attendance_list": attendance_list,
         "student_list": student_list,
         "present_list": student_list_attendance_present,
-        "absent_list": student_list_attendance_absent
+        "absent_list": student_list_attendance_absent,
+
+        # ✅ Pass Data for New Graphs
+        "assignment_titles": json.dumps(assignment_titles),
+        "assignment_counts": json.dumps(assignment_counts),
+        "subject_names": json.dumps(subject_names),
+        "student_counts": json.dumps(student_counts),
     }
 
     return render(request, "staff_template/staff_home_template.html", context)
+
 @csrf_exempt
 def staff_take_attendance(request):
     subjects = Subjects.objects.filter(staff_id=request.user.id).values("id", "subject_name", "has_lab")
@@ -127,7 +144,7 @@ def get_students(request):
     return JsonResponse(list_data, safe=False)
 
 
-
+from datetime import datetime, timedelta
 @csrf_exempt
 def save_attendance_data(request):
     student_ids=request.POST.get("student_ids")
@@ -138,8 +155,29 @@ def save_attendance_data(request):
 
    # print(data[0]['id'])
     try:
-        subject_model = Subjects.objects.get(id=subject_id)
+        attendance_date_obj = datetime.strptime(attendance_date, "%Y-%m-%d").date()
+        today_date = datetime.today().date()
+        two_days_before = today_date - timedelta(days=2)
         session_model = SessionYearModel.object.get(id=session_year_id)
+        session_start_date = session_model.session_start_year
+        session_end_date = session_model.session_end_year
+
+        # ✅ Validate that the date is within the session year range
+        if not (session_start_date <= attendance_date_obj <= session_end_date):
+            return HttpResponse("ERROR: Attendance date must be within the session year range.", status=400)
+        if not (two_days_before <= attendance_date_obj <= today_date):
+            return HttpResponse("ERROR: Attendance can only be taken for today or the past two days.", status=400)
+        subject_model = Subjects.objects.get(id=subject_id)
+
+        existing_attendance = Attendance.objects.filter(
+            subject_id=subject_model,
+            attendance_date=attendance_date,
+            session_year_id=session_model,
+            class_type=class_type
+        ).exists()
+
+        if existing_attendance:
+            return HttpResponse("ERROR: Attendance already marked for this date.", status=400)
         json_sstudent = json.loads(student_ids)
         # Ensure class_type is valid
         if class_type not in ["theory", "lab"]:
@@ -159,9 +197,14 @@ def save_attendance_data(request):
             print(f"Attendance Report Saved for Student: {student.admin.username}")
 
         return HttpResponse("OKAY")
+    except SessionYearModel.DoesNotExist:
+        return HttpResponse("ERROR: Invalid Session Year", status=400)
+    except Subjects.DoesNotExist:
+        return HttpResponse("ERROR: Invalid Subject", status=400)
     except Exception as e:
         print(f"Error while saving attendance: {str(e)}")
         return HttpResponse(f"ERROR: {str(e)}")
+
 @csrf_exempt
 def staff_subjects(request):
     subjects = Subjects.objects.filter(staff_id=request.user.id)
@@ -171,7 +214,8 @@ def staff_update_attendance(request):
     subjects = Subjects.objects.filter(staff_id=request.user.id)
     session_years = SessionYearModel.object.all()
     return render(request,"staff_template/staff_update_attendance.html",{"subjects":subjects,"session_years":session_years})
-
+from django.utils import timezone
+from datetime import timedelta
 @csrf_exempt
 def get_attendance_dates(request):
     subject=request.POST.get("subject")
@@ -180,7 +224,9 @@ def get_attendance_dates(request):
 
     subject_obj=Subjects.objects.get(id=subject)
     session_year_obj = SessionYearModel.object.get(id=session_year_id)
-    attendance=Attendance.objects.filter(subject_id=subject_obj,session_year_id=session_year_obj, class_type=class_type)
+    today = timezone.now().date()
+    three_days_ago = today - timedelta(days=3)
+    attendance=Attendance.objects.filter(subject_id=subject_obj,session_year_id=session_year_obj, class_type=class_type,attendance_date__range=[three_days_ago, today])
     attendance_obj=[]
     for attendance_single in attendance:
         data={"id":attendance_single.id,"attendance_date":str(attendance_single.attendance_date),"session_year_id":attendance_single.session_year_id.id}

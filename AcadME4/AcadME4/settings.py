@@ -92,8 +92,8 @@ DATABASES = {
         'PASSWORD': 'acadme4',
         #'USER': 'ananya',
         #'PASSWORD': 'ananya',
-       # 'HOST': '172.19.131.135', #hostel
-        'HOST': '192.168.106.166', #hotspot
+        'HOST': '172.19.131.135', #hostel
+       # 'HOST': '192.168.106.166', #hotspot
         #'HOST': '172.21.81.118', #lab
         #'HOST': '192.168.206.166',
         'PORT': '3306'

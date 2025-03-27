@@ -2,7 +2,6 @@
 {% block page_title %}
 Home
     <div id="greeting" style="font-size: 1.2em; color: #333; margin-top: 10px;"></div>
-
 {% endblock page_title %}
 {% block main_content %}
 <section class="content">
@@ -130,190 +129,157 @@ Home
       </style>
 
      <!-- ./col -->
-          <div class="col-lg-3 col-6">
+      <div class="col-lg-3 col-6">
         <!-- Small Box with Pastel Red Gradient -->
         <div class="small-box bg-warning">
-            <div class="icon">
-                <i class="fas fa-book"></i> <!-- Changed icon for courses -->
-            </div>
-            <div class="inner">
-                <h3>{{ course_count }}</h3>
-                <p>Total Courses</p>
-            </div>
-            <a href="{% url 'manage_course' %}" class="small-box-footer">
-                More info <i class="fas fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
-
-<style>
-    /* Ensure all small boxes have the same size */
-    .small-box {
-        height: 160px; /* Uniform height */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s ease-in-out;
-        position: relative;
-        overflow: hidden;
-    }
-
-    /* Hover Effect */
-    .small-box:hover {
-        transform: scale(1.05);
-        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Pastel Red Gradient */
-    .bg-warning {
-        background: linear-gradient(135deg, #FF9A9E, #F76C6C) !important; /* Soft pastel red */
-    }
-
-    /* Icon Styling - Top Left Corner */
-    .small-box .icon {
-        font-size: 28px;
-        color: rgba(255, 255, 255, 0.8);
-        position: absolute;
-        top: 10px;
-        left: 15px;
-    }
-
-    /* Move Text Up */
-    .small-box .inner {
-        margin-top: -10px;
-    }
-
-    /* Text Styling */
-    .small-box h3 {
-        font-size: 30px;
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #FFF;
-    }
-
-    .small-box p {
-        font-size: 16px;
-        font-weight: 500;
-        color: #F8F9FA;
-    }
-
-    /* Force "More info" to be White */
-    .small-box-footer {
-        display: block;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.2);
-        text-decoration: none;
-        color: #FFF !important; /* Stronger override */
-        font-weight: bold;
-        border-radius: 0 0 12px 12px;
-        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-    }
-
-    /* Ensure White on Hover */
-    .small-box-footer:hover,
-    .small-box-footer:focus,
-    .small-box-footer:visited {
-        background: rgba(255, 255, 255, 0.3) !important;
-        color: #FFF !important; /* Absolutely force white */
-    }
-
-    /* Force White on All Links Inside Footer */
-    .small-box-footer i,
-    .small-box-footer span {
-        color: #FFF !important;
-    }
-</style>
-
-
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-danger">
-              <div class="inner">
-                <h3>{{ subject_count }}</h3>
-
-                <p>Total Subject</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-pie-graph"></i>
-              </div>
-              <a href="{% url 'manage_subject' %}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
+          <div class="icon">
+            <i class="fas fa-book"></i>
           </div>
-<style>
-    /* Ensure all small boxes have the same size */
-    .small-box {
-        height: 160px; /* Uniform height */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s ease-in-out;
-        position: relative;
-        overflow: hidden;
-    }
+          <div class="inner">
+            <h3>{{ course_count }}</h3>
+            <p>Total Courses</p>
+          </div>
+          <a href="{% url 'manage_course' %}" class="small-box-footer">
+            More info <i class="fas fa-arrow-circle-right"></i>
+          </a>
+        </div>
+      </div>
+      <style>
+        /* Ensure all small boxes have the same size */
+        .small-box {
+          height: 160px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          border-radius: 12px;
+          text-align: center;
+          box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
+          transition: all 0.3s ease-in-out;
+          position: relative;
+          overflow: hidden;
+        }
+        .small-box:hover {
+          transform: scale(1.05);
+          box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+        }
+        .bg-warning {
+          background: linear-gradient(135deg, #FF9A9E, #F76C6C) !important;
+        }
+        .small-box .icon {
+          font-size: 28px;
+          color: rgba(255, 255, 255, 0.8);
+          position: absolute;
+          top: 10px;
+          left: 15px;
+        }
+        .small-box .inner {
+          margin-top: -10px;
+        }
+        .small-box h3 {
+          font-size: 30px;
+          font-weight: bold;
+          margin-bottom: 5px;
+          color: #FFF;
+        }
+        .small-box p {
+          font-size: 16px;
+          font-weight: 500;
+          color: #F8F9FA;
+        }
+        .small-box-footer {
+          display: block;
+          padding: 12px;
+          background: rgba(255, 255, 255, 0.2);
+          text-decoration: none;
+          color: #FFF !important;
+          font-weight: bold;
+          border-radius: 0 0 12px 12px;
+          transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+        }
+        .small-box-footer:hover,
+        .small-box-footer:focus,
+        .small-box-footer:visited {
+          background: rgba(255, 255, 255, 0.3) !important;
+          color: #FFF !important;
+        }
+        .small-box-footer i,
+        .small-box-footer span {
+          color: #FFF !important;
+        }
+      </style>
 
-    /* Hover Effect */
-    .small-box:hover {
-        transform: scale(1.05);
-        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Pastel Teal Gradient */
-    .bg-danger {
-        background: linear-gradient(135deg, #A0E7E5, #5AC8C8) !important; /* Soft pastel teal */
-    }
-
-    /* Icon Styling - Top Left Corner */
-    .small-box .icon {
-        font-size: 28px;
-        color: rgba(255, 255, 255, 0.8);
-        position: absolute;
-        top: 10px;
-        left: 15px;
-    }
-
-    /* Move Text Up */
-    .small-box .inner {
-        margin-top: -10px;
-    }
-
-    /* Text Styling */
-    .small-box h3 {
-        font-size: 30px;
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #FFF;
-    }
-
-    .small-box p {
-        font-size: 16px;
-        font-weight: 500;
-        color: #F8F9FA;
-    }
-
-    /* Footer Styling ("More Info" Button) */
-    .small-box-footer {
-        display: block;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.2);
-        text-decoration: none;
-        color: #FFF !important; /* Force White */
-        font-weight: bold;
-        border-radius: 0 0 12px 12px;
-        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-    }
-
-    .small-box-footer:hover,
-    .small-box-footer:focus {
-        background: rgba(255, 255, 255, 0.3);
-        color: #FFF !important; /* Ensure White on Hover */
-    }
+      <!-- ./col -->
+      <div class="col-lg-3 col-6">
+        <!-- Small Box with Pastel Teal Gradient -->
+        <div class="small-box bg-danger">
+          <div class="inner">
+            <h3>{{ subject_count }}</h3>
+            <p>Total Subject</p>
+          </div>
+          <div class="icon">
+            <i class="ion ion-pie-graph"></i>
+          </div>
+          <a href="{% url 'manage_subject' %}" class="small-box-footer">
+            More info <i class="fas fa-arrow-circle-right"></i>
+          </a>
+        </div>
+      </div>
+      <style>
+        .small-box {
+          height: 160px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          border-radius: 12px;
+          text-align: center;
+          box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.15);
+          transition: all 0.3s ease-in-out;
+          position: relative;
+          overflow: hidden;
+        }
+        .small-box:hover {
+          transform: scale(1.05);
+          box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .bg-danger {
+          background: linear-gradient(135deg, #A0E7E5, #5AC8C8) !important;
+        }
+        .small-box .icon {
+          font-size: 28px;
+          color: rgba(255, 255, 255, 0.8);
+          position: absolute;
+          top: 10px;
+          left: 15px;
+        }
+        .small-box .inner {
+          margin-top: -10px;
+        }
+        .small-box h3 {
+          font-size: 30px;
+          font-weight: bold;
+          margin-bottom: 5px;
+          color: #FFF;
+        }
+        .small-box p {
+          font-size: 16px;
+          font-weight: 500;
+          color: #F8F9FA;
+        }
+        .small-box-footer {
+          display: block;
+          padding: 12px;
+          background: rgba(255, 255, 255, 0.2);
+          text-decoration: none;
+          color: #FFF !important;
+          font-weight: bold;
+          border-radius: 0 0 12px 12px;
+          transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+        }
+        .small-box-footer:hover,
+        .small-box-footer:focus {
+          background: rgba(255, 255, 255, 0.3);
+          color: #FFF !important;
+        }
       </style>
     </div>
     <!-- ./row -->
@@ -339,66 +305,42 @@ Home
         </div>
       </div>
       <style>
-    /* ✅ Apply soft pastel theme with modern UI */
-    .card {
-        border-radius: 10px; /* Smooth rounded corners */
-        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15); /* Soft shadow */
-        transition: all 0.3s ease-in-out;
-        border: none;
-    }
-
-    .card:hover {
-        box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.2);
-        transform: scale(1.02);
-    }
-
-    /* ✅ Pastel Red Header */
-    .card-danger {
-        background: linear-gradient(135deg, #FFB6C1, #FF6B6B) !important;
-        border: none;
-    }
-    .card-danger .card-header {
-    background: #339DFF !important;
-    }
-
-    /* ✅ Card Header Styling */
-    .card-header {
-        color: white;
-        font-weight: bold;
-        font-size: 18px;
-        padding: 15px;
-        /* text-transform: uppercase; */
-    }
-
-    /* ✅ Buttons inside the header */
-    .card-tools button {
-        color: white !important;
-        font-size: 14px;
-    }
-
-    /* ✅ Card Body Background */
-    .card-body {
-        background: #F9F9F9; /* Soft white-gray */
-        padding: 15px;
-        border-radius: 0 0 10px 10px;
-    }
-
-    /* ✅ Chart Styling */
-    #pieChart {
-        min-height: 250px !important;
-        max-height: 250px !important;
-    }
-    .card-success .card-header {
-    background: #339DFF !important;
-    }
-    .card-info .card-header {
-    background: #339DFF !important;
-    }
-    .card-warning .card-header {
-    background: #339DFF !important;
-    color: white !important;
-    }
-</style>
+        /* Card Styling */
+        .card {
+          border-radius: 10px;
+          box-shadow: 4px 4px 12px rgba(0,0,0,0.15);
+          transition: all 0.3s ease-in-out;
+          border: none;
+        }
+        .card:hover {
+          box-shadow: 6px 6px 18px rgba(0,0,0,0.2);
+          transform: scale(1.02);
+        }
+        .card-danger .card-header {
+          background: #339DFF !important;
+        }
+        .card-header {
+          color: white;
+          font-weight: bold;
+          font-size: 18px;
+          padding: 15px;
+        }
+        .card-tools button {
+          color: white !important;
+          font-size: 14px;
+        }
+        .card-body {
+          background: #F9F9F9;
+          padding: 15px;
+          border-radius: 0 0 10px 10px;
+        }
+        .card-info:not(.card-outline)>.card-header {
+    background-color: #339DFF;
+}
+        .card-success:not(.card-outline)>.card-header {
+    background-color: #339DFF;
+}
+      </style>
       <div class="col-lg-6">
         <div class="card card-success">
           <div class="card-header">
@@ -440,11 +382,7 @@ Home
           </div>
         </div>
       </div>
-
-    <!-- /.row -->
-
-    <!-- Mini Calendar Row -->
-      <!-- Increase column width to half the row -->
+      <!-- Mini Calendar Row -->
       <div class="col-lg-6 col-12">
         <div class="card card-primary card-mini-calendar">
           <div class="card-header">
@@ -474,89 +412,87 @@ Home
   </div>
   <!-- /.container-fluid -->
   <div style="background: linear-gradient(135deg, #FFDEE9, #B5FFFC); width: 100%; height: 50px; display: flex; align-items: center; justify-content: space-around;">
-  <div id="digitalClock" style="font-size: 1.2em; font-weight: bold; color: #333;">Loading time...</div>
-  <div id="inspirationalQuote" style="font-size: 1.2em; font-weight: bold; font-style: italic; color: #555;">Your inspirational quote goes here.</div>
-
-<!-- FullCalendar CSS -->
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
-<style>
-  /* Common Card Styles */
-  .card {
-    border-radius: 10px;
-    box-shadow: 4px 4px 12px rgba(0,0,0,0.15);
-    transition: all 0.3s ease-in-out;
-    border: none;
-  }
-  .card:hover {
-    box-shadow: 6px 6px 18px rgba(0,0,0,0.2);
-    transform: scale(1.02);
-  }
-  .card-danger .card-header {
-    background: #339DFF !important;
-  }
-  .card-header {
-    color: #FFF;
-    font-weight: bold;
-    font-size: 18px;
-    padding: 15px;
-  }
-  .card-tools button {
-    color: #FFF !important;
-    font-size: 14px;
-  }
-  .card-body {
-    padding: 15px;
-    border-radius: 0 0 10px 10px;
-  }
-
-   /* -------------------- Mini Calendar Styles -------------------- */
-  .card-mini-calendar {
-      /* Increase or adjust height as desired */
+    <div id="digitalClock" style="font-size: 1.2em; font-weight: bold; color: #333;">Loading time...</div>
+    <div id="inspirationalQuote" style="font-size: 1.2em; font-weight: bold; font-style: italic; color: #555;">Your inspirational quote goes here.</div>
+  </div>
+  <!-- FullCalendar CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+  <style>
+    /* Common Card Styles */
+    .card {
+      border-radius: 10px;
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.15);
+      transition: all 0.3s ease-in-out;
+      border: none;
+    }
+    .card:hover {
+      box-shadow: 6px 6px 18px rgba(0,0,0,0.2);
+      transform: scale(1.02);
+    }
+    .card-danger .card-header {
+      background: #339DFF !important;
+    }
+    .card-header {
+      color: #FFF;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 15px;
+    }
+    .card-tools button {
+      color: #FFF !important;
+      font-size: 14px;
+    }
+    .card-body {
+      padding: 15px;
+      border-radius: 0 0 10px 10px;
+    }
+    /* -------------------- Mini Calendar Styles -------------------- */
+    .card-mini-calendar {
       height: 338px;
       color: #333;
       overflow: hidden;
-      display: flex;            /* allow flex layout */
+      display: flex;
       flex-direction: column;
       border-radius: 0;
-  }
-  .card-mini-calendar .card-body {
-      /* fill the remaining space of the card */
+    }
+    .card-mini-calendar .card-body {
       flex: 1;
-      padding: 0; /* remove default padding to let iframe fill area */
-  }
-  .card-mini-calendar iframe {
+      padding: 0;
+    }
+    .card-mini-calendar iframe {
       width: 100%;
       height: 100%;
       border: 0;
-  }
-  .card-primary:not(.card-outline)>.card-header {
-    background-color: #339DFF;
-}
-</style>
-</div>
+    }
+    .card-primary:not(.card-outline)>.card-header {
+      background-color: #339DFF;
+    }
+  </style>
 </section>
 {% endblock main_content %}
 {% block custom_js %}
 <!-- FullCalendar JS -->
-
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  // Greet the user based on time of day
   $(document).ready(function(){
-  function greetUser() {
-    const now = new Date();
-    const hour = now.getHours();
-    let greeting = "";
-    if(hour < 12){
-      greeting = "Good Morning!";
-    } else if(hour < 18) {
-      greeting = "Good Afternoon!";
-    } else {
-      greeting = "Good Evening!";
+    function greetUser() {
+      const now = new Date();
+      const hour = now.getHours();
+      let greeting = "";
+      if(hour < 12){
+        greeting = "Good Morning!";
+      } else if(hour < 18) {
+        greeting = "Good Afternoon!";
+      } else {
+        greeting = "Good Evening!";
+      }
+      document.getElementById("greeting").innerText = greeting;
     }
-    document.getElementById("greeting").innerText = greeting;
-  }
-  greetUser();
-  // Digital Clock: update every second
+    greetUser();
+
+    // Digital Clock: update every second
     function updateClock() {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, '0');
@@ -576,100 +512,97 @@ Home
       "Success is not final, failure is not fatal: It is the courage to continue that counts. – Winston Churchill"
     ];
     document.getElementById('inspirationalQuote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
+  });
 
-    // Pie Chart for Students and Staff
-    var pieData = {
-      labels: ['Students', 'Staffs'],
-      datasets: [{
-        data: [{{ student_count }}, {{ staff_count }}],
-        backgroundColor: [ '#FF7F89', '#AA82FF', '#B0D684', '#70D6D4', '#FFEB88', '#FF947D', '#96AEC6',
-                        '#FFC3A0', '#A0E7E5', '#B4A7D6', '#FFD3B6', '#E2F0CB', '#FEC8D8', '#D4A5A5','#FFB6C1', '#D1A3FF', '#A5E6E6', '#B0E0E6', '#F3E5AB', '#FFBB9E', '#A0C4FF',
-                        '#FFDAC1', '#A2D2FF', '#C6D57E', '#FFCF81', '#E0BBE4', '#D8F3DC', '#FFAFCC','#FDE4CF', '#A9DEF9', '#B5CDA3', '#F5E1DA', '#F3B8A8', '#D5AAFF', '#B8E2F2',
-                        '#F1E1A6', '#FBC4AB', '#C5D9E2', '#FFCCCB', '#D9F2D9', '#FEC5E5', '#D4A373','#F2CC8F', '#F4BFBF', '#D6E5FA', '#FFD166', '#99E2B4', '#EAC7C7', '#C4B0FF'],
-      }]
-    };
-    var pieChartCanvas = $('#pieChart').get(0).getContext('2d');
-    var pieOptions = {
-      maintainAspectRatio: false,
-      responsive: true,
-    };
-    var pieChart = new Chart(pieChartCanvas, {
-      type: 'pie',
-      data: pieData,
-      options: pieOptions
-    });
+  // Pastel color array (unchanged)
+  var pastelColors = [
+    '#FF7F89', '#AA82FF', '#B0D684', '#70D6D4', '#FFEB88', '#FF947D', '#96AEC6',
+    '#FFC3A0', '#A0E7E5', '#B4A7D6', '#FFD3B6', '#E2F0CB', '#FEC8D8', '#D4A5A5',
+    '#FFB6C1', '#D1A3FF', '#A5E6E6', '#B0E0E6', '#F3E5AB', '#FFBB9E', '#A0C4FF',
+    '#FFDAC1', '#A2D2FF', '#C6D57E', '#FFCF81', '#E0BBE4', '#D8F3DC', '#FFAFCC',
+    '#FDE4CF', '#A9DEF9', '#B5CDA3', '#F5E1DA', '#F3B8A8', '#D5AAFF', '#B8E2F2',
+    '#F1E1A6', '#FBC4AB', '#C5D9E2', '#FFCCCB', '#D9F2D9', '#FEC5E5', '#D4A373',
+    '#F2CC8F', '#F4BFBF', '#D6E5FA', '#FFD166', '#99E2B4', '#EAC7C7', '#C4B0FF'
+  ];
 
-    // Donut Chart for Subjects in Each Course
-    var subject_count_list = {{ subject_count_list }};
-    var course_name_list = {{ course_name_list|safe }};
-    var donutChartCanvas = $('#donutChart').get(0).getContext('2d');
-    var donutData = {
-      labels: course_name_list,
-      datasets: [{
-        data: subject_count_list,
-        backgroundColor: [ '#FF7F89', '#AA82FF', '#B0D684', '#70D6D4', '#FFEB88', '#FF947D', '#96AEC6',
-                        '#FFC3A0', '#A0E7E5', '#B4A7D6', '#FFD3B6', '#E2F0CB', '#FEC8D8', '#D4A5A5','#FFB6C1', '#D1A3FF', '#A5E6E6', '#B0E0E6', '#F3E5AB', '#FFBB9E', '#A0C4FF',
-                        '#FFDAC1', '#A2D2FF', '#C6D57E', '#FFCF81', '#E0BBE4', '#D8F3DC', '#FFAFCC','#FDE4CF', '#A9DEF9', '#B5CDA3', '#F5E1DA', '#F3B8A8', '#D5AAFF', '#B8E2F2',
-                        '#F1E1A6', '#FBC4AB', '#C5D9E2', '#FFCCCB', '#D9F2D9', '#FEC5E5', '#D4A373','#F2CC8F', '#F4BFBF', '#D6E5FA', '#FFD166', '#99E2B4', '#EAC7C7', '#C4B0FF'],
-      }]
-    };
-    var donutOptions = {
-      maintainAspectRatio: false,
-      responsive: true,
-    };
-    var donutChart = new Chart(donutChartCanvas, {
-      type: 'doughnut',
-      data: donutData,
-      options: donutOptions
-    });
+  // Pie Chart for Student and Staff Chart
+  var pieLabels = ['Students', 'Staffs'];
+  var pieDataValues = [{{ student_count }}, {{ staff_count }}];
+  var pieData = {
+    labels: pieLabels,
+    datasets: [{
+      data: pieDataValues,
+      backgroundColor: pastelColors.slice(0, pieLabels.length)
+    }]
+  };
+  var pieChartCanvas = document.getElementById('pieChart').getContext('2d');
+  var pieOptions = {
+    maintainAspectRatio: false,
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'right',
+        align: 'start'
+      }
+    }
+  };
+  var pieChart = new Chart(pieChartCanvas, {
+    type: 'pie',
+    data: pieData,
+    options: pieOptions
+  });
 
-    // Pie Chart for Total Students in Each Course
-    var student_count_list_in_course = {{ student_count_list_in_course }};
-    var pieData2 = {
-      labels: course_name_list,
-      datasets: [{
-        data: student_count_list_in_course,
-        backgroundColor: [ '#FF7F89', '#AA82FF', '#B0D684', '#70D6D4', '#FFEB88', '#FF947D', '#96AEC6',
-                        '#FFC3A0', '#A0E7E5', '#B4A7D6', '#FFD3B6', '#E2F0CB', '#FEC8D8', '#D4A5A5','#FFB6C1', '#D1A3FF', '#A5E6E6', '#B0E0E6', '#F3E5AB', '#FFBB9E', '#A0C4FF',
-                        '#FFDAC1', '#A2D2FF', '#C6D57E', '#FFCF81', '#E0BBE4', '#D8F3DC', '#FFAFCC','#FDE4CF', '#A9DEF9', '#B5CDA3', '#F5E1DA', '#F3B8A8', '#D5AAFF', '#B8E2F2',
-                        '#F1E1A6', '#FBC4AB', '#C5D9E2', '#FFCCCB', '#D9F2D9', '#FEC5E5', '#D4A373','#F2CC8F', '#F4BFBF', '#D6E5FA', '#FFD166', '#99E2B4', '#EAC7C7', '#C4B0FF'],
-      }]
-    };
-    var pieChartCanvas2 = $('#pieChart2').get(0).getContext('2d');
-    var pieOptions2 = {
-      maintainAspectRatio: false,
-      responsive: true,
-    };
-    var pieChart2 = new Chart(pieChartCanvas2, {
-      type: 'pie',
-      data: pieData2,
-      options: pieOptions2
-    });
-/*
-    // Pie Chart for Total Students in Each Subject
-    var student_count_list_in_subject = {{ student_count_list_in_subject }};
-    var subject_list = {{ subject_list|safe }};
-    var pieData3 = {
-      labels: subject_list,
-      datasets: [{
-        data: student_count_list_in_subject,
-        backgroundColor: [ '#FF7F89', '#AA82FF', '#B0D684', '#70D6D4', '#FFEB88', '#FF947D', '#96AEC6',
-                        '#FFC3A0', '#A0E7E5', '#B4A7D6', '#FFD3B6', '#E2F0CB', '#FEC8D8', '#D4A5A5','#FFB6C1', '#D1A3FF', '#A5E6E6', '#B0E0E6', '#F3E5AB', '#FFBB9E', '#A0C4FF',
-                        '#FFDAC1', '#A2D2FF', '#C6D57E', '#FFCF81', '#E0BBE4', '#D8F3DC', '#FFAFCC','#FDE4CF', '#A9DEF9', '#B5CDA3', '#F5E1DA', '#F3B8A8', '#D5AAFF', '#B8E2F2',
-                        '#F1E1A6', '#FBC4AB', '#C5D9E2', '#FFCCCB', '#D9F2D9', '#FEC5E5', '#D4A373','#F2CC8F', '#F4BFBF', '#D6E5FA', '#FFD166', '#99E2B4', '#EAC7C7', '#C4B0FF'],
-      }]
-    };
-    var pieChartCanvas3 = $('#pieChart4').get(0).getContext('2d');
-    var pieOptions3 = {
-      maintainAspectRatio: false,
-      responsive: true,
-    };
-    var pieChart3 = new Chart(pieChartCanvas3, {
-      type: 'pie',
-      data: pieData3,
-      options: pieOptions3
-    });
-*/
+  // Donut Chart for Subjects in Each Course
+  var courseNames = {{ course_name_list|safe }};
+  var subjectCounts = {{ subject_count_list }};
+  var donutData = {
+    labels: courseNames,
+    datasets: [{
+      data: subjectCounts,
+      backgroundColor: pastelColors.slice(0, courseNames.length)
+    }]
+  };
+  var donutChartCanvas = document.getElementById('donutChart').getContext('2d');
+  var donutOptions = {
+    maintainAspectRatio: false,
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'right',
+        align: 'start'
+      }
+    }
+  };
+  var donutChart = new Chart(donutChartCanvas, {
+    type: 'doughnut',
+    data: donutData,
+    options: donutOptions
+  });
+
+  // Pie Chart for Total Students in Each Course
+  var studentCountsInCourse = {{ student_count_list_in_course }};
+  var pieData2 = {
+    labels: courseNames,
+    datasets: [{
+      data: studentCountsInCourse,
+      backgroundColor: pastelColors.slice(0, courseNames.length)
+    }]
+  };
+  var pieChartCanvas2 = document.getElementById('pieChart2').getContext('2d');
+  var pieOptions2 = {
+    maintainAspectRatio: false,
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'right',
+        align: 'start'
+      }
+    }
+  };
+  var pieChart2 = new Chart(pieChartCanvas2, {
+    type: 'pie',
+    data: pieData2,
+    options: pieOptions2
   });
 </script>
 {% endblock custom_js %}
