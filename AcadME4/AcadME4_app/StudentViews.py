@@ -1,8 +1,10 @@
 from time import localtime
 from django.conf import settings
+from django.contrib.messages import get_messages
 from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Avg
 from django.http import HttpResponseRedirect,HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
@@ -33,7 +35,9 @@ from AcadME4_app.models import Attendance, AttendanceReport
 import calendar
 import datetime
 from django.core.files.storage import FileSystemStorage
-
+from django.db.models import Avg, F
+from django.db.models.functions import Coalesce
+from django.db.models import Avg, FloatField
 def student_home(request):
     student_obj = Students.objects.get(admin=request.user.id)
 
@@ -64,16 +68,60 @@ def student_home(request):
 
     # ✅ Student Notifications Count
     student_notification_count = NotificationStudent.objects.filter(student_id=student_obj.id).count()
+    results = StudentResult.objects.filter(student_id=student_obj)
+    subjects = results.values_list('subject_id__subject_name', flat=True)
 
+    student_marks = []
+    class_average = []
+
+    for result in results:
+        total_marks = sum(filter(None, [
+            result.assignment1_marks,
+            result.assignment2_marks,
+            result.periodical1_marks,
+            result.periodical2_marks
+        ])) / 4  # Average of available marks
+
+        student_marks.append(total_marks)
+
+        avg = StudentResult.objects.filter(subject_id=result.subject_id).aggregate(
+            avg_marks=(
+                              Coalesce(Avg('assignment1_marks'), 0, output_field=FloatField()) +
+                              Coalesce(Avg('assignment2_marks'), 0, output_field=FloatField()) +
+                              Coalesce(Avg('periodical1_marks'), 0, output_field=FloatField()) +
+                              Coalesce(Avg('periodical2_marks'), 0, output_field=FloatField())
+                      ) / 4
+        )['avg_marks']
+
+        class_average.append(avg)
+    # ✅ Pending Assignments Calculation
+    from datetime import datetime
+
+    student_subjects = Subjects.objects.filter(course_id=student_obj.course_id)
+
+    # Total assignments for the student's subjects that have **not passed the due date**
+    total_assignments = Assignment.objects.filter(subject__in=student_subjects,
+                                                      due_date__gte=datetime.now()).count()
+
+    # Assignments already submitted by the student
+    submitted_assignments = AssignmentSubmission.objects.filter(student=student_obj).count()
+
+    # Pending assignments
+    pending_assignments = total_assignments - submitted_assignments
     return render(request, "student_template/student_home_template.html", {
         "total_attendance": attendance_total,
         "attendance_absent": attendance_absent,
         "attendance_present": attendance_present,
-        "subjects": subjects,
+        "pending_assignments": pending_assignments,
         "data_name": subject_name,
         "data1": data_present,
         "data2": data_absent,
-        "student_notification_count": student_notification_count,  # ✅ Add this to the template
+        "student_notification_count": student_notification_count,
+        # ✅ Add this to the template
+        "subjects": list(subjects),
+        'student_marks':student_marks,
+        'class_average': class_average,
+
     })
 
 def student_view_attendance(request):
@@ -235,7 +283,10 @@ def student_view_assignments(request):
 
     # Fetch assignments based on student's enrolled subjects
     assignments = Assignment.objects.filter(subject__course_id=student_obj.course_id)
-
+    # Clear stored messages after displaying them
+    storage = get_messages(request)
+    for _ in storage:
+        pass  # Accessing messages clears them
     return render(
         request,
         "student_template/view_assignments.html",
@@ -264,9 +315,9 @@ def student_submit_assignment(request, assignment_id):
             submission_file=submission_file
         )
         submission.save()
+       # request.session["submitted_assignment_id"] = assignment_id
 
-        messages.success(request, "Assignment submitted successfully!")
-        return redirect("student_view_assignments")
+        return redirect(f"{request.path}?success=1")
 
     return render(
         request,

@@ -163,57 +163,77 @@ def add_student(request):
     return render(request,"admin_template/add_student_template.html",{"form":form,"courses":courses})
 
 def add_student_save(request):
-    if request.method!="POST":
+    if request.method != "POST":
         return HttpResponse("Method Not Allowed")
     else:
-            form=AddStudentForm(request.POST,request.FILES)
-            if form.is_valid():
-                 first_name=form.cleaned_data["first_name"]
-                 last_name=form.cleaned_data["last_name"]
-                 btbt_id=form.cleaned_data["btbt_id"]
-                 roll_no=form.cleaned_data["roll_no"]
-                 username=form.cleaned_data["username"]
-                 email=form.cleaned_data["email"]
-                 password=form.cleaned_data["password"]
-                 address=form.cleaned_data["address"]
-                 session_year_id=form.cleaned_data["session_year_id"]
-                 course_id=form.cleaned_data["course"]
-                 branch_id=form.cleaned_data["branch"]
-                 profile_pic = request.FILES.get('profile_pic', None)
+        form = AddStudentForm(request.POST, request.FILES)
+        if form.is_valid():
+            first_name      = form.cleaned_data["first_name"]
+            last_name       = form.cleaned_data["last_name"]
+            btbt_id         = form.cleaned_data["btbt_id"]
+            roll_no         = form.cleaned_data["roll_no"]  # Must be unique and not "Not Assigned"
+            username        = form.cleaned_data["username"]
+            email           = form.cleaned_data["email"]
+            password        = form.cleaned_data["password"]
+            address         = form.cleaned_data["address"]
+            session_year_id = form.cleaned_data["session_year_id"]  # This value comes from the form
+            course_id       = form.cleaned_data["course"]
+            branch_id       = form.cleaned_data["branch"]
+            profile_pic     = request.FILES.get('profile_pic', None)
 
-                 print(form.cleaned_data)
-                 if profile_pic:  # ✅ Save the uploaded file
-                     fs = FileSystemStorage()
-                     filename = fs.save(profile_pic.name, profile_pic)
-                     profile_pic_url = fs.url(filename)
-                 else:
-                     profile_pic_url = None
-                 '''profile_pic=request.FILES['profile_pic']
-                 fs=FileSystemStorage()
-                 filename=fs.save(profile_pic.name,profile_pic)
-                 profile_pic_url=fs.url(filename)'''
-
-                 try:
-                     user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=3)
-                     students = Students.objects.create(
-                         admin=user,
-                         roll_no=roll_no,
-                         btbt_id=btbt_id,
-                         address=address,
-                         course_id=course_obj,
-                         branch_id=branch_obj,
-                         session_year_id=session_year,
-                         profile_pic=profile_pic_url
-                     )
-                     students.save()
-                     messages.success(request,"Successfully Added Student")
-                     return HttpResponseRedirect(reverse("add_student"))
-                 except:
-                    messages.success(request,"Successfully Added Student")
-                    return HttpResponseRedirect(reverse("add_student"))
+            if profile_pic:
+                fs = FileSystemStorage()
+                filename = fs.save(profile_pic.name, profile_pic)
+                profile_pic_url = fs.url(filename)
             else:
-                form=AddStudentForm(request.POST)
-                return render(request, "admin_template/add_student_template.html", {"form": form})
+                profile_pic_url = None
+
+            try:
+                # Create the CustomUser.
+                # The post_save signal in your models.py will automatically create a Student record for user_type==3.
+                user = CustomUser.objects.create_user(
+                    username=username,
+                    password=password,
+                    email=email,
+                    last_name=last_name,
+                    first_name=first_name,
+                    user_type=3
+                )
+                # Debug print: confirm user creation
+                print("CustomUser created, id:", user.id)
+
+                # Retrieve related objects.
+                course_obj = Courses.objects.get(id=int(course_id))
+                branch_obj = Branch.objects.get(id=int(branch_id)) if branch_id else None
+                # Get the SessionYearModel record using the ID provided in the form
+                session_year_obj = SessionYearModel.object.get(id=int(session_year_id))
+
+                # Retrieve the auto-created Student record via the OneToOne relationship.
+                student = user.students  # This uses the related_name from your OneToOneField.
+                # Debug print: show default roll_no before update
+                print("Student roll_no before update:", student.roll_no)
+
+                # Update the Student record with the values from the form.
+                student.roll_no = roll_no
+                student.btbt_id = btbt_id
+                student.address = address
+                student.course_id = course_obj
+                student.branch_id = branch_obj
+                student.session_year_id = session_year_obj
+                student.profile_pic = profile_pic_url
+                student.save()
+                # Debug print: show updated roll_no
+                print("Student roll_no after update:", student.roll_no)
+
+                messages.success(request, "Successfully Added Student")
+                return HttpResponseRedirect(reverse("add_student"))
+            except Exception as e:
+                messages.error(request, "Failed to add Student. Error: " + str(e))
+                print("Exception:", e)
+                return HttpResponseRedirect(reverse("add_student"))
+        else:
+            return render(request, "admin_template/add_student_template.html", {"form": form})
+
 
 def add_subject(request):
     courses=Courses.objects.all()
@@ -899,6 +919,7 @@ def get_timetable_data(request):
         "timetable": formatted_timetable
     })
 
+
 @csrf_exempt
 def add_timetable_entry(request):
     """
@@ -910,6 +931,9 @@ def add_timetable_entry(request):
       - day_of_week
       - start_time (in HH:MM format)
       - end_time (in HH:MM format)
+
+    New Constraint: For a given course and branch (from the subject) at a specific day and start time,
+    only one class can be scheduled.
     """
     if request.method == "POST":
         try:
@@ -920,18 +944,36 @@ def add_timetable_entry(request):
             day_of_week = data.get("day_of_week")
             start_time_str = data.get("start_time")
             end_time_str = data.get("end_time")
+
             if not (subject_id and course_id and teacher_id and day_of_week and start_time_str and end_time_str):
                 return JsonResponse({"error": "All fields are required"}, status=400)
+
             try:
                 start_time = datetime.strptime(start_time_str, "%H:%M").time()
                 end_time = datetime.strptime(end_time_str, "%H:%M").time()
             except ValueError:
                 return JsonResponse({"error": "Invalid time format. Use HH:MM"}, status=400)
+
             subject = Subjects.objects.get(id=subject_id)
             course = Courses.objects.get(id=course_id)
             teacher = Staffs.objects.get(id=teacher_id)
+
+            # Existing teacher constraint (unchanged)
             if Timetable.objects.filter(teacher=teacher, day_of_week=day_of_week, start_time=start_time).exists():
-                return JsonResponse({"error": "This teacher is already assigned for that time slot on " + day_of_week}, status=400)
+                return JsonResponse({"error": "This teacher is already assigned for that time slot on " + day_of_week},
+                                    status=400)
+
+            # New constraint: Check if a timetable entry exists for the same course and branch at that time slot.
+            if subject.branch_id:
+                branch_id = subject.branch_id.id
+                if Timetable.objects.filter(
+                        course=course,
+                        day_of_week=day_of_week,
+                        start_time=start_time,
+                        subject__branch_id=branch_id
+                ).exists():
+                    return JsonResponse({"error": "Time slot already occupied for the same class"}, status=400)
+
             Timetable.objects.create(
                 subject=subject,
                 course=course,
@@ -951,7 +993,9 @@ def add_timetable_entry(request):
             return JsonResponse({"error": "Invalid teacher ID"}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
 
 @csrf_exempt
 def get_subjects_by_course_and_branch(request):
@@ -1030,7 +1074,6 @@ def get_teachers_by_subject(request):
             return JsonResponse([teacher_data], safe=False)
         return JsonResponse([], safe=False)
     return JsonResponse({"error": "Invalid method"}, status=405)
-
 def admin_gallery(request):
     """
     Renders the admin achievements & gallery page.

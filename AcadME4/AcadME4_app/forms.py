@@ -17,6 +17,7 @@ class DateInput(forms.DateInput):
 from django import forms
 from AcadME4_app.models import Courses, Branch, SessionYearModel
 
+
 class AddStudentForm(forms.Form):
     email = forms.EmailField(label="Email", max_length=50,
                              widget=forms.EmailInput(attrs={"class": "form-control", "autocomplete": "off"}))
@@ -35,32 +36,27 @@ class AddStudentForm(forms.Form):
     address = forms.CharField(label="Address", max_length=50,
                               widget=forms.TextInput(attrs={"class": "form-control"}))
 
-    # ✅ Initialize empty fields
+    # Populate choices dynamically in __init__
     course = forms.ChoiceField(label="Course", choices=[],
                                widget=forms.Select(attrs={"class": "form-control", "id": "course"}))
     branch = forms.ChoiceField(label="Branch", choices=[],
                                widget=forms.Select(attrs={"class": "form-control", "id": "branch"}), required=False)
     session_year_id = forms.ChoiceField(label="Session Year", choices=[],
                                         widget=forms.Select(attrs={"class": "form-control"}))
-
     profile_pic = forms.FileField(label="Profile Pic", required=False,
                                   widget=forms.FileInput(attrs={"class": "form-control"}))
 
     def __init__(self, *args, **kwargs):
         super(AddStudentForm, self).__init__(*args, **kwargs)
-
-        # ✅ Populate course choices dynamically
+        # Populate course choices dynamically.
         self.fields['course'].choices = [(course.id, course.course_name) for course in Courses.objects.all()]
-
-        # ✅ Populate session year choices dynamically
+        # Populate session year choices dynamically.
         self.fields['session_year_id'].choices = [
             (ses.id, f"{ses.session_start_year} to {ses.session_end_year}")
             for ses in SessionYearModel.object.all()
         ]
-
-        # ✅ Populate branch choices dynamically
+        # Populate branch choices dynamically.
         self.fields['branch'].choices = [(branch.id, branch.name) for branch in Branch.objects.all()]
-
 
 class EditStudentForm(forms.Form):
     email=forms.EmailField(label="Email",max_length=50,widget=forms.EmailInput(attrs={"class":"form-control"}))

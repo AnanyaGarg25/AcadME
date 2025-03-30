@@ -4,7 +4,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 # Create your models here.
-
+from django.core.validators import MinValueValidator,MaxValueValidator
+import os
+from jsonschema.exceptions import ValidationError
 
 class SessionYearModel(models.Model):
     id=models.AutoField(primary_key=True)
@@ -180,10 +182,10 @@ class StudentResult(models.Model):
     id = models.AutoField(primary_key=True)
     student_id = models.ForeignKey(Students, on_delete=models.CASCADE)
     subject_id = models.ForeignKey(Subjects, on_delete=models.CASCADE)
-    assignment1_marks = models.FloatField(null=True, blank=True, default=None)
-    assignment2_marks = models.FloatField(null=True, blank=True, default=None)
-    periodical1_marks = models.FloatField(null=True, blank=True, default=None)
-    periodical2_marks = models.FloatField(null=True, blank=True, default=None)
+    assignment1_marks = models.FloatField(null=True, blank=True, default=None,validators=[MinValueValidator(0), MaxValueValidator(20)])
+    assignment2_marks = models.FloatField(null=True, blank=True, default=None,validators=[MinValueValidator(0), MaxValueValidator(20)])
+    periodical1_marks = models.FloatField(null=True, blank=True, default=None,validators=[MinValueValidator(0), MaxValueValidator(20)])
+    periodical2_marks = models.FloatField(null=True, blank=True, default=None,validators=[MinValueValidator(0), MaxValueValidator(20)])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     objects = models.Manager()

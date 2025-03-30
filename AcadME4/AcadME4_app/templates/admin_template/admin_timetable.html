@@ -471,48 +471,57 @@ Admin Timetable
     });
 
     // -------------------------
-    // Form Submission
-    // -------------------------
-    $("#timetableForm").submit(function(e){
-      e.preventDefault();
-      var timeSlotVal = $("#time_slot").val();
-      if(!timeSlotVal){
-        alert("Please select a time slot.");
-        return;
+   // Form Submission
+$("#timetableForm").submit(function(e){
+  e.preventDefault();
+  var timeSlotVal = $("#time_slot").val();
+  if(!timeSlotVal){
+    alert("Please select a time slot.");
+    return;
+  }
+  var times = timeSlotVal.split("-");
+  var start_time = $.trim(times[0]);
+  var end_time = $.trim(times[1]);
+  var data = {
+    subject_id: $("#subject").val(),
+    course_id: $("#course").val(),
+    teacher_id: $("#teacher").val(),
+    day_of_week: $("#day").val(),
+    start_time: start_time,
+    end_time: end_time
+  };
+  $.ajax({
+    url: "/add_timetable_entry/",
+    type: "POST",
+    data: JSON.stringify(data),
+    contentType: "application/json",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}"
+    },
+    success: function(response){
+      logResponse('add_timetable_entry', response);
+      if(response.message){
+        alert(response.message);
+        fetchTimetableData();
+      } else if(response.error){
+        alert("Warning: " + response.error);
       }
-      var times = timeSlotVal.split("-");
-      var start_time = $.trim(times[0]);
-      var end_time = $.trim(times[1]);
-      var data = {
-        subject_id: $("#subject").val(),
-        course_id: $("#course").val(),
-        teacher_id: $("#teacher").val(),
-        day_of_week: $("#day").val(),
-        start_time: start_time,
-        end_time: end_time
-      };
-      $.ajax({
-        url: "/add_timetable_entry/",
-        type: "POST",
-        data: JSON.stringify(data),
-        contentType: "application/json",
-        headers: {
-          "X-CSRFToken": "{{ csrf_token }}"
-        },
-        success: function(response){
-          logResponse('add_timetable_entry', response);
-          if(response.message){
-            alert(response.message);
-            fetchTimetableData();
-          } else if(response.error){
-            alert("Error: " + response.error);
-          }
-        },
-        error: function(err){
-          console.error("Error submitting timetable entry:", err);
+    },
+    error: function(xhr, status, error){
+      try {
+        let res = JSON.parse(xhr.responseText);
+        if (res.error) {
+          alert("Warning: " + res.error);
+        } else {
+          alert("An unexpected error occurred.");
         }
-      });
-    });
+      } catch(e) {
+        alert("Error submitting timetable entry.");
+      }
+    }
+  });
+});
+
 
     // -------------------------
     // Initial Data Fetch

@@ -6,10 +6,14 @@ from django.contrib.auth.decorators import login_required
 from django.core.serializers import serialize
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, reverse, redirect, get_object_or_404
-
+from django.shortcuts import render
+from AcadME4_app.models import FAQ  # Adjust the import according to your project structure
 from AcadME4_app.models import Subjects, SessionYearModel
 from django.views.decorators.csrf import csrf_exempt
-
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Syllabus, Subjects, Staffs
+from django.contrib.auth.decorators import login_required
 from AcadME4_app.models import Students
 
 from AcadME4_app.models import AttendanceReport
@@ -35,6 +39,8 @@ from AcadME4_app.models import AssignmentSubmission
 from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
 from AcadME4_app.models import Staffs, Timetable
+from django.core.validators import MinValueValidator,MaxValueValidator
+from jsonschema.exceptions import ValidationError
 
 @csrf_exempt
 def staff_home(request):
@@ -394,6 +400,12 @@ def save_student_result(request):
                 periodical1_marks = float(periodical1_marks) if periodical1_marks else None
                 periodical2_marks = float(periodical2_marks) if periodical2_marks else None
 
+                # Validate marks before saving
+                for mark in [assignment1_marks, assignment2_marks, periodical1_marks, periodical2_marks]:
+                    if mark is not None and (mark < 0 or mark > 20):
+                        messages.error(request,
+                                       f"Invalid marks for student {student_obj.admin.username}. Marks should be between 0 and 20.")
+                        return HttpResponseRedirect(reverse("staff_add_result"))
                 # Check if the result already exists
                 result, created = StudentResult.objects.get_or_create(
                     student_id=student_obj,
@@ -410,14 +422,19 @@ def save_student_result(request):
                 if periodical2_marks is not None:
                     result.periodical2_marks = periodical2_marks
 
-                result.save()
+                # Manually validate before saving
+                try:
+                    result.full_clean()  # This will trigger Django's built-in validators
+                    result.save()
+                except ValidationError as e:
+                    messages.error(request, f"Validation error: {e}")
+                    return HttpResponseRedirect(reverse("staff_add_result"))
 
         messages.success(request, "Successfully Added Results")
         return HttpResponseRedirect(reverse("staff_add_result"))
     except:
         messages.error(request, "Failed to Add Results")
         return HttpResponseRedirect(reverse("staff_add_result"))
-
 @login_required
 def staff_notifications(request):
     """Display notifications for staff members"""
@@ -643,10 +660,7 @@ def staff_gallery(request):
     Renders the staff achievements & gallery page.
     """
     return render(request, "staff_template/staff_gallery.html")
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Syllabus, Subjects, Staffs
-from django.contrib.auth.decorators import login_required
+
 @login_required
 def upload_syllabus_books(request):
     staff = Staffs.objects.get(admin=request.user)  # Get the logged-in teacher
@@ -761,8 +775,7 @@ def get_session_years(request):
     session_years = SessionYearModel.object.all().values("id", "session_start_year", "session_end_year")
     return JsonResponse(list(session_years), safe=False)
 # StaffViews.py
-from django.shortcuts import render
-from AcadME4_app.models import FAQ  # Adjust the import according to your project structure
+
 def staff_chatbot(request):
     faqs = FAQ.objects.filter(user_type="staff")
     return render(request, 'chatbot/staff_chatbot.html', {'faqs': faqs})

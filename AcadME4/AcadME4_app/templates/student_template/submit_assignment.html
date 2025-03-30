@@ -9,18 +9,23 @@
         </div>
         <div class="card-body">
              <!-- Success/Error Message Display -->
-            {% if messages %}
+            {% if request.GET.success %}
                 <div id="message-container">
-                    {% for message in messages %}
-                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            Assignment submitted successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
                 <script>
                     setTimeout(function() {
                         document.getElementById("message-container").style.display = "none";
                     }, 3000); // Hide after 3 seconds
+                      // Remove success parameter from URL after displaying the message
+        if (window.history.replaceState) {
+            let url = new URL(window.location.href);
+            url.searchParams.delete('success');
+            window.history.replaceState({}, document.title, url);
+        }
                 </script>
             {% endif %}
             <form method="POST" enctype="multipart/form-data">
@@ -35,4 +40,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
