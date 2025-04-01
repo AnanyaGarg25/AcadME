@@ -1,0 +1,71 @@
+{% extends 'admin_template/base_template.html' %}
+{% block page_title %}
+Edit Branch
+{% endblock page_title %}
+{% block main_content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Edit Branch</h3>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="branch_name"><strong>Branch Name:</strong></label>
+                                <input type="text" id="branch_name" name="branch_name" class="form-control"
+                                       value="{{ branch.name }}" required>
+                            </div>
+                            <!-- ✅ Display Success Messages -->
+                        {% if messages %}
+                          <div id="message-container">
+                              {% for message in messages %}
+                              <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                                  {{ message }}
+                              </div>
+                              {% endfor %}
+                          </div>
+                        {% endif %}
+                            <button type="submit" class="btn btn-primary">Update Branch</button>
+                            <a href="{% url 'manage_branch' %}" class="btn btn-secondary">Cancel</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock main_content %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+        // Handle form submission with AJAX to show messages
+        $('#edit-branch-form').submit(function (e) {
+            e.preventDefault();
+            var formData = $(this).serialize(); // Get form data
+            $.ajax({
+                url: "{% url 'edit_branch' branch.id %}",
+                method: "POST",
+                data: formData,
+                success: function(response) {
+                    if(response.success) {
+                        alert("Branch updated successfully!");
+                        location.reload();
+                    } else {
+                        alert("Error updating branch!");
+                    }
+                },
+                error: function() {
+                    alert("An error occurred while updating the branch!");
+                }
+            });
+        });
+    });
+</script>
+{% endblock custom_js %}

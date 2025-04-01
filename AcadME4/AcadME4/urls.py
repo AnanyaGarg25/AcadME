@@ -28,7 +28,7 @@ from AcadME4_app import StudentViews
 from AcadME4_app import StaffViews
 
 from AcadME4_app.EditResultViewClass import EditResultViewClass
-from AcadME4_app.AdminViews import get_branches_by_course
+
 
 
 
@@ -48,8 +48,13 @@ urlpatterns = [
     path('add_student_save',AdminViews.add_student_save,name='add_student_save'),
     path('add_branch',AdminViews.add_branch,name='add_branch'),
     path('add_branch_save',AdminViews.add_branch_save,name='add_branch_save'),
+path('manage-branch/', AdminViews.manage_branch, name='manage_branch'),
+path('edit-branch/<int:branch_id>/', AdminViews.edit_branch, name='edit_branch'),
+path('delete-branch/<int:branch_id>/', AdminViews.delete_branch, name='delete_branch'),
+
     path("get-branches-by-course/", AdminViews.get_branches_by_course, name="get_branches_by_course"),
-    path("get_branches_by_course/", AdminViews.get_branches_by_course, name="get_branches_by_course"),
+path("get-branch/<int:course_id>/", AdminViews.get_branch, name="get_branch"),
+   # path("get_branches_by_course/", AdminViews.get_branches_by_course, name="get_branches_by_course"),
     path("get-subjects-by-course-and-branch/", AdminViews.get_subjects_by_course_and_branch, name="get_subjects_by_course_and_branch"),
     path('get_attendance_data/',StudentViews.get_attendance_data, name="get_attendance_data"),
     path('add_subject',AdminViews.add_subject,name='add_subject'),
@@ -155,6 +160,10 @@ path('delete-subject/<int:subject_id>/', AdminViews.delete_subject, name='delete
 path('staff/chatbot/', StaffViews.staff_chatbot, name='staff_chatbot'),
 path('student/chatbot/', StudentViews.student_chatbot, name='student_chatbot'),
 path('admin-chatbot/', AdminViews.admin_chatbot, name='admin_chatbot'),
+path('delete-course/<int:course_id>/', AdminViews.delete_course, name='delete_course'),
+
+
+
 
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 

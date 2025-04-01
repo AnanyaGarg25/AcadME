@@ -1,5 +1,6 @@
 import json
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
@@ -126,6 +127,53 @@ def add_branch(request):
     print(courses)
     return render(request, 'admin_template/add_branch.html', {'courses': courses})
 
+
+def manage_branch(request):
+    courses = Courses.objects.all()  # Fetch all courses
+    course_branches = {}
+
+    for course in courses:
+        branches = Branch.objects.filter(course_id=course.id)  # Correct filtering
+        course_branches[course.id] = branches
+
+    return render(request, 'admin_template/manage_branch.html', {
+        'courses': courses,
+        'course_branches': course_branches
+    })
+@login_required
+def edit_branch(request, branch_id):
+    """ Edit a branch """
+    try:
+        branch = Branch.objects.get(id=branch_id)
+
+        if request.method == "POST":
+            branch.name = request.POST.get("branch_name")
+            branch.save()
+
+            messages.success(request, "Branch updated successfully!")  # ✅ Success message
+            return redirect("manage_branch")  # Redirect after editing
+
+        return render(request, "admin_template/edit_branch.html", {"branch": branch})
+    except Branch.DoesNotExist:
+        messages.error(request, "Branch not found!")
+        return redirect("manage_branch")  # Redirect if branch not found
+
+@csrf_exempt
+def delete_branch(request, branch_id):
+    """ Delete a branch """
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+    try:
+        branch = Branch.objects.get(id=branch_id)
+        branch.delete()  # ✅ Delete the branch
+
+        return JsonResponse({"status": "success", "message": "Branch deleted successfully!"})
+    except Branch.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Branch not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
 @csrf_exempt
 def get_branches_by_course(request):
     course_id = request.POST.get("course_id")
@@ -137,6 +185,26 @@ def get_branches_by_course(request):
     print("Fetched Branches:", list(branches))  # ✅ Debugging line
     # Get branches for selected course
     return JsonResponse(list(branches), safe=False)
+
+@csrf_exempt
+def get_branch(request, course_id):
+    """ Fetch only branches where the logged-in teacher teaches subjects """
+    try:
+
+
+        # Get branches where the teacher has subjects under the selected course
+        branches = Branch.objects.filter(
+            course_id=course_id
+        ).values("id", "name")
+        if branches.exists():
+            return JsonResponse(list(branches), safe=False)
+        else:
+            return JsonResponse({"error": "No branches found for this course."}, status=404)
+
+
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 def add_branch_save(request):
     if request.method!= "POST":
@@ -597,6 +665,29 @@ def edit_course_save(request):
         except:
             messages.error(request,"Failed to Edit Course")
             return HttpResponseRedirect(reverse("edit_course",kwargs={"course_id":course_id}))
+
+@csrf_exempt
+def delete_course(request, course_id):
+    """ Delete a course and its associated subjects and labs """
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+    try:
+        course = Courses.objects.get(id=course_id)
+
+        # ✅ Delete associated subjects and their labs first
+        subjects = Subjects.objects.filter(course_id=course.id)
+        for subject in subjects:
+            subject.labs_set.all().delete()  # Delete associated labs
+        subjects.delete()  # Delete subjects
+
+        course.delete()  # ✅ Delete course
+
+        return JsonResponse({"status": "success", "message": "Course deleted successfully!"})
+    except Courses.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Course not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 def manage_session(request):
     return render(request,"admin_template/manage_session_template.html")

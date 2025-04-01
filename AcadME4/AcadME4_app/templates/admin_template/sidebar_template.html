@@ -136,7 +136,7 @@
               </p>
             </a>
           </li>
-             <li class="nav-item">
+          <li class="nav-item">
               {% url 'add_branch' as add_branch %}
             <a href="{% url 'add_branch' %}" class="nav-link {% if request.path == add_branch %} active {% endif %} "><!-- {% if request.path == edit_staff %} active {% endif %}-->
               <i class="fas fa-plus" style="margin-right: 8px;"></i>
@@ -145,9 +145,13 @@
               </p>
             </a>
           </li>
-
-
-
+            <li class="nav-item">
+                {% url 'manage_branch' as manage_branch %}
+                <a href="{% url 'manage_branch' %}" class="nav-link {% if request.path == manage_branch %} active {% endif %}">
+                    <i class="fas fa-pencil-alt" style="margin-right: 8px;"></i>
+                    <p>Manage Branch</p>
+                </a>
+            </li>
           <li class="nav-item">
               {% url 'student_feedback_message' as student_feedback_message %}
              <!-- {% url 'add_staff' as manage_staff %}
