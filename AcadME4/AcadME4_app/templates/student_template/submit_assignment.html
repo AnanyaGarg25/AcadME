@@ -21,7 +21,7 @@
                 <script>
                     setTimeout(function() {
                         document.getElementById("message-container").style.display = "none";
-                    }; // Hide after 3 seconds
+                    }, 10000); // Hide after 10 seconds
                       // Remove success parameter from URL after displaying the message
                 if (window.history.replaceState) {
                     let url = new URL(window.location.href);
@@ -30,6 +30,10 @@
                 }
                 </script>
             {% endif %}
+            {% if due_date_passed and not already_submitted %}
+                <div class="alert alert-danger">The submission deadline has passed. You cannot submit this assignment.</div>
+                <a href="{% url 'student_view_assignments' %}" class="btn btn-primary mt-3">Back to Assignments</a>
+            {% endif %}
             <!-- ✅ Check if student already submitted -->
             {% if already_submitted and not request.GET.submitted %}
                 <div class="alert alert-warning" role="alert">
@@ -37,7 +41,7 @@
                 </div>
                 <a href="{% url 'student_view_assignments' %}" class="btn btn-primary mt-3">Back to Assignments</a>
             {% endif %}
-            {% if not already_submitted %}
+            {% if not already_submitted and not due_date_passed %}
             <!-- Assignment Submission Form -->
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}

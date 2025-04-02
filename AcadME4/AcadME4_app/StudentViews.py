@@ -14,6 +14,7 @@ from AcadME4_app.models import CustomUser
 from AcadME4_app.models import Students,Subjects,Courses
 
 from AcadME4_app.models import Attendance, AttendanceReport
+from django.utils import timezone
 from future.backports.datetime import datetime
 
 from AcadME4_app.models import FeedBackStudent
@@ -304,10 +305,27 @@ def student_submit_assignment(request, assignment_id):
 
     # Check if the student has already submitted this assignment
     existing_submission = AssignmentSubmission.objects.filter(student=student_obj, assignment=assignment).exists()
+
+    # Check if the due date has passed
+    # Ensure both are datetime objects for a valid comparison
+    if isinstance(assignment.due_date, datetime.date) and not isinstance(assignment.due_date, datetime.datetime):
+        assignment_due_datetime = datetime.combine(assignment.due_date, datetime.time.max)  # Convert date to datetime
+        assignment_due_datetime = timezone.make_aware(assignment_due_datetime, timezone.get_current_timezone())  # Ensure timezone awareness
+    else:
+        assignment_due_datetime = assignment.due_date  # Already datetime
+
+    # ✅ Extend the deadline by 1 more day
+    #extended_due_datetime = assignment_due_datetime + datetime.timedelta(days=1)
+    due_date_passed = timezone.now() >= assignment_due_datetime  # Assuming due_date is a DateField
+    #print(f"Due Date: {assignment_due_datetime} | Current Time: {timezone.now()} | Due Date Passed: {due_date_passed}")
+
     if request.method == "POST":
         if existing_submission:
             #messages.error(request, "You have already submitted this assignment. You cannot submit again.")
             return redirect(f"{request.path}?already_submitted=1")  # Redirect to assignments list
+
+        if due_date_passed:
+            return redirect(f"{request.path}?late_submission=1")
 
 
         submission_file = request.FILES.get("submission_file")
@@ -334,7 +352,7 @@ def student_submit_assignment(request, assignment_id):
     return render(
         request,
         "student_template/submit_assignment.html",
-        {"assignment": assignment, "already_submitted": existing_submission,"submitted": request.GET.get("submitted")}
+        {"assignment": assignment, "already_submitted": existing_submission,"submitted": request.GET.get("submitted"),"late_submission": request.GET.get("late_submission"),"due_date_passed": due_date_passed}
     )
 
 from django.shortcuts import render, redirect
