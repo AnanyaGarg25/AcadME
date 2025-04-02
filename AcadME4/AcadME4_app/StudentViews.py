@@ -302,27 +302,39 @@ def student_submit_assignment(request, assignment_id):
         messages.error(request, "Invalid request.")
         return redirect("student_view_assignments")
 
+    # Check if the student has already submitted this assignment
+    existing_submission = AssignmentSubmission.objects.filter(student=student_obj, assignment=assignment).exists()
     if request.method == "POST":
+        if existing_submission:
+            #messages.error(request, "You have already submitted this assignment. You cannot submit again.")
+            return redirect(f"{request.path}?already_submitted=1")  # Redirect to assignments list
+
+
         submission_file = request.FILES.get("submission_file")
+
         if submission_file and not submission_file.name.lower().endswith(".pdf"):
             messages.error(request, "Only PDF files are allowed.")
             return redirect("student_submit_assignment", assignment_id=assignment_id)
 
         # Save submission
-        submission = AssignmentSubmission(
-            assignment=assignment,
-            student=student_obj,
-            submission_file=submission_file
-        )
-        submission.save()
-       # request.session["submitted_assignment_id"] = assignment_id
+        try:
+            AssignmentSubmission.objects.create(
+                assignment=assignment,
+                student=student_obj,
+                submission_file=submission_file
+            ).save()
 
-        return redirect(f"{request.path}?success=1")
+           # request.session["submitted_assignment_id"] = assignment_id
+            #messages.success(request, "Assignment submitted successfully!")
+            return redirect(f"{request.path}?submitted=1")
+        except Exception as e:
+            messages.error(request, f"Error saving submission: {e}")
+            return redirect(request.path)
 
     return render(
         request,
         "student_template/submit_assignment.html",
-        {"assignment": assignment}
+        {"assignment": assignment, "already_submitted": existing_submission,"submitted": request.GET.get("submitted")}
     )
 
 from django.shortcuts import render, redirect

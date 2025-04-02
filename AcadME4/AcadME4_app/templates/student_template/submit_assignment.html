@@ -2,6 +2,7 @@
 {% block page_title %} Submit Assignment {% endblock %}
 
 {% block main_content %}
+
 <div class="container mt-4">
     <div class="card">
         <div class="card-header bg-success text-white text-center">
@@ -9,25 +10,35 @@
         </div>
         <div class="card-body">
              <!-- Success/Error Message Display -->
-            {% if request.GET.success %}
+            {% if request.GET.submitted %}
                 <div id="message-container">
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            Assignment submitted successfully!
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </div>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        Assignment submitted successfully!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <a href="{% url 'student_view_assignments' %}" class="btn btn-primary mt-3">Back to Assignments</a>
+                </div>
                 <script>
                     setTimeout(function() {
                         document.getElementById("message-container").style.display = "none";
-                    }, 3000); // Hide after 3 seconds
+                    }; // Hide after 3 seconds
                       // Remove success parameter from URL after displaying the message
-        if (window.history.replaceState) {
-            let url = new URL(window.location.href);
-            url.searchParams.delete('success');
-            window.history.replaceState({}, document.title, url);
-        }
+                if (window.history.replaceState) {
+                    let url = new URL(window.location.href);
+                    url.searchParams.delete('submitted');
+                    window.history.replaceState({}, document.title, url);
+                }
                 </script>
             {% endif %}
+            <!-- ✅ Check if student already submitted -->
+            {% if already_submitted and not request.GET.submitted %}
+                <div class="alert alert-warning" role="alert">
+                    You have already submitted this assignment. You cannot submit again.
+                </div>
+                <a href="{% url 'student_view_assignments' %}" class="btn btn-primary mt-3">Back to Assignments</a>
+            {% endif %}
+            {% if not already_submitted %}
+            <!-- Assignment Submission Form -->
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="mb-3">
@@ -35,10 +46,10 @@
                     <input type="file" name="submission_file" class="form-control" required>
                 </div>
                 <button type="submit" class="btn btn-success w-100" onclick="this.disabled=true; this.form.submit();">Submit</button>
+                <a href="{% url 'student_view_assignments' %}" class="btn btn-primary mt-3">Back to Assignments</a>
             </form>
-
+        {% endif %}
         </div>
     </div>
 </div>
-
 {% endblock %}
