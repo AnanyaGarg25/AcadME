@@ -1,3 +1,4 @@
+
 {% extends 'admin_template/base_template.html' %}
 {% block page_title %}
 Edit Subject
@@ -17,6 +18,17 @@ Edit Subject
               <form role="form" action="/edit_subject_save" method="post">
                   {% csrf_token %}
                 <div class="card-body">
+                    <!-- Success and Error Messages -->
+                            {% if messages %}
+                                {% for message in messages %}
+                                    {% if message.tags == 'error' %}
+                                        <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
+                                    {% endif %}
+                                    {% if message.tags == 'success' %}
+                                        <div class="alert alert-success" style="margin-top:10px">{{ message }}</div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
                   <div class="form-group">
                     <label>Subject Name</label>
                     <input type="text" class="form-control" name="subject_name" placeholder="Enter Subject" value="{{ subject.subject_name }}">
@@ -54,6 +66,24 @@ Edit Subject
                        {% endfor %}
                     </select>
                   </div>
+                   {% if not subject.has_lab %}
+                    <div class="form-group">
+                        <label>This subject has no lab. Do you want to add one?</label>
+                        <select class="form-control" id="add_lab_option">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                    <div id="lab_section" style="{% if not subject.has_lab %}display:none;{% endif %}">
+                         {% if subject.has_lab %}
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="remove_lab_checkbox" name="remove_lab" value="1">
+                                    Remove existing lab from this subject
+                                </label>
+                            </div>
+                            {% endif %}
                     <div class="form-group">
                         <label>Labs</label>
                         <select class="form-control" id="lab_select" name="lab">
@@ -74,7 +104,7 @@ Edit Subject
                         <input type="text" class="form-control" name="new_lab_name" placeholder="Enter New Lab Name">
                     </div>
                       <div class="form-group">
-                      {% if messages %}
+                     <!-- {% if messages %}
                         {% for message in messages %}
                         {% if message.tags == 'error' %}
                         <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
@@ -83,7 +113,7 @@ Edit Subject
                         <div class="alert alert-success" style="margin-top:10px">{{ message }}</div>
                         {% endif %}
                         {% endfor %}
-                      {% endif %}
+                      {% endif %}-->
                     </div>
 
                 </div>
@@ -91,6 +121,7 @@ Edit Subject
 
                 <div class="card-footer">
                   <button type="submit" class="btn btn-primary btn-block">Save Subject</button>
+                </div>
                 </div>
               </form>
             </div>
@@ -150,6 +181,28 @@ Edit Subject
                 $("#new_lab_fields").hide();
             }
         });
+         $("#add_lab_option").change(function () {
+        const value = $(this).val();
+        if (value === "yes") {
+            $("#lab_section").slideDown();
+        } else {
+            $("#lab_section").slideUp();
+            $("#new_lab_fields").hide();
+            $("#lab_select").val("");  // Reset lab selection
+        }
     });
+
+    $("#remove_lab_checkbox").change(function () {
+        if ($(this).is(":checked")) {
+            $("#lab_select").prop("disabled", true);
+            $("#new_lab_fields").hide();
+        } else {
+            $("#lab_select").prop("disabled", false);
+            if ($("#lab_select").val() === "new") {
+                $("#new_lab_fields").show();
+            }
+        }
+    });
+  });
 </script>
 {% endblock custom_js %}

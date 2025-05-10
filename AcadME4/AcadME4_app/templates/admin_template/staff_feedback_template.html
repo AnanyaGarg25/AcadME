@@ -35,7 +35,14 @@ Staff Feedback
                        <td>{{ feedback.created_at }}</td>
                        <td>
                            {% if feedback.feedback_reply == "" %}
-                           <button class="btn btn-success reply_open_modal"  data-toggle="modal" data-target="#reply_modal">Reply</button>
+                          <button class="btn btn-success reply_open_modal"
+        data-toggle="modal"
+        data-target="#reply_modal"
+        data-id="{{ feedback.id }}"
+        data-name="{{ feedback.staff_id.admin.first_name }} {{ feedback.staff_id.admin.last_name }}">
+    Reply
+</button>
+
                            {% else %}
                            {{ feedback.feedback_reply }}
                            {% endif %}
@@ -84,8 +91,8 @@ Staff Feedback
 <script>
     $(document).ready(function(){
         $(".reply_open_modal").click(function(){
-            var id=$(this).parents("tr").children("td:eq(0)").text();
-            var name=$(this).parents("tr").children("td:eq(2)").text();
+            var id = $(this).data("id");
+            var name = $(this).data("name");
             $("#reply_id").val(id);
             $("#reply_name").text(name);
 

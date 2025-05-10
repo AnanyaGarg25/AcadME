@@ -34,7 +34,7 @@ from AcadME4_app.models import Students, Timetable
 from django.http import JsonResponse
 from AcadME4_app.models import Attendance, AttendanceReport
 import calendar
-import datetime
+from datetime import datetime,time,date
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Avg, F
 from django.db.models.functions import Coalesce
@@ -102,13 +102,17 @@ def student_home(request):
 
     # Total assignments for the student's subjects that have **not passed the due date**
     total_assignments = Assignment.objects.filter(subject__in=student_subjects,
-                                                      due_date__gte=datetime.now()).count()
+                                                      due_date__gte=date.today()).count()
 
-    # Assignments already submitted by the student
-    submitted_assignments = AssignmentSubmission.objects.filter(student=student_obj).count()
+    # Assignments the student still *can* submit (not past due)
+    current_assignments = Assignment.objects.filter(subject__in=student_subjects, due_date__gte=date.today())
 
-    # Pending assignments
-    pending_assignments = total_assignments - submitted_assignments
+    # Submissions for those specific assignments
+    submitted_assignments = AssignmentSubmission.objects.filter(student=student_obj, assignment__in=current_assignments)
+
+    # Safe pending count
+    pending_assignments = current_assignments.count() - submitted_assignments.count()
+    pending_assignments = max(pending_assignments, 0)
     return render(request, "student_template/student_home_template.html", {
         "total_attendance": attendance_total,
         "attendance_absent": attendance_absent,
@@ -155,8 +159,8 @@ def get_attendance_data(request):
     year, month = map(int, month_year.split('-'))
     last_day = calendar.monthrange(year, month)[1]
 
-    start_date = datetime.date(year, month, 1)
-    end_date = datetime.date(year, month, last_day)
+    start_date = date(year, month, 1)
+    end_date = date(year, month, last_day)
 
     # ✅ Fetch attendance records for the given subject, date range, and class type
     attendance_records = Attendance.objects.filter(
@@ -283,7 +287,7 @@ def student_view_assignments(request):
         return redirect("home")
 
     # Fetch assignments based on student's enrolled subjects
-    assignments = Assignment.objects.filter(subject__course_id=student_obj.course_id)
+    assignments = Assignment.objects.filter(subject__course_id=student_obj.course_id).order_by('due_date')
     # Clear stored messages after displaying them
     storage = get_messages(request)
     for _ in storage:
@@ -308,8 +312,8 @@ def student_submit_assignment(request, assignment_id):
 
     # Check if the due date has passed
     # Ensure both are datetime objects for a valid comparison
-    if isinstance(assignment.due_date, datetime.date) and not isinstance(assignment.due_date, datetime.datetime):
-        assignment_due_datetime = datetime.combine(assignment.due_date, datetime.time.max)  # Convert date to datetime
+    if isinstance(assignment.due_date, date) and not isinstance(assignment.due_date, datetime):
+        assignment_due_datetime = datetime.combine(assignment.due_date, time.max)  # Convert date to datetime
         assignment_due_datetime = timezone.make_aware(assignment_due_datetime, timezone.get_current_timezone())  # Ensure timezone awareness
     else:
         assignment_due_datetime = assignment.due_date  # Already datetime

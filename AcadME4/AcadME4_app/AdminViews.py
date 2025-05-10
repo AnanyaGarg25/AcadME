@@ -30,6 +30,10 @@ from AcadME4_app.models import NotificationStaffs, NotificationStudent
 
 from django.contrib import messages
 from django.utils.timezone import now
+
+from . import models
+
+
 def admin_home(request):
     student_count = Students.objects.all().count()  # ✅ Correct total student count
     staff_count = Staffs.objects.all().count()
@@ -580,11 +584,15 @@ def delete_subject(request, subject_id):
 
 def edit_subject(request,subject_id):
     subject=Subjects.objects.get(id=subject_id)
-
+    subject_labs = Labs.objects.filter(subject=subject)
     courses=Courses.objects.all()
     branches = Branch.objects.filter(course_id=subject.course_id.id)
     staffs=CustomUser.objects.filter(user_type=2)
-    all_labs = Labs.objects.all()  # ✅ Show all labs
+    unassigned_labs = Labs.objects.filter(subject__isnull=True)
+    assigned_to_this_subject = Labs.objects.filter(subject=subject)
+
+    all_labs = unassigned_labs.union(assigned_to_this_subject)
+   # all_labs = Labs.objects.all()  # ✅ Show all labs
     subject_labs = Labs.objects.filter(subject=subject)  # ✅ Only selected subject labs
 
     return render(request,"admin_template/edit_subject_template.html",{"subject":subject,"staffs":staffs,"courses":courses, "branches": branches,"all_labs": all_labs,"subject_labs": subject_labs,"id": subject_id,"selected_course": subject.course_id.id,
@@ -603,6 +611,7 @@ def edit_subject_save(request):
         lab_id = request.POST.get("lab")
         new_lab_id = request.POST.get("new_lab_id")
         new_lab_name = request.POST.get("new_lab_name")
+        remove_lab = request.POST.get("remove_lab") == "1"  # From checkbox
         try:
             subject=Subjects.objects.get(id=subject_id)
             subject.subject_name=subject_name
@@ -615,24 +624,32 @@ def edit_subject_save(request):
 
             has_lab = False  # ✅ Default: No lab assigned
 
+            if remove_lab:
+                # ✅ Remove all labs linked to this subject
+                Labs.objects.filter(subject=subject).delete()
+                has_lab = False  # Explicit
             # ✅ If a new lab is added, create it
-            if lab_id == "new" and new_lab_id and new_lab_name:
-                lab = Labs.objects.create(
-                    lab_id=new_lab_id,
-                    lab_name=new_lab_name,
-                    subject=subject
-                )
-                has_lab = True  # ✅ Subject now has a lab
-
-            # ✅ If an existing lab is selected, update it
-            elif lab_id and lab_id != "new":
-                try:
-                    lab = Labs.objects.get(id=lab_id)
-                    lab.subject = subject
-                    lab.save()
+            else:
+                if lab_id == "new" and new_lab_id and new_lab_name:
+                    if Labs.objects.filter(lab_id=new_lab_id).exists():
+                        messages.error(request, f"Lab ID '{new_lab_id}' already exists. Please choose a unique Lab ID.")
+                        return HttpResponseRedirect(reverse("edit_subject", kwargs={"subject_id": subject_id}))
+                    lab = Labs.objects.create(
+                        lab_id=new_lab_id,
+                        lab_name=new_lab_name,
+                        subject=subject
+                    )
                     has_lab = True  # ✅ Subject now has a lab
-                except Labs.DoesNotExist:
-                    pass  # No lab was selected or added
+
+                # ✅ If an existing lab is selected, update it
+                elif lab_id and lab_id != "new":
+                    try:
+                        lab = Labs.objects.get(id=lab_id)
+                        lab.subject = subject
+                        lab.save()
+                        has_lab = True  # ✅ Subject now has a lab
+                    except Labs.DoesNotExist:
+                        pass  # No lab was selected or added
 
             # ✅ Update `has_lab` in the Subjects table
             subject.has_lab = has_lab

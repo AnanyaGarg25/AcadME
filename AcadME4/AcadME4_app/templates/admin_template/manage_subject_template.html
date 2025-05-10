@@ -52,6 +52,7 @@ Manage Subject
                       <td>{{subject.staff_id.first_name}} {{subject.staff_id.last_name}}</td>
                       <!-- Show Labs if Available -->
                       <td>
+                           {% if subject.has_lab %}
                           {% if subject_lab_mapping|get_item:subject.id %}
                               {% for lab in subject_lab_mapping|get_item:subject.id %}
                                   <p>ID: {{ lab.lab_id }} - {{ lab.lab_name }}</p>
@@ -59,6 +60,9 @@ Manage Subject
                           {% else %}
                               <p>No Labs</p>
                           {% endif %}
+                           {% else %}
+                      <p>No Labs</p>
+                         {% endif %}
                       </td>
                       <td><a href="/edit_subject/{{subject.id}}" class="btn btn-success">Edit</a></td>
                         <td><button class="btn btn-danger delete-subject" data-subject-id="{{ subject.id }}">Delete</button></td>

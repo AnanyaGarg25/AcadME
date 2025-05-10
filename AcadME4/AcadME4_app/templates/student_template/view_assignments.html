@@ -1,6 +1,7 @@
 {% extends "student_template/base_template.html" %}
 {% block page_title %} View Assignments {% endblock %}
 {% load custom_filters %}
+{% load tz %}
 
 {% block main_content %}
 <div class="container mt-4">
@@ -22,7 +23,7 @@
                 <td>{{ assignment.title }}</td>
                 <td>{{ assignment.subject.subject_name }}</td>
                 <td>{{ assignment.description }}</td>
-                <td>{{ assignment.due_date|format_due_date }}</td>
+                <td>{{ assignment.due_date }}</td>
                <td>
                     {% if assignment.assignment_file %}
                         <a href="{{ assignment.assignment_file.url }}" class="btn btn-primary" target="_blank">Download</a>

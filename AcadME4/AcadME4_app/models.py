@@ -120,7 +120,7 @@ class Attendance(models.Model):
     ]
 
     id = models.AutoField(primary_key=True)
-    subject_id = models.ForeignKey(Subjects, on_delete=models.DO_NOTHING)
+    subject_id = models.ForeignKey(Subjects, on_delete=models.CASCADE)
     attendance_date=models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     session_year_id = models.ForeignKey(SessionYearModel, on_delete=models.CASCADE)
@@ -220,7 +220,7 @@ class Assignment(models.Model):
     description = models.TextField()
     subject = models.ForeignKey(Subjects, on_delete=models.CASCADE)
     staff = models.ForeignKey(Staffs, on_delete=models.CASCADE)  # The teacher who created the assignment
-    due_date = models.DateTimeField()
+    due_date = models.DateField()
     assignment_file = models.FileField(upload_to="assignments/", validators=[validate_pdf], null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
